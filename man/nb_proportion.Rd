@@ -6,9 +6,17 @@
 and compares to the previously determined threshold of 0.42 for extreme low
 values.}
 \usage{
-nb_proportion(p_val_table, low_pval = 0.01, threshold = 0.42, num_samples)
+nb_proportion(
+  adj_p_val_table,
+  p_val_table,
+  low_pval = 0.01,
+  threshold = 0.42,
+  num_samples
+)
 }
 \arguments{
+\item{adj_p_val_table}{table of adjusted p-values from the nb test}
+
 \item{p_val_table}{table of p-values from the nb test}
 
 \item{low_pval}{value of the p-value cut off to use in proportion}

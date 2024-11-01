@@ -76,15 +76,18 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
     formula_for_DeSeq <- ""
 
     if (!is.null(other_variables)) {
-        for (i in 1:length(other_variables)) {
-            conditions_df <- DataFrame(c(conditions_df, SummarizedExperiment::colData(se)[[other_variables[i]]]))
-            formula_for_DeSeq <- paste0(formula_for_DeSeq, " + ", other_variables[i])
+        for (i in seq_len(length(other_variables))) {
+            conditions_df <- DataFrame(c(conditions_df,
+                SummarizedExperiment::colData(se)[[other_variables[i]]]))
+            formula_for_DeSeq <- paste0(formula_for_DeSeq,
+                " + ",
+                other_variables[i])
         }
     }
 
     colnames(conditions_df) <- other_variables
 
-    for (i in 1:length(colnames(conditions_df))){
+    for (i in seq_len(length(colnames(conditions_df)))){
         conditions_df[, i] <- as.factor(conditions_df[, i])
     }
 
@@ -111,14 +114,15 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
         unique_conditions <- unique(condition)
         num_unique_conditions <- length(unique_conditions)
 
-        # For each condition level, get the goodness-of-fit p-values for each genes
+        # For each condition level, get goodness-of-fit p-values for each genes
         all_pvalues <- sapply(seq_len(length(unique_conditions)), function(j) {
             index_j <- which(condition == unique_conditions[j])
             # For one condition level, calculate the goodness-of-fit p-values
             pvalues_level <-  sapply(seq_len(length(size)), function(i) {
                 mu_gene <- mu_matrix[i, index_j]
                 count_condition <- count_matrix[i, index_j]
-                pvalue <- counts2pvalue(counts = count_condition, size = size[i],
+                pvalue <- counts2pvalue(counts = count_condition,
+                    size = size[i],
                     mu = mu_gene)
                 return(pvalue)
             })
@@ -130,7 +134,11 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
         colnames(all_pvalues) <- unique_conditions
         recommendation <- nb_proportion(all_pvalues, 0.01, 0.42, num_samples)
         res_histogram <- nb_histogram(all_pvalues)
-        reference <- "Adapted for small sample sizes from: Li, Y., Ge, X., Peng, F. et al. Exaggerated false positives by popular differential expression methods when analyzing human population samples. Genome Biol 23, 79 (2022). https://doi.org/10.1186/s13059-022-02648-4"
+        reference <- paste0("Adapted for small sample sizes from: Li, Y., ",
+        "Ge, X., Peng, F. et al. Exaggerated false positives by popular ",
+        "differential expression methods when analyzing human population ",
+        "samples. Genome Biol 23, 79 (2022). ",
+        "https://doi.org/10.1186/s13059-022-02648-4")
     }else {
         conditions_perm <- sample(condition)
         # Do DE analysis on permuted data
@@ -147,51 +155,71 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
         # count the number of DEGs
         num_DEGs <- sum(res$padj <= 0.05)
 
+        all_padj_values <- NULL
         all_pvalues <- NULL
         for (i in 2:length(resultsNames(dds))){
-            pvalues <- as.data.frame(results(dds, name = resultsNames(dds)[i])$padj, row.names = sampled)
-            all_pvalues <- as.data.frame(c(all_pvalues, pvalues))
+            padj_values <- as.data.frame(results(dds,
+                name = resultsNames(dds)[i])$padj, row.names = sampled)
+            all_padj_values <- as.data.frame(c(all_padj_values, padj_values))
+            p_values <- as.data.frame(results(dds,
+                name = resultsNames(dds)[i])$pvalue, row.names = sampled)
+            all_pvalues <- as.data.frame(c(all_pvalues, p_values))
         }
+        rownames(all_padj_values) <- sampled
         rownames(all_pvalues) <- sampled
+        all_padj_values <- stats::na.omit(all_padj_values)
         all_pvalues <- stats::na.omit(all_pvalues)
         num_genes <- dim(count_matrix)[1]
 
+        colnames(all_padj_values) <- resultsNames(dds)[2:
+                length(resultsNames(dds))]
         colnames(all_pvalues) <- resultsNames(dds)[2:length(resultsNames(dds))]
         levels_of_condition <- length(levels(condition))
 
         pvals_condition <- as.data.frame(
-            all_pvalues[, 1:(levels_of_condition - 1)])
+            all_padj_values[, seq_len(levels_of_condition - 1)])
         colnames(pvals_condition) <- resultsNames(dds)[2:levels_of_condition]
-    rownames(pvals_condition) <- rownames(all_pvalues)
+        rownames(pvals_condition) <- rownames(all_padj_values)
+
+        adj_pvals_condition <- as.data.frame(
+            all_padj_values[, seq_len(levels_of_condition - 1)])
+        colnames(adj_pvals_condition) <-
+            resultsNames(dds)[2:levels_of_condition]
+        rownames(adj_pvals_condition) <- rownames(all_padj_values)
         threshold <- floor(0.001 * num_genes)
-        recommendation <- nb_proportion(pvals_condition,
+        recommendation <- nb_proportion(adj_pvals_condition,
+            pvals_condition,
             0.05,
             threshold,
             num_samples)
-        res_histogram <- nb_histogram(all_pvalues)
-        reference <- "Paper Reference: Li, Y., Ge, X., Peng, F. et al. Exaggerated false positives by popular differential expression methods when analyzing human population samples. Genome Biol 23, 79 (2022). https://doi.org/10.1186/s13059-022-02648-4"
-    }
+        res_histogram <- nb_histogram(all_padj_values)
+        reference <- paste0("Paper Reference: Li, Y., ",
+        "Ge, X., Peng, F. et al. Exaggerated false positives by popular ",
+        "differential expression methods when analyzing human population ",
+        "samples. Genome Biol 23, 79 (2022). ",
+        "https://doi.org/10.1186/s13059-022-02648-4")
+        }
     return(list(recommendation = recommendation, res_histogram = res_histogram,
         reference = reference))
 }
 
 #' This function creates a histogram from the negative binomial goodness-of-fit
-#' pvalues.
+#' adjusted pvalues.
 #' @import tibble
 #' @import tidyr
 #' @import ggplot2
-#' @param p_val_table table of p-values from the nb test
+#' @param adj_p_val_table table of adjusted p-values from the nb test
 #' @return a histogram of the number of genes within a p-value range
 
-nb_histogram <- function(p_val_table) {
+nb_histogram <- function(adj_p_val_table) {
     # tidy the data so there is a gene, condition and pval column
-    p_val_table <- tibble::rownames_to_column(p_val_table, "features")
-    p_val_table <- tidyr::pivot_longer(p_val_table,
-        cols = 2:length(colnames(p_val_table)),
+    adj_p_val_table <- tibble::rownames_to_column(adj_p_val_table, "features")
+    adj_p_val_table <- tidyr::pivot_longer(adj_p_val_table,
+        cols = 2:length(colnames(adj_p_val_table)),
         names_to = "condition",
         values_to = "p_val")
 
-    nb_histogram <- ggplot2::ggplot(p_val_table, aes_string(x = "p_val")) +
+    nb_histogram <- ggplot2::ggplot(adj_p_val_table, aes_string(x = "p_val")) +
         xlab("adjusted p-value (FDR)") +
         ggplot2::geom_histogram() +
         ggplot2::facet_grid(condition ~ .)
@@ -205,6 +233,7 @@ nb_histogram <- function(p_val_table) {
 #' @import tibble
 #' @import tidyr
 #' @import ggplot2
+#' @param adj_p_val_table table of adjusted p-values from the nb test
 #' @param p_val_table table of p-values from the nb test
 #' @param low_pval value of the p-value cut off to use in proportion
 #' @param threshold the value to compare the proportion of p-values to for data
@@ -212,9 +241,10 @@ nb_histogram <- function(p_val_table) {
 #' @param num_samples the number of samples in the analysis
 #' @return a statement about whether DESeq2 is appropriate to use for analysis
 
-nb_proportion <- function(p_val_table, low_pval = 0.01, threshold = 0.42, num_samples) {
+nb_proportion <- function(adj_p_val_table, p_val_table, low_pval = 0.01,
+    threshold = 0.42, num_samples) {
     if (num_samples < 20) {
-        proportion_below_value <- mean(p_val_table < low_pval, na.rm = TRUE)
+        proportion_below_value <- mean(adj_p_val_table < low_pval, na.rm = TRUE)
         nb_fit <- proportion_below_value < threshold
 
         if (nb_fit) {
@@ -229,27 +259,41 @@ nb_proportion <- function(p_val_table, low_pval = 0.01, threshold = 0.42, num_sa
             "Thus based on a threshold of ",
             threshold, ", you ", recommendation)
     }else {
-        ngenes <- nrow(p_val_table)
+        ngenes <- nrow(adj_p_val_table)
         threshold <- ngenes * 1 / 1000
 
         count_below_value <- 0
-        for (i in 1:nrow(p_val_table)){
-            if (min(p_val_table[i, ]) < low_pval) {
+        for (i in seq_len(nrow(adj_p_val_table))){
+            if (min(adj_p_val_table[i, ]) < low_pval) {
                 count_below_value <- count_below_value + 1
             }
         }
 
-        nb_fit <- count_below_value < threshold
+        ngene_pval <- nrow(p_val_table)
+        threshold_pval <- ngene_pval * 0.05
 
-        if (nb_fit) {
-            if (count_below_value == 0) {
-                recommendation <- "may use DESeq2 for your analysis."
+        count_below_value_pval <- 0
+        for (i in seq_len(nrow(p_val_table))){
+            if (min(p_val_table[i, ]) < 0.05) {
+                count_below_value_pval <- count_below_value_pval + 1
+            }
+        }
+
+        nb_fit <- count_below_value < threshold
+        nb_fit_pval <- count_below_value_pval < threshold_pval
+
+        if (nb_fit & nb_fit_pval) {
+            if (count_below_value == 0 && count_below_value_pval == 0) {
+                recommendation <- "you may use DESeq2 for your analysis."
             }else {
-                recommendation <- paste0("should be cautious about using DESeq2",
-                " for your analysis. You are at risk of receiving false results.")
+                recommendation <- paste0("you should be cautious about using ",
+                "DESeq2 for your analysis. You have significant features,",
+                " and thus you are at risk of receiving false results.")
             }
         }else {
-            recommendation <- "should not use DESeq2 for your analysis."
+            recommendation <- paste0(
+            "therefore, we do not recommend that you should use DESeq2 for ",
+            "your analysis.")
         }
 
         commentary <- paste0("With an adjusted FDR cut off of ", low_pval, ", ",
@@ -257,7 +301,9 @@ nb_proportion <- function(p_val_table, low_pval = 0.01, threshold = 0.42, num_sa
             " of your condition variable features are below the cutoff. ",
             "If DESeq's assumptions are met, we would not expect to find any",
             " significant features. Since ",
-            count_below_value, " features are significant, you ",
+            count_below_value, " features have a significant FDR, and ",
+            count_below_value_pval,
+            " features have a significant pvalue (<0.05), ",
             recommendation)
     }
 
