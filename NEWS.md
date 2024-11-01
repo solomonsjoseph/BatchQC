@@ -1,3 +1,7 @@
+# Version 2.2.1
+## Minor Changes
+* Added pval information to the DESeq2 binomial evaluation
+
 # Version 2.1.6
 ## Bug Fixes
 * Corrected code for proper division of less than or 20+ samples
