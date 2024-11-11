@@ -1,3 +1,8 @@
+# Version 2.2.2
+## Minor Changes
+* Updated SE object upload to allow assays of any name (no longer require one
+  assay to be called "counts")
+  
 # Version 2.2.1
 ## Minor Changes
 * Added pval information to the DESeq2 binomial evaluation

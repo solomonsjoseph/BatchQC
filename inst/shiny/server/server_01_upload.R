@@ -158,7 +158,7 @@ observeEvent(input$se, {
     reactivevalue$se_location <- input$se$datapath
     se <- readRDS(input$se$datapath)
     reactivevalue$se <- se
-    output$counts_header <- renderDT(datatable(assays(reactivevalue$se)$counts))
+    output$counts_header <- renderDT(datatable(assays(reactivevalue$se)[[1]]))
     output$counts_dimensions <- renderText(paste(dim(reactivevalue$se),
         c('observations and', 'samples')))
 
@@ -218,7 +218,7 @@ observeEvent(input$submit, {
         } else if (input$uploadChoice == "seObject" &
                 !is.null(input$se$datapath)) {
             se <- readRDS(reactivevalue$se_location)
-            se <- se[rowSums(se@assays@data$counts) > 0, ]
+            se <- se[rowSums(se@assays@data[[1]]) > 0, ]
         } else if (input$uploadChoice == "example") {
             se <- summarized_experiment(reactivevalue$counts,
                 reactivevalue$metadata)
