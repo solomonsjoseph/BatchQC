@@ -11,7 +11,7 @@ covar, output_assay_name)
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{method}{Normalization Method}
+\item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma")}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
@@ -19,7 +19,7 @@ covar, output_assay_name)
 
 \item{group}{The group variable}
 
-\item{covar}{Covariate Matrix}
+\item{covar}{list of covariates}
 
 \item{output_assay_name}{name of results assay}
 }
@@ -39,12 +39,12 @@ se <- BatchQC::batch_correct(se, method = "ComBat-Seq",
                                     covar = "Treatment",
                                     output_assay_name =
                                         "ComBat_Seq_Corrected")
-se <- BatchQC::batch_correct(se, method = "Combat",
+se <- BatchQC::batch_correct(se, method = "ComBat",
                                     assay_to_normalize = "counts",
                                     batch = "Mutation_Status",
                                     covar = "Treatment",
                                     output_assay_name =
-                                        "Combat_Corrected")
+                                        "ComBat_Corrected")
 se
 
 }

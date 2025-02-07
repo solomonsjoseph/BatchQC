@@ -1,11 +1,11 @@
 #' Batch Correct
 #' This function allows you to Add batch corrected count matrix to the SE object
 #' @param se SummarizedExperiment object
-#' @param method Normalization Method
+#' @param method Normalization Method ("ComBat-Seq", "ComBat", "limma")
 #' @param assay_to_normalize Which assay use to do normalization
 #' @param batch The batch
 #' @param group The group variable
-#' @param covar Covariate Matrix
+#' @param covar list of covariates
 #' @param output_assay_name name of results assay
 #' @usage batch_correct(se, method, assay_to_normalize, batch, group = NULL,
 #' covar, output_assay_name)
@@ -21,12 +21,12 @@
 #'                                     covar = "Treatment",
 #'                                     output_assay_name =
 #'                                         "ComBat_Seq_Corrected")
-#' se <- BatchQC::batch_correct(se, method = "Combat",
+#' se <- BatchQC::batch_correct(se, method = "ComBat",
 #'                                     assay_to_normalize = "counts",
 #'                                     batch = "Mutation_Status",
 #'                                     covar = "Treatment",
 #'                                     output_assay_name =
-#'                                         "Combat_Corrected")
+#'                                         "ComBat_Corrected")
 #' se
 #'
 #' @export
@@ -35,31 +35,34 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
     se <- se
     batch <- data.frame(colData(se))[, batch]
     if (method == 'ComBat-Seq') {
-        se <- combat_seq_correction(se, assay_to_normalize, batch, group, covar,
+        se <- ComBat_seq_correction(se, assay_to_normalize, batch, group, covar,
             output_assay_name)
     } else if (method == 'ComBat') {
-        se <- combat_correction(se, assay_to_normalize, batch, covar,
+        se <- ComBat_correction(se, assay_to_normalize, batch, covar,
+            output_assay_name)
+    } else if (method == 'limma') {
+        se <- limma_correction(se, assay_to_normalize, batch, covar,
             output_assay_name)
     }
     return(se)
 }
 
-#' Combat-Seq Correction
-#' This function applies combat-seq correction to your summarized experiment
+#' ComBat-Seq Correction
+#' This function applies ComBat-seq correction to your summarized experiment
 #' object
 #' @param se SummarizedExperiment object
 #' @param assay_to_normalize Assay that should be corrected
 #' @param batch The variable that represents batch
 #' @param group The group variable
-#' @param covar Covariate Matrix
+#' @param covar list of covariates
 #' @param output_assay_name name of results assay
-#' @usage combat_seq_correction(se, assay_to_normalize, batch, group, covar,
+#' @usage ComBat_seq_correction(se, assay_to_normalize, batch, group, covar,
 #' output_assay_name)
-#' @return SE object with an added combat-seq corrected array
+#' @return SE object with an added ComBat-seq corrected array
 #' @import SummarizedExperiment
 #' @import sva
 
-combat_seq_correction <- function(se, assay_to_normalize, batch,
+ComBat_seq_correction <- function(se, assay_to_normalize, batch,
     group, covar, output_assay_name) {
     if (is.null(covar)) {
         assays(se)[[output_assay_name]] <- ComBat_seq(as.matrix(
@@ -104,18 +107,18 @@ combat_seq_correction <- function(se, assay_to_normalize, batch,
     return(se)
 }
 
-#' Combat Correction
-#' This function applies combat correction to your summarized experiment object
+#' ComBat Correction
+#' This function applies ComBat correction to your summarized experiment object
 #' @param se SummarizedExperiment object
 #' @param assay_to_normalize Assay that should be corrected
 #' @param batch The variable that represents batch
-#' @param covar Covariate Matrix
+#' @param covar list of covariates
 #' @param output_assay_name name of results assay
-#' @return SE object with an added combat corrected array
+#' @return SE object with an added ComBat corrected array
 #' @import SummarizedExperiment
 #' @import sva
 
-combat_correction <- function(se, assay_to_normalize, batch,
+ComBat_correction <- function(se, assay_to_normalize, batch,
     covar, output_assay_name) {
     if (is.null(covar)) {
         assays(se)[[output_assay_name]] <-
@@ -163,3 +166,44 @@ combat_correction <- function(se, assay_to_normalize, batch,
     }
     return(se)
 }
+
+#' Limma Correction
+#' This function applies limma batch correction to your provided assay
+#' @param se SummarizedExperiment object
+#' @param assay_to_normalize Log assay that should be corrected
+#' @param batch Factor containing batch information
+#' @param covar list of covariates
+#' @param output_assay_name name of results assay
+#' @return SE object with an added limma corrected array
+#' @import SummarizedExperiment
+#' @importFrom limma removeBatchEffect
+#'
+limma_correction <- function(se, assay_to_normalize, batch, covar,
+    output_assay_name) {
+    if (is.null(covar)) {
+        limma_corrected <- limma::removeBatchEffect(
+            assays(se)[[assay_to_normalize]],
+            batch = batch
+            #design = model.matrix(~)
+        )
+    }else {
+        cov <- data.frame(colData(se))[, covar]
+
+        for (i in seq_len(ncol(cov))) {
+            cov[, i] <- as.factor(cov[, i])
+            cov[, i] <- as.numeric(cov[, i])
+        }
+
+        cov <- data.frame(cov)
+        rownames(cov) <- rownames(data.frame(colData(se)))
+        colnames(cov) <- covar
+
+        limma_corrected <- limma::removeBatchEffect(
+            assays(se)[[assay_to_normalize]],
+            batch = batch,
+            covariates = cov
+        )
+    }
+    assays(se)[[output_assay_name]] <- limma_corrected
+    return(se)
+    }
