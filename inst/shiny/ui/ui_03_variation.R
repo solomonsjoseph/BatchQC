@@ -35,7 +35,7 @@ tabPanel(
             ),
             tabPanel("Individual Variation Variable/Batch Ratio",
                 h5("The boxplot and table display the individual, or raw
-                    variation, divided by the batch. A ratio greater that 1
+                    variation, divided by the batch. A ratio less that 1
                     indicates that batch has a stronger affect than the
                     variable of interest."),
                 plotOutput('EV_ratio_plot'),
@@ -43,7 +43,7 @@ tabPanel(
             ),
             tabPanel("Residual Variation Variable/Batch Ratio",
                 h5("The boxplot and table display the residual divided by the
-                    batch. A ratio greater that 1 indicates that batch has a
+                    batch. A ratio less that 1 indicates that batch has a
                     stronger affect than the variable of interest."),
                 plotOutput('EV_residual_ratio_plot'),
                 dataTableOutput('EV_residual_ratio_table')
