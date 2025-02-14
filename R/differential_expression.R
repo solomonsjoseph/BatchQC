@@ -1,4 +1,4 @@
-globalVariables(c("chosen", "P.Value", "adj.P.Val"))
+globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 
 #' Differential Expression Analysis
 #'
@@ -120,7 +120,7 @@ pval_summary <- function(res_list) {
 #' This function allows you to plot p-values of explained variation
 #' @param DE_results Differential Expression analysis result (a named list of
 #' dataframes corresponding to each analysis completed with a "pvalue" column)
-#' @import reshape2
+#' @importFrom tidyr pivot_longer
 #' @import ggplot2
 #' @importFrom data.table data.table
 #' @return boxplots of pvalues for each condition
@@ -145,15 +145,17 @@ pval_plotter <- function(DE_results) {
 
     colnames(pval_table) <- names(DE_results)
 
-    covar_boxplot <- ggplot(subset(melt(data.table::as.data.table(pval_table),
-        id.vars = NULL),
-        variable %in% names(DE_results)),
-        aes(x = variable, y = value, fill = variable)) +
-        geom_violin(width = 0.8) +
+    pval_table <- pivot_longer(pval_table, 2:length(colnames(pval_table)),
+        names_to = "effects",
+        values_to = "pval")
+
+    covar_boxplot <- ggplot(pval_table,
+        aes(x = effects, y = pval, fill = effects)) +
+        geom_violin(width = 1.4) +
         geom_boxplot(width = 0.1) +
-        coord_flip() +
         scale_x_discrete(name = "") +
         scale_y_continuous(name = "P-Values") +
+        coord_flip() +
         labs(title =
                 "Distribution of Batch and Covariate Effects (P-Values)
                 Across Genes") +
