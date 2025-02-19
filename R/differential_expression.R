@@ -154,7 +154,7 @@ pval_plotter <- function(DE_results) {
         geom_violin(width = 1.4) +
         geom_boxplot(width = 0.1) +
         scale_x_discrete(name = "") +
-        scale_y_continuous(name = "P-Values") +
+        scale_y_continuous(name = "P-Values", limit = c(0,1)) +
         coord_flip() +
         labs(title =
                 "Distribution of Batch and Covariate Effects (P-Values)
