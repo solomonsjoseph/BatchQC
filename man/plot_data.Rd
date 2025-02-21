@@ -4,7 +4,7 @@
 \alias{plot_data}
 \title{This function formats the PCA plot using ggplot}
 \usage{
-plot_data(pca_plot_data, color, shape, xaxisPC, yaxisPC)
+plot_data(pca_plot_data, color, shape, batch, xaxisPC, yaxisPC)
 }
 \arguments{
 \item{pca_plot_data}{Data for all assays to plot}
@@ -12,6 +12,8 @@ plot_data(pca_plot_data, color, shape, xaxisPC, yaxisPC)
 \item{color}{variable that will be plotted as color}
 
 \item{shape}{variable that will be plotted as shape}
+
+\item{batch}{variable representing batch for the ellipses}
 
 \item{xaxisPC}{the PC to plot as the x axis}
 

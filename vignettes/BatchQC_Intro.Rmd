@@ -432,7 +432,8 @@ Use the following code to recreate the PCA plot and associated table that lists
 the explained variation of each PC for our signature data set:
 ```{r}
 pca_plot <- BatchQC::PCA_plotter(se = se_object, nfeature = 20, color = "batch",
-    shape = "condition", assays = c("log_intensity", "ComBat_corrected"),
+    shape = "condition", batch = "batch",
+    assays = c("log_intensity", "ComBat_corrected"),
     xaxisPC = 1, yaxisPC = 2, log_option = FALSE)
 pca_plot$plot
 pca_plot$var_explained

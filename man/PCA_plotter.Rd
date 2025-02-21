@@ -4,8 +4,8 @@
 \alias{PCA_plotter}
 \title{This function allows you to plot PCA}
 \usage{
-PCA_plotter(se, nfeature, color, shape, assays, xaxisPC, yaxisPC,
-log_option = FALSE)
+PCA_plotter(se, nfeature, color, shape, batch, assays, xaxisPC,
+yaxisPC, log_option = FALSE)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
@@ -15,6 +15,8 @@ log_option = FALSE)
 \item{color}{choose a color}
 
 \item{shape}{choose a shape}
+
+\item{batch}{variable representing batch (for ellipses)}
 
 \item{assays}{array of assay names from \code{se}}
 
@@ -43,7 +45,7 @@ se_object_ComBat_Seq <- BatchQC::batch_correct(se, method = "ComBat-Seq",
                                                 "ComBat_Seq_Corrected")
 pca_plot <- BatchQC::PCA_plotter(se = se_object_ComBat_Seq,
                             nfeature = 2, color = "Mutation_Status",
-                            shape = "Treatment",
+                            shape = "Treatment", batch = "batch",
                             assays = c("counts", "ComBat_Seq_Corrected"),
                             xaxisPC = 1, yaxisPC = 2, log_option = FALSE)
 pca_plot$plot

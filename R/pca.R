@@ -3,14 +3,15 @@
 #' @param nfeature number of features
 #' @param color choose a color
 #' @param shape choose a shape
+#' @param batch variable representing batch (for ellipses)
 #' @param assays array of assay names from `se`
 #' @param xaxisPC the PC to plot as the x axis
 #' @param yaxisPC the PC to plot as the y axis
 #' @param log_option TRUE if data should be logged before plotting (recommended
 #' for sequencing counts), FALSE if data should not be logged (for instance,
 #' data is already logged); FALSE by default
-#' @usage PCA_plotter(se, nfeature, color, shape, assays, xaxisPC, yaxisPC,
-#' log_option = FALSE)
+#' @usage PCA_plotter(se, nfeature, color, shape, batch, assays, xaxisPC,
+#' yaxisPC, log_option = FALSE)
 #' @return List containing PCA info, PCA variance and PCA plot
 #' @examples
 #' library(scran)
@@ -23,14 +24,14 @@
 #'                                                 "ComBat_Seq_Corrected")
 #' pca_plot <- BatchQC::PCA_plotter(se = se_object_ComBat_Seq,
 #'                             nfeature = 2, color = "Mutation_Status",
-#'                             shape = "Treatment",
+#'                             shape = "Treatment", batch = "batch",
 #'                             assays = c("counts", "ComBat_Seq_Corrected"),
 #'                             xaxisPC = 1, yaxisPC = 2, log_option = FALSE)
 #' pca_plot$plot
 #' pca_plot$var_explained
 #'
 #' @export
-PCA_plotter <- function(se, nfeature, color, shape,
+PCA_plotter <- function(se, nfeature, color, shape, batch,
     assays, xaxisPC, yaxisPC, log_option = FALSE) {
     pca_plot_data <- data.frame()
     var_explained_data <- NULL
@@ -74,7 +75,7 @@ PCA_plotter <- function(se, nfeature, color, shape,
     pca_plot_data$assay <- factor(pca_plot_data$assay, levels = assays)
     var_explained_data <- var_explained_data[c(xaxisPC, yaxisPC), ,
                                             drop = FALSE]
-    plot <- plot_data(pca_plot_data, color, shape, xaxisPC, yaxisPC)
+    plot <- plot_data(pca_plot_data, color, shape, batch, xaxisPC, yaxisPC)
 
     return(list(PCA = pca_plot_data, var_explained = var_explained_data,
         plot = plot))
@@ -84,12 +85,13 @@ PCA_plotter <- function(se, nfeature, color, shape,
 #' @param pca_plot_data Data for all assays to plot
 #' @param color variable that will be plotted as color
 #' @param shape variable that will be plotted as shape
+#' @param batch variable representing batch for the ellipses
 #' @param xaxisPC the PC to plot as the x axis
 #' @param yaxisPC the PC to plot as the y axis
 #' @import ggplot2
 #' @return PCA plot
 
-plot_data <- function(pca_plot_data, color, shape, xaxisPC, yaxisPC) {
+plot_data <- function(pca_plot_data, color, shape, batch, xaxisPC, yaxisPC) {
     pca_plot_data[, c(color)] <- factor(pca_plot_data[, color])
     pca_plot_data[, c(shape)] <- factor(pca_plot_data[, shape])
 
@@ -100,8 +102,9 @@ plot_data <- function(pca_plot_data, color, shape, xaxisPC, yaxisPC) {
             y = yaxisPC,
             color = color,
             shape = shape,
-            sample = 'sample')) +
+            group = batch)) +
         geom_point(size = 3) +
+        stat_ellipse(aes_string(color = batch, group = batch)) +
         facet_wrap(vars(assay), ncol = 2, scales = 'free')
 
     return(PCAplot)

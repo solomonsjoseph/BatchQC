@@ -14,6 +14,7 @@ observeEvent(input$PCA_plot, {
                             input$top_n_PCA,
                             input$variates_color,
                             input$variates_shape,
+                            input$variates_batch,
                             assays,
                             input$firstPC,
                             input$secondPC,

@@ -4,7 +4,7 @@ Title: Batch Effects Quality Control Software
 Version: 2.2.2
 Date: 2024-10-11
 Authors@R: c(
-    person("Jessica", "McClintock", , "jessica.mcclintock@rutgers.edu", 
+    person("Jessica", "Anderson", , "anderson.jessica@rutgers.edu", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0542-9872")),
     person("W. Evan", "Johnson", , "wj183@njms.rutgers.edu", role = c("aut"), 
     comment = c(ORCID = "0000-0002-6247-6595")),
