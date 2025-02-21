@@ -69,7 +69,7 @@ setupSelections <- function() {
         choices = colnames(colData(reactivevalue$se)),
         selected = NULL)
     updateNumericInput(session = session, inputId = 'top_n_heatmap',
-        value = 2, min = 2, max = dim(reactivevalue$se)[1])
+        value = dim(reactivevalue$se)[1], min = 2, max = dim(reactivevalue$se)[1])
 
     # Dendrogram
     updateSelectizeInput(session = session, inputId = 'dend_assay_name',
@@ -87,11 +87,14 @@ setupSelections <- function() {
         choices = assayNames((reactivevalue$se)),
         selected = NULL)
     updateNumericInput(session = session, inputId = 'top_n_PCA',
-        value = 2, min = 2, max = dim(reactivevalue$se)[1])
+        value = dim(reactivevalue$se)[1], min = 2, max = dim(reactivevalue$se)[1])
     updateSelectizeInput(session = session, inputId = 'variates_shape',
         choices = colnames(colData(reactivevalue$se)),
         selected = NULL)
     updateSelectizeInput(session = session, inputId = 'variates_color',
+        choices = colnames(colData(reactivevalue$se)),
+        selected = NULL)
+    updateSelectizeInput(session = session, inputId = 'variates_batch',
         choices = colnames(colData(reactivevalue$se)),
         selected = NULL)
     updateSelectizeInput(session, inputId = 'batch',
