@@ -1,3 +1,13 @@
+# Version 2.2.3
+## Major Changes
+* Added limma as a batch correction
+* Added umap plot option
+* Added ellipses to pca plot
+
+## Minor Changes
+* Set p-val plot x scale to always be 0 to 1
+* Removed Intercept from p-val violin plots
+
 # Version 2.2.2
 ## Minor Changes
 * Updated SE object upload to allow assays of any name (no longer require one
