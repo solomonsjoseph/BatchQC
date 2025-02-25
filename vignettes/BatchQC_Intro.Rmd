@@ -439,7 +439,36 @@ pca_plot$plot
 pca_plot$var_explained
 ```
 
-## 9. Differential Expression Analysis
+## 9. umap Analysis
+You may plot your data on a umap by selecting the assay, the batch variable, and
+selecting a value for nearest neighbors and minimum distance for the points to
+plot. The default for neighbors is 15 and minimum distance default is 0.1. We
+expect each batch to cluster together when there is a batch effect present.
+Otherwise, having dispersed points in each batch indicates there is not a strong
+batch effect. You can adjust the nearest neighbor parameter, a lower value will
+priortize local structure and a higher value will represent bigger picture, but
+lose finer details. A higher minimum distance value will also put less emphasis
+on the global structure.
+
+Use the following code to recreate the umap for the signature data set:
+
+```{r umap}
+umap_plot <- BatchQC::umap(se = se_object, assay_of_interest = "log_intensity",
+    batch = "batch", neighbors = 15, min_distance = 0.1)
+
+umap_plot
+```
+
+This code creates a umap for the batch corrected assay:
+```{r umap}
+umap_plot_batch_corrected <- BatchQC::umap(se = se_object,
+    assay_of_interest = "ComBat_corrected",
+    batch = "batch", neighbors = 15, min_distance = 0.1)
+
+umap_plot_batch_corrected
+```
+
+## 10. Differential Expression Analysis
 To explore which features are differentially expressed between conditions, use
 the differential expression tab. DE_Seq2 should be used for count data
 (non-negative, integer values) while limma can be used for all other data. 
