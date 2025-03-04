@@ -4,7 +4,15 @@
 \alias{umap}
 \title{Create a umap plot; wrapper function for umap package pplus custom plotting}
 \usage{
-umap(se_object, assay_of_interest, batch, neighbors = 15, min_distance = 0.1)
+umap(
+  se_object,
+  assay_of_interest,
+  batch,
+  neighbors = 15,
+  min_distance = 0.1,
+  spread = 1,
+  exploratory = FALSE
+)
 }
 \arguments{
 \item{se_object}{se_object; containing data of interest}
@@ -18,7 +26,13 @@ lower values prioritize local structure, higher values will represent
 bigger picture but lose finer details}
 
 \item{min_distance}{numeric; how close points appear in final layout; higher
-values puts less emphasis on global structure}
+values puts less emphasis on global structure; must be less than spread}
+
+\item{spread}{numeric; dispersion of points in umap}
+
+\item{exploratory}{Boolean; default is FALSE, if True, a 5x5 grid with
+k = 15, 25, 50, 100 and min_distance = 0.1, .2, .5, .75, .99 will
+be plotted}
 }
 \value{
 umap plot
