@@ -116,6 +116,8 @@ setupSelections <- function() {
         max = dim(reactivevalue$se)[1] - 1)
     updateNumericInput(session = session, inputId = 'distance',
         value = 0.1, min = 0.000000000001)
+    updateNumericInput(session = session, inputId = 'spread',
+        value = 1, min = 0.000000000001)
 
     # Variation Analysis
     updateSelectizeInput(session = session, inputId = "variation_assay",

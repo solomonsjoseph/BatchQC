@@ -1,3 +1,8 @@
+# Version 2.2.4
+## Major Changes
+* Updated variation ratio analysis to be log transformed
+* Added umap exploratory option
+
 # Version 2.2.3
 ## Major Changes
 * Added limma as a batch correction

@@ -454,16 +454,16 @@ Use the following code to recreate the umap for the signature data set:
 
 ```{r umap}
 umap_plot <- BatchQC::umap(se = se_object, assay_of_interest = "log_intensity",
-    batch = "batch", neighbors = 15, min_distance = 0.1)
+    batch = "batch", neighbors = 15, min_distance = 0.1, spread = 1)
 
 umap_plot
 ```
 
 This code creates a umap for the batch corrected assay:
-```{r umap}
+```{r umap batch corrected}
 umap_plot_batch_corrected <- BatchQC::umap(se = se_object,
     assay_of_interest = "ComBat_corrected",
-    batch = "batch", neighbors = 15, min_distance = 0.1)
+    batch = "batch", neighbors = 15, min_distance = 0.1, spread = 1)
 
 umap_plot_batch_corrected
 ```
