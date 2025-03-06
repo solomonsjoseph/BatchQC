@@ -201,6 +201,13 @@ assays).
 2. **ComBat.** ComBat corrects for Batch effect using a parametric empirical 
 Bayes framework and data should be cleaned and normalized. Select a normalized 
 assay to run this on.
+3. **limma.** limma fitsa linear model to tohe data and then removes components
+due to batch effect. It shoudl be used on log transformed data.
+4. **sva** sva identifies and estimates surrogate varaibels for unknown sources
+of variation. It is appropriate when you know your experimental variable of
+interest (like the disease state of samples), but unknown sources of variation.
+It should be run on cleaned and log transformed data. This can be run with or
+without additional adjustment variables.
 
 To apply your desired batch effect correction model, select the method from the 
 drop down menu, then select the appropriate assay in the second drop down menu,
@@ -213,7 +220,7 @@ state "Correction Complete" in the bottom right hand corner when complete.
 
 You are now ready to analyze your raw and batch effect corrected data sets! 
 
-The signature data is log normalized, so ComBat is the appropriate batch
+The signature data is log normalized, so ComBat is one appropriate batch
 correction tool. Therefore, to run from the command line use the following:
 
 ```{r}
@@ -223,8 +230,8 @@ se_object <- BatchQC::batch_correct(se = se_object, method = "ComBat",
     covar = c("condition"), output_assay_name = "ComBat_corrected")
 ```
 
-ComBat-Seq can be applied to a data set by providing "ComBat-Seq" to the method
-parameter in the function call.
+ComBat-Seq (or limma or sva) can be applied to a data set by providing
+"ComBat-Seq" (or "limma" or "sva") to the method parameter in the function call.
 
 ## 4. Experimental Design
 ### Batch Design

@@ -1,7 +1,7 @@
 #' Batch Correct
 #' This function allows you to Add batch corrected count matrix to the SE object
 #' @param se SummarizedExperiment object
-#' @param method Normalization Method ("ComBat-Seq", "ComBat", "limma")
+#' @param method Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva")
 #' @param assay_to_normalize Which assay use to do normalization
 #' @param batch The batch
 #' @param group The group variable
@@ -33,6 +33,7 @@
 batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
     covar, output_assay_name) {
     se <- se
+    var_of_interest <- batch
     batch <- data.frame(colData(se))[, batch]
     if (method == 'ComBat-Seq') {
         se <- ComBat_seq_correction(se, assay_to_normalize, batch, group, covar,
@@ -42,6 +43,9 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
             output_assay_name)
     } else if (method == 'limma') {
         se <- limma_correction(se, assay_to_normalize, batch, covar,
+            output_assay_name)
+    } else if (method == 'sva') {
+        se <- sva_correction(se, assay_to_normalize, var_of_interest, covar,
             output_assay_name)
     }
     return(se)
@@ -206,4 +210,56 @@ limma_correction <- function(se, assay_to_normalize, batch, covar,
     }
     assays(se)[[output_assay_name]] <- limma_corrected
     return(se)
+}
+
+#' sva Correction
+#' This function applies sva correction to a summarized experiment object
+#' (implementation adapted from sva::psva)
+#' @param se SummarizedExperiment object
+#' @param assay_to_normalize string; name of assay that should be corrected
+#' @param var_of_interest string; name of  experimental variable of interest
+#' @param covar list; sting list  of covariates to include in sva analysis
+#' @param output_assay_name string; name of results assay
+#' @return SE object with an added sva corrected array
+#' @import SummarizedExperiment
+#' @import sva
+
+sva_correction <- function(se, assay_to_normalize, var_of_interest,
+    covar, output_assay_name) {
+    if (is.null(covar)) {
+        mod0 <- model.matrix(~1, data = colData(se))
+        n.sv <- sva::num.sv(assays(se)[[assay_to_normalize]], mod,
+            method = "leek")
+        sva_assay <- sva::psva(dat = assays(se)[[assay_to_normalize]],
+            batch = data.frame(colData(se))[, var_of_interest],
+            mod0 = mod0,
+            n.sv = n.sv)
+    }else {
+        str_formula <- ""
+        for (i in seq_len(covar)) {
+            if (i < length(covar)) {
+                str_formula <- paste0(str_formula,
+                    "as.factor(", covar[i], ") + ")
+            }else {
+                str_formula <- paste0(str_formula, "as.factor(", covar[i], ")")
+            }
+        }
+        form_mod0 <- formula(paste0("~", str_formula))
+        mod0 <- model.matrix(form_mod0, data = colData(se))
+        mod_formula <- formula(paste0("~as.factor(", var_of_interest, ") + ",
+            str_formula))
+        mod <- model.matrix(mod_formula, data = colData(se))
+
+        psva.SV <- sva::sva(assays(se)[[assay_to_normalize]], mod = mod,
+            mod0 = mod0) #, n.sv = n.sv)
+        colnames(psva.SV$sv) <- paste('sv', seq_len(ncol(psva.SV$sv)))
+        psva.fit <- lmFit(assays(se)[[assay_to_normalize]],
+            cbind(mod, psva.SV$sv))
+        sva_assay <- sweep(psva.fit$coefficients[,
+            paste('sv', seq_len(ncol(psva.SV$sv)))] %*% t(psva.SV$sv), 1,
+            psva.fit$coefficients[, "(Intercept)"], FUN = "+")
     }
+    colnames(sva_assay) <- colnames(assays(se)[[assay_to_normalize]])
+    assays(se)[[output_assay_name]] <- sva_assay
+    return(se)
+}

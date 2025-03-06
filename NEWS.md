@@ -1,3 +1,7 @@
+# Version 2.2.5
+## Minor Changes
+* Added sva batch correction method (for unknown variation correction)
+
 # Version 2.2.4
 ## Major Changes
 * Updated variation ratio analysis to be log transformed

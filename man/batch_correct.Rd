@@ -11,7 +11,7 @@ covar, output_assay_name)
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma")}
+\item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva")}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
