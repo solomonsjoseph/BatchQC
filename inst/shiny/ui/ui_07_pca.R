@@ -1,4 +1,4 @@
-tabPanel("PCA Analysis",
+tabPanel("PCA",
 
          # Application title
          titlePanel("PCA Analysis"),

@@ -22,10 +22,6 @@
 #' @export
 #'
 
-### Check if batch and conditions are linearly independent
-### Check if batch and condition variables are factors
-# (in Shiny, only let the user choose batch and conditions that are factors)
-
 batchqc_explained_variation <- function(se, batch, condition = NULL,
     assay_name) {
     se <- check_valid_input(se, batch, condition)

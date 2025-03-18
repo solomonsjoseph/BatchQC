@@ -21,8 +21,8 @@ variation_ratios <- function(ex_variation_table, batch) {
     colnames(ratio_variation_table) <- c(batch)
     for (column in names(ex_variation_table)) {
         if (column != batch & column != "Explained" & column != "Unexplained") {
-            col_div_batch <- ex_variation_table[[column]] /
-                ex_variation_table[[batch]]
+            col_div_batch <- log(ex_variation_table[[column]] /
+                ex_variation_table[[batch]])
             new_col <- paste0(column, "/", batch)
             ratio_variation_table[[new_col]] <- col_div_batch
         }

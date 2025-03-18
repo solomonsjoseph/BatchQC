@@ -35,7 +35,7 @@ tabPanel(
             ),
             tabPanel("Individual Variation Variable/Batch Ratio",
                 h5("The boxplot and table display the individual, or raw
-                    variation, divided by the batch. A ratio less that 1
+                    variation, divided by the batch. A ratio less that 0
                     indicates that batch has a stronger affect than the
                     variable of interest."),
                 plotOutput('EV_ratio_plot'),
