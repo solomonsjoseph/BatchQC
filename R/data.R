@@ -79,6 +79,7 @@ globalVariables(c("protein_sample_info", "protein_data", "batch_indicator",
 #' se_object <- bladder_data_upload()
 #'
 #' @export
+
 bladder_data_upload <- function() {
     if (!requireNamespace("bladderbatch")) {
         stop("You need to install the 'bladderbatch' package to use this
@@ -89,6 +90,84 @@ bladder_data_upload <- function() {
     pheno <- pData(bladderEset) %>% select(-sample)
     edata <- exprs(bladderEset)
     se_object <- BatchQC::summarized_experiment(edata, pheno)
-
+    colData(se_object)[['batch']] <- as.factor(colData(se_object)[['batch']])
     return(se_object)
+}
+
+#' TB data upload
+#' This function uploads the TB data set from the curatedTBData package.
+#'
+#' @usage tb_data_upload()
+#' @return a SE object with raw counts data and metadata
+#' @import SummarizedExperiment
+#' @import dplyr
+#'
+#' @examples
+#' library(curatedTBData)
+#' se_object <- tb_data_upload()
+#'
+#' @export
+
+tb_data_upload <- function() {
+    if (!requireNamespace("curatedTBData")) {
+        stop("You need to install the 'curatedTBData' package to use this
+            data set.")
+    } else if (!requireNamespace("MultiAssayExperiment")) {
+        stop("You need to install the 'MultiAssayExperiment' package to use this
+            data set.")
+    }
+    curatedData <- curatedTBData::curatedTBData(c("GSE152218", "GSE101705"),
+        dry.run = FALSE, curated.only = FALSE)
+
+    batch1_se <- MultiAssayExperiment::experiments(
+        curatedData$GSE152218)$object_raw
+    batch1_data <- SummarizedExperiment::assays(batch1_se)$assay_raw
+    batch1_metadata <- MultiAssayExperiment::colData(curatedData$GSE152218)
+    batch1_metadata$Experiment <- rep("GSE152218", length(batch1_metadata[, 1]))
+    batch1_metadata <- batch1_metadata %>% as.data.frame() %>%
+        select("TBStatus", "HIVStatus", "BMI", "Experiment")
+
+    batch2_data <- MultiAssayExperiment::experiments(
+        curatedData$GSE101705)$assay_reprocess_hg38
+    batch2_metadata <- MultiAssayExperiment::colData(curatedData$GSE101705)
+    batch2_metadata$Experiment <- rep("GSE101705", length(batch2_metadata[, 1]))
+
+    # need to get actual batch data, function calls "made up" data
+    batch2_bmi <- BMI_data()
+    batch2_metadata$BMI <- batch2_bmi
+    batch2_metadata <- batch2_metadata %>% as.data.frame() %>%
+        select("TBStatus", "HIVStatus", "BMI", "Experiment")
+
+    # Merge data and metadata from both experiments
+    all_data <- merge(batch1_data, batch2_data, by = 0)
+    rownames(all_data) <- all_data$Row.names
+    all_data <- all_data %>% select(-1) %>% as.matrix()
+    all_metadata <- rbind(batch1_metadata, batch2_metadata)
+
+    se <- summarized_experiment(all_data, all_metadata)
+    colData(se)[['Experiment']] <- as.factor(colData(se)[['Experiment']])
+    colData(se)[['TBStatus']] <- as.factor(colData(se)[['TBStatus']])
+    colData(se)[['HIVStatus']] <- as.factor(colData(se)[['HIVStatus']])
+    colData(se)[['BMIcat']] <- as.factor(vapply(colData(se)[['BMI']],
+        function(x) {
+            if (x < 16) {
+                return("mal")
+            }else {
+                return("well")
+                }
+            }, FUN.VALUE = character(1)))
+    return(se)
+}
+
+#' This function returns BMI data that comes form the indata object provided to
+#' Jessica from Evan
+#' @usage BMI_data()
+#' @return a SE object with raw counts data and metadata
+#'
+BMI_data <- function() {
+    return(c(20.40, 23.20, 21.70, 18.90, 19.30, 18.60, 19.40, 19.20,
+        21.50, 20.10, 19.00, 20.30, 19.20, 26.00, 20.90, 24.90, 15.10, 13.80,
+        14.20, 15.10, 21.40, 11.50, 15.60, 14.30, 15.60, 20.40, 23.20, 21.70,
+        21.80, 23.50, 25.00, 24.80, 24.10, 24.30, 26.30, 28.80, 22.30, 38.70,
+        21.70, 26.00, 28.3, 22.30, 38.7, 21.7))
 }

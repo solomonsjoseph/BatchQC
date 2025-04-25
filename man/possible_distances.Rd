@@ -2,7 +2,7 @@
 % Please edit documentation in R/umap.R
 \name{possible_distances}
 \alias{possible_distances}
-\title{Create pottential min_distance values for exploratory analysis based on the
+\title{Create potential min_distance values for exploratory analysis based on the
 value of spread}
 \usage{
 possible_distances(spread)
@@ -14,6 +14,6 @@ possible_distances(spread)
 vector of min_distance values to use in exploratory analysis
 }
 \description{
-Create pottential min_distance values for exploratory analysis based on the
+Create potential min_distance values for exploratory analysis based on the
 value of spread
 }
