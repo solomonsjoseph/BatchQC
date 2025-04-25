@@ -216,12 +216,18 @@ observeEvent(input$exampleData, {
             c('observations and', 'samples')))
 
         reactivevalue$metadata <- as.data.frame(colData(bladder_data))
-        reactivevalue$metadata[["batch"]] <- as.factor(reactivevalue$metadata[["batch"]])
         output$metadata_header <- renderDT(datatable(reactivevalue$metadata))
 
-    } #else if (input$exampleData == "TbData") {
-    #     #Add Indian Data Set
-    # }
+    }else if (input$exampleData == "TBData") {
+        TB_data <- tb_data_upload()
+        reactivevalue$counts <- assays(TB_data)$counts
+        output$counts_header <- renderDT(datatable(reactivevalue$counts))
+        output$counts_dimensions <- renderText(paste(dim(reactivevalue$counts),
+            c('observations and', 'samples')))
+
+        reactivevalue$metadata <- as.data.frame(colData(TB_data))
+        output$metadata_header <- renderDT(datatable(reactivevalue$metadata))
+     }
 })
 
 ## Create summarized experiment object and set up plot options

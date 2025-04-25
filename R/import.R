@@ -1,11 +1,10 @@
 #' This function creates a summarized experiment object from count
 #' and metadata files uploaded by the user
-#' @param counts counts dataframe
+#' @param counts counts matrix
 #' @param columndata metadata dataframe
 #' @return a summarized experiment object
 #' @import SummarizedExperiment
 #' @import reader
-#' @import EBSeq
 #' @import utils
 #'
 #' @examples

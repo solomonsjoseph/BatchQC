@@ -1,3 +1,10 @@
+# Version 2.5.1
+## Major Changes
+* Added TB data example
+
+## Minor Changes
+* Changed sapply to vapply in nb check
+
 # Version 2.2.5
 ## Minor Changes
 * Added sva batch correction method (for unknown variation correction)

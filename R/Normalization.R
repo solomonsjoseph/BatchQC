@@ -8,8 +8,8 @@
 #' @param output_assay_name name for the resulting normalized assay
 #' @return the original SE object with normalized assay appended
 #' @import SummarizedExperiment
-#' @import reader
 #' @import EBSeq
+#' @import reader
 #' @examples
 #' library(scran)
 #' se <- mockSCE()
@@ -36,9 +36,9 @@ normalize_SE <- function(se, method, log_bool, assay_to_normalize,
             colSums(assays(se)[[assay_to_normalize]]) * (10^6)
 
     }else if (method == 'DESeq') {
-        assays(se)[[output_assay_name]] <- GetNormalizedMat(
+        assays(se)[[output_assay_name]] <- EBSeq::GetNormalizedMat(
             assays(se)[[assay_to_normalize]],
-            MedianNorm(assays(se)[[assay_to_normalize]]))
+            EBSeq::MedianNorm(assays(se)[[assay_to_normalize]]))
     }else {
         assays(se)[[output_assay_name]] <- assays(se)[[assay_to_normalize]]
     }

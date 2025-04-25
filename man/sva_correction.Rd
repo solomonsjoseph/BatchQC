@@ -17,13 +17,13 @@ sva_correction(
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{assay_to_normalize}{Assay that should be corrected}
+\item{assay_to_normalize}{string; name of assay that should be corrected}
 
-\item{var_of_interest}{The experimental variable of interest}
+\item{var_of_interest}{string; name of  experimental variable of interest}
 
-\item{covar}{list of covariates to include in sva analysis}
+\item{covar}{list; sting list  of covariates to include in sva analysis}
 
-\item{output_assay_name}{name of results assay}
+\item{output_assay_name}{string; name of results assay}
 }
 \value{
 SE object with an added sva corrected array

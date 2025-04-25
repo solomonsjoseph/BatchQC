@@ -201,9 +201,9 @@ assays).
 2. **ComBat.** ComBat corrects for Batch effect using a parametric empirical 
 Bayes framework and data should be cleaned and normalized. Select a normalized 
 assay to run this on.
-3. **limma.** limma fitsa linear model to tohe data and then removes components
-due to batch effect. It shoudl be used on log transformed data.
-4. **sva** sva identifies and estimates surrogate varaibels for unknown sources
+3. **limma.** limma fits a linear model to the data and then removes components
+due to batch effect. It should be used on log transformed data.
+4. **sva** sva identifies and estimates surrogate variables for unknown sources
 of variation. It is appropriate when you know your experimental variable of
 interest (like the disease state of samples), but unknown sources of variation.
 It should be run on cleaned and log transformed data. This can be run with or
@@ -453,7 +453,7 @@ plot. The default for neighbors is 15 and minimum distance default is 0.1. We
 expect each batch to cluster together when there is a batch effect present.
 Otherwise, having dispersed points in each batch indicates there is not a strong
 batch effect. You can adjust the nearest neighbor parameter, a lower value will
-priortize local structure and a higher value will represent bigger picture, but
+prioritize local structure and a higher value will represent bigger picture, but
 lose finer details. A higher minimum distance value will also put less emphasis
 on the global structure.
 

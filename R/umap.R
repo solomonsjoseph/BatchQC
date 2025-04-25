@@ -1,4 +1,4 @@
-#' Create a umap plot; wrapper function for umap package pplus custom plotting
+#' Create a umap plot; wrapper function for umap package plus custom plotting
 #' @param se_object se_object; containing data of interest
 #' @param assay_of_interest string; the assay in the se_object to plot
 #' @param batch string; representing batch
@@ -87,7 +87,7 @@ possible_k_neighbors <- function(data_size) {
     }
 }
 
-#' Create pottential min_distance values for exploratory analysis based on the
+#' Create potential min_distance values for exploratory analysis based on the
 #' value of spread
 #' @param spread numeric; the value of spread used in the exploratory analysis
 #' @return vector of min_distance values to use in exploratory analysis

@@ -132,19 +132,19 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
     num_unique_conditions <- length(unique_conditions)
 
     # For each condition level, get goodness-of-fit p-values for each genes
-    all_pvalues <- sapply(seq_len(length(unique_conditions)), function(j) {
+    all_pvalues <- vapply(seq_len(length(unique_conditions)), function(j) {
         index_j <- which(condition == unique_conditions[j])
         # For one condition level, calculate the goodness-of-fit p-values
-        pvalues_level <-  sapply(seq_len(length(size)), function(i) {
+        pvalues_level <-  vapply(seq_len(length(size)), function(i) {
             mu_gene <- mu_matrix[i, index_j]
             count_condition <- count_matrix[i, index_j]
             pvalue <- counts2pvalue(counts = count_condition,
                 size = size[i],
                 mu = mu_gene)
             return(pvalue)
-        })
+        }, double(1))
         return(pvalues_level)
-    })
+    }, double(1))
 
     all_pvalues <- as.data.frame(all_pvalues, row.names =
             row.names(count_matrix))

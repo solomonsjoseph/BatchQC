@@ -2,7 +2,7 @@
 % Please edit documentation in R/umap.R
 \name{umap}
 \alias{umap}
-\title{Create a umap plot; wrapper function for umap package pplus custom plotting}
+\title{Create a umap plot; wrapper function for umap package plus custom plotting}
 \usage{
 umap(
   se_object,
@@ -38,7 +38,7 @@ be plotted}
 umap plot
 }
 \description{
-Create a umap plot; wrapper function for umap package pplus custom plotting
+Create a umap plot; wrapper function for umap package plus custom plotting
 }
 \examples{
 library(scran)
