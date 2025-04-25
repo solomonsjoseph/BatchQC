@@ -60,6 +60,23 @@ if (!requireNamespace("bladderbatch", quietly = TRUE))
 se_object <- BatchQC::bladder_data_upload()
 ```
 
+# Example 4: TB Data
+This is a whole blood gene expression profiling from well and malnourished
+Indian individuals with TB and severely malnourished household contacts with
+latent TB infection (LTBI). Severe malnutrition was defined as body mass index
+<16. kg/m2 in adults and based on weight-for-height Z scores in children <18
+years. Gene expression was measured using RNA-sequencing. (VanValkenburg A, et
+al. Malnutrition leads to increased inflammation and expression of tuberculosis
+risk signatures in recently exposed household contacts of pulmonary
+tuberculosis. Front Immunol. 2022 Sep 28;13:1011166.
+doi: 10.3389/fimmu.2022.1011166")
+
+```{r, eval = FALSE}
+if (!requireNamespace("curatedTBData", quietly = TRUE))
+    BiocManager::install("curatedTBData")
+se_object <- BatchQC::tb_data_upload()
+```
+
 # Session info {.unnumbered}
 
 ```{r sessionInfo, echo=FALSE}

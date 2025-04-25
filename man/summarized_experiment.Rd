@@ -8,7 +8,7 @@ and metadata files uploaded by the user}
 summarized_experiment(counts, columndata)
 }
 \arguments{
-\item{counts}{counts dataframe}
+\item{counts}{counts matrix}
 
 \item{columndata}{metadata dataframe}
 }

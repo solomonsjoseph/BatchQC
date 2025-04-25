@@ -55,7 +55,7 @@ tabPanel("Upload Data",
                 selectInput("exampleData",
                     "Example Data",
                     choices = c("", "proteinData", "signatureData",
-                        "bladderData", "No Selection"), #"TbData",
+                        "bladderData", "TBData", "No Selection"),
                     selected = ""), ),
             withBusyIndicatorUI(actionButton(inputId = 'submit',
                 label = 'Upload'))
@@ -81,7 +81,7 @@ tabPanel("Upload Data",
                                     bladderbatch package which must be installed to use this data example set"),
                             h6("Reference: Leek J., et al. Tackling the widespread and critical impact of batch effects in high-throughput data. Nat Rev Genet 11, 733–739 (2010). https://doi.org/10.1038/nrg2825")
                         ),
-                        conditionalPanel(condition = "input.exampleData == 'TbData'",
+                        conditionalPanel(condition = "input.exampleData == 'TBData'",
                             h5("This data set is from a TB cohort study from Pondicherry India and contains RNA-seq counts data."),
                             h6("Reference: VanValkenburg A, et al. Malnutrition leads to increased inflammation and expression of tuberculosis risk signatures in recently exposed household contacts of pulmonary tuberculosis. Front Immunol. 2022 Sep 28;13:1011166. doi: 10.3389/fimmu.2022.1011166")
                         )),

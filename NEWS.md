@@ -1,3 +1,6 @@
+# Version 2.5.1
+* Added TB data example
+
 # Version 2.2.5
 ## Minor Changes
 * Added sva batch correction method (for unknown variation correction)
