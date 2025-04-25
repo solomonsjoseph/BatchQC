@@ -76,8 +76,23 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
-    } else {
-        stop("Please select a method 'DESeq2' or 'limma'")
+    }else if (method == 'edgeR') {
+      # Create DGEList
+      dge <- edgeR::DGEList(counts = assays(se)$counts, samples = colData(se), group = colData(se)$conditions)
+      # Filtering and normalization
+      #
+      # define design matrix
+      design <- stats::model.matrix(~ group + batch, data = dge$samples)
+      # Test for significant DE in each gene using QL F-test
+      fit <- edgeR::glmQLFit(dge, design, robust = TRUE)
+      qlf <- edgeR::glmQLFTest(fit, coef = 2)
+      # get results
+      results <- edgeR::topTags(qlf, n = Inf, adjust.method = "BH")$table |>
+        select(logFC, PValue, FDR)
+      colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
+      res[[1]] <- results
+    }else {
+        stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
     return(res)
 }
