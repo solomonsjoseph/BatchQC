@@ -5,7 +5,7 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #' This function runs DE analysis on a count matrix (DESeq) or a normalized log
 #' or log-CPM matrix (limma) contained in the se object
 #' @param se SummarizedExperiment object
-#' @param method DE analysis method option (either 'DESeq2' or 'limma')
+#' @param method DE analysis method option ('DESeq2', 'limma', or 'edgeR')
 #' @param batch metadata column in the se object representing batch
 #' @param conditions metadata columns in the se object representing additional
 #'   analysis covariates
@@ -16,6 +16,7 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #' @import SummarizedExperiment
 #' @import DESeq2
 #' @import scran
+#' @import edgeR
 #' @importFrom stats model.matrix as.formula t.test aov coef
 #' @importFrom limma lmFit eBayes topTable makeContrasts contrasts.fit
 #' @examples
@@ -77,20 +78,28 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
     }else if (method == 'edgeR') {
-      # Create DGEList
-      dge <- edgeR::DGEList(counts = assays(se)$counts, samples = colData(se), group = colData(se)$conditions)
       # Filtering and normalization
-      #
       # define design matrix
-      design <- stats::model.matrix(~ group + batch, data = dge$samples)
-      # Test for significant DE in each gene using QL F-test
-      fit <- edgeR::glmQLFit(dge, design, robust = TRUE)
-      qlf <- edgeR::glmQLFTest(fit, coef = 2)
-      # get results
-      results <- edgeR::topTags(qlf, n = Inf, adjust.method = "BH")$table |>
-        select(logFC, PValue, FDR)
-      colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
-      res[[1]] <- results
+      design <- stats::model.matrix(
+        stats::as.formula(
+          paste(
+            "~", paste(colnames(analysis_design)),
+            collapse = "+"
+          )
+        ),
+        data = analysis_design
+      )
+      
+      # Test for significant DE in each gene using QL F-test and get results
+      fit <- edgeR::glmQLFit(data, design)
+      
+      for (i in 2:length(colnames(design))){
+        qlf <- edgeR::glmQLFTest(fit, coef = i)
+        results <- edgeR::topTags(qlf, n = Inf, adjust.method = "BH")$table %>%
+          select(logFC, PValue, FDR)
+        colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
+        res[[qlf$comparison]] <- results
+      }
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
