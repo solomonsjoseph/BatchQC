@@ -93,7 +93,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
       # Test for significant DE in each gene using QL F-test and get results
       fit <- edgeR::glmQLFit(data, design)
       
-      for (i in 2:length(colnames(design))){
+      for (i in 1:length(colnames(design))){
         qlf <- edgeR::glmQLFTest(fit, coef = i)
         results <- edgeR::topTags(qlf, n = Inf, adjust.method = "BH")$table %>%
           select(logFC, PValue, FDR)

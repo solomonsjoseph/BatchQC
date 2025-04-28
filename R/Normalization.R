@@ -1,6 +1,6 @@
 #' This function allows you to add normalized count matrix to the SE object
 #' @param se SummarizedExperiment Object
-#' @param method Normalization Method, either 'CPM' or 'DESeq' or 'none' for
+#' @param method Normalization Method, either 'CPM', 'DESeq', 'edgeR', or 'none' for
 #'   log only
 #' @param log_bool True or False; True to log normalize the data set after
 #'   normalization method
@@ -9,6 +9,7 @@
 #' @return the original SE object with normalized assay appended
 #' @import SummarizedExperiment
 #' @import EBSeq
+#' @import edgeR
 #' @import reader
 #' @examples
 #' library(scran)
@@ -39,7 +40,14 @@ normalize_SE <- function(se, method, log_bool, assay_to_normalize,
         assays(se)[[output_assay_name]] <- EBSeq::GetNormalizedMat(
             assays(se)[[assay_to_normalize]],
             EBSeq::MedianNorm(assays(se)[[assay_to_normalize]]))
-    }else {
+        
+    }else if (method == "edgeR") {
+        dge <- edgeR::DGEList(counts = assays(se)[[assay_to_normalize]])
+        dge <- edgeR::normLibSizes(dge)
+        assays(se)[[output_assay_name]] <- dge$counts
+    }
+    
+    else {
         assays(se)[[output_assay_name]] <- assays(se)[[assay_to_normalize]]
     }
 
