@@ -78,7 +78,6 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
     }else if (method == 'edgeR') {
-      # Filtering and normalization
       # define design matrix
       design <- stats::model.matrix(
         stats::as.formula(
