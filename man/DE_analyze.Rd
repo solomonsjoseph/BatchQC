@@ -9,22 +9,22 @@ DE_analyze(se, method, batch, conditions, assay_to_analyze)
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{method}{DE analysis method option (either 'DESeq2' or 'limma')}
+\item{method}{DE analysis method option ('DESeq2', 'limma', or 'edgeR')}
 
 \item{batch}{metadata column in the se object representing batch}
 
 \item{conditions}{metadata columns in the se object representing additional
 analysis covariates}
 
-\item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or
+\item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or edgeR or
 normalized data for limma) for DE analysis}
 }
 \value{
 A named list containing the log2FoldChange, pvalue and adjusted
-pvalue (padj) for each analysis returned by DESeq2 or limma
+pvalue (padj) for each analysis returned by DESeq2 or limma or edgeR
 }
 \description{
-This function runs DE analysis on a count matrix (DESeq) or a normalized log
+This function runs DE analysis on a count matrix (DESeq, edgeR) or a normalized log
 or log-CPM matrix (limma) contained in the se object
 }
 \examples{
