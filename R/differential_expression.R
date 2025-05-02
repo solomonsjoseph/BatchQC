@@ -78,7 +78,6 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
     }else if (method == 'edgeR') {
-      # define design matrix
       design <- stats::model.matrix(
         stats::as.formula(
           paste(
@@ -89,7 +88,6 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
         data = analysis_design
       )
       
-      # Test for significant DE in each gene using QL F-test and get results
       fit <- edgeR::glmQLFit(data, design)
       
       for (i in 1:length(colnames(design))){
