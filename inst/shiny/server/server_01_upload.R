@@ -136,10 +136,6 @@ setupSelections <- function() {
         selected = NULL)
 }
 
-observeEvent(input$uploadChoice, {
-    ##When it changes, set all reactive values to null
-})
-
 ## Obtain the counts matrix and count table location
 observeEvent(input$counts, {
     req(input$counts)
