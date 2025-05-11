@@ -1,3 +1,4 @@
+BMI
 Bladderbatch
 CPM
 ComBat
@@ -27,10 +28,12 @@ dendextend
 devtools
 doi
 downsample
+edgeR
 et
 fimmu
 ggplot
 github
+indata
 limma
 mTCC
 nb
@@ -45,6 +48,7 @@ pvalue
 pvalues
 reproducibility
 sTCC
+sapply
 se
 shinyjs
 sva
@@ -53,3 +57,4 @@ umap
 umaps
 unadjusted
 untransformed
+vapply
