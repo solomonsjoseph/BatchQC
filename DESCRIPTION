@@ -46,6 +46,7 @@ Imports:
     DESeq2,
     dplyr,
     EBSeq,
+    edgeR,
     ggdendro,
     ggnewscale,
     ggplot2,
