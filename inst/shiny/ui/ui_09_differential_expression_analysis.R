@@ -29,6 +29,8 @@ tabPanel("Differential Expression Analysis",
                      onInitialize = I('function() { this.setValue(""); }'))),
             withBusyIndicatorUI(actionButton('DE_analyze', label = 'Here we go!'))),
            mainPanel(
+             h4(strong("Usage")),
+             h5("Each differential expression method requires a specific type of input. Please provide raw counts data or DESeq-normalized data for DESeq, normalized log or log-CPM data for limma, and edgeR-normalized data for edgeR."),
              tabsetPanel(
                tabPanel("Results Table",
                        selectizeInput("result_to_view",
