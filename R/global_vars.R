@@ -8,4 +8,7 @@ globalVariables(c("exprs",
     "y",
     "yend",
     "y.x",
-    "y.y"))
+    "y.y",
+    "logFC",
+    "PValue",
+    "FDR"))
