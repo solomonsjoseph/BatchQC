@@ -1,3 +1,8 @@
+# Version 2.5.2
+## Major Changes
+* Added edgeR as a normalization method
+* Added edgeR as a differential expression analysis method
+
 # Version 2.5.1
 ## Major Changes
 * Added TB data example
