@@ -41,7 +41,6 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
     design <- stats::model.matrix(stats::as.formula(paste(" ~",
             paste(colnames(analysis_design), collapse = "+"))),
             data = analysis_design)
-
     if (method == 'DESeq2') {
         # Check if the assay contains counts (e.g. non negative integer data),
         for (item in data){
@@ -78,23 +77,28 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
     }else if (method == 'edgeR') {
-        fit <- edgeR::glmQLFit(data, design)
-
-        for (i in seq_len(length(colnames(design)))){
-            quasi_likelihood <- edgeR::glmQLFTest(fit, coef = i)
-            results <- edgeR::topTags(quasi_likelihood,
-                                      n = Inf,
-                                      adjust.method = "BH")$table %>%
-                select(logFC, PValue, FDR)
-        colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
-        res[[quasi_likelihood$comparison]] <- results
-      }
+        res <- edgeR_DE(data, design)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
     return(res)
 }
 
+
+edgeR_DE <- function(data, design) {
+    fit <- edgeR::glmQLFit(data, design)
+    res <- list()
+
+    for (i in seq_len(length(colnames(design)))){
+        quasi_likelihood <- edgeR::glmQLFTest(fit, coef = i)
+        results <- edgeR::topTags(quasi_likelihood,
+            n = Inf, adjust.method = "BH")$table %>%
+            select(logFC, PValue, FDR)
+        colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
+        res[[quasi_likelihood$comparison]] <- results
+    }
+    return(res)
+}
 
 #' Returns summary table for p-values of explained variation
 #'
