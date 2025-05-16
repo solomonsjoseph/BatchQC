@@ -3,19 +3,21 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #' Differential Expression Analysis
 #'
 #' This function runs DE analysis on a count matrix (DESeq) or a normalized log
-#' or log-CPM matrix (limma) contained in the se object
+#' or log-CPM matrix (limma) or an edgeR-normalized matrix (edgeR)
+#' contained in the se object
 #' @param se SummarizedExperiment object
-#' @param method DE analysis method option (either 'DESeq2' or 'limma')
+#' @param method DE analysis method option ('DESeq2', 'limma', or 'edgeR')
 #' @param batch metadata column in the se object representing batch
 #' @param conditions metadata columns in the se object representing additional
 #'   analysis covariates
 #' @param assay_to_analyze Assay in the se object (either counts for DESeq2 or
-#'   normalized data for limma) for DE analysis
+#'   normalized data for limma or edgeR) for DE analysis
 #' @return A named list containing the log2FoldChange, pvalue and adjusted
-#'   pvalue (padj) for each analysis returned by DESeq2 or limma
+#'   pvalue (padj) for each analysis returned by DESeq2 or limma or edgeR
 #' @import SummarizedExperiment
 #' @import DESeq2
 #' @import scran
+#' @import edgeR
 #' @importFrom stats model.matrix as.formula t.test aov coef
 #' @importFrom limma lmFit eBayes topTable makeContrasts contrasts.fit
 #' @examples
@@ -36,7 +38,9 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
     rownames(data) <- names(se)
     analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
     res <- list()
-
+    design <- stats::model.matrix(stats::as.formula(paste(" ~",
+            paste(colnames(analysis_design), collapse = "+"))),
+            data = analysis_design)
     if (method == 'DESeq2') {
         # Check if the assay contains counts (e.g. non negative integer data),
         for (item in data){
@@ -63,10 +67,6 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             res[[covar]] <- imp_data
         }
     }else if (method == 'limma') {
-        design <- stats::model.matrix(stats::as.formula(paste(" ~",
-            paste(colnames(analysis_design), collapse = "+"))),
-            data = analysis_design)
-
         fit <- limma::lmFit(data, design)
         eBayes_res <- limma::eBayes(fit)
 
@@ -76,12 +76,29 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
             colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
-    } else {
-        stop("Please select a method 'DESeq2' or 'limma'")
+    }else if (method == 'edgeR') {
+        res <- edgeR_DE(data, design)
+    }else {
+        stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
     return(res)
 }
 
+
+edgeR_DE <- function(data, design) {
+    fit <- edgeR::glmQLFit(data, design)
+    res <- list()
+
+    for (i in seq_len(length(colnames(design)))){
+        quasi_likelihood <- edgeR::glmQLFTest(fit, coef = i)
+        results <- edgeR::topTags(quasi_likelihood,
+            n = Inf, adjust.method = "BH")$table %>%
+            select(logFC, PValue, FDR)
+        colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
+        res[[quasi_likelihood$comparison]] <- results
+    }
+    return(res)
+}
 
 #' Returns summary table for p-values of explained variation
 #'

@@ -146,6 +146,12 @@ specific size factors. Size factors are determined by the median ratio of gene
 counts relative to the geometric mean per feature. DESeq may be used to adjust
 expression count biases introduced by sequencing depth and RNA composition. 
 DESeq adjusted values are not recommended for within sample comparison.
+3. **edgeR.** edgeR calculates scale factors using a trimmed mean of M-values
+between each pair of samples and multiplies the scale factors with the original
+library size to get the normalized library size. This normalization method
+should be selected when you plan to use edgeR for differential expression
+analysis. The original read (raw) counts should be the provided input for this
+normalization method.
 
 To use one of these two methods, select it from the normalization method drop 
 down, select an assay to perform the normalization on from the drop down, and
@@ -478,7 +484,9 @@ umap_plot_batch_corrected
 ## 10. Differential Expression Analysis
 To explore which features are differentially expressed between conditions, use
 the differential expression tab. DE_Seq2 should be used for count data
-(non-negative, integer values) while limma can be used for all other data. 
+(non-negative, integer values), edgeR can be used for edgeR-normalized data,
+and limma can be used for all other data. edgeR implemented in BatchQC uses glm
+quasi-likelihood F-tests to test for differential expression.
 
 Our signature data is logged data, so we will use limma, we will select the
 assay we are interested in, select the batch variable and select all covariates
