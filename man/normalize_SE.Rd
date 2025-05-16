@@ -9,8 +9,8 @@ normalize_SE(se, method, log_bool, assay_to_normalize, output_assay_name)
 \arguments{
 \item{se}{SummarizedExperiment Object}
 
-\item{method}{Normalization Method, either 'CPM', 'DESeq', 'edgeR', or 'none' for
-log only}
+\item{method}{Normalization Method, either 'CPM', 'DESeq', 'edgeR', or 'none'
+for log only}
 
 \item{log_bool}{True or False; True to log normalize the data set after
 normalization method}
