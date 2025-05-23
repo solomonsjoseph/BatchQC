@@ -2,9 +2,7 @@
 % Please edit documentation in R/kBET.R
 \name{run_kBET}
 \alias{run_kBET}
-\title{kBET rejection rate
-This function runs the k-nearest neighbor batch effect test (kBET) to
-evaluate whether the data has detectable batch effect.}
+\title{kBET rejection rate}
 \usage{
 run_kBET(
   se,
@@ -81,17 +79,18 @@ expected frequencies will be adapted}
 }
 }
 \description{
-kBET rejection rate
 This function runs the k-nearest neighbor batch effect test (kBET) to
 evaluate whether the data has detectable batch effect.
 }
 \examples{
 library(scran)
 se <- mockSCE()
-kBET_result <- BatchQC::run_kBET(se = se,
-                                 assay_to_normalize = "counts",
-                                 batch = "Treatment")
-                                 
+kBET_result <- BatchQC::run_kBET(
+  se = se,
+  assay_to_normalize = "counts",
+  batch = "Treatment"
+)
+
 BatchQC::plot_kBET(kBET_result)
 
 }

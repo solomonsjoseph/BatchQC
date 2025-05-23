@@ -2,9 +2,7 @@
 % Please edit documentation in R/kBET.R
 \name{plot_kBET}
 \alias{plot_kBET}
-\title{kBET Rejection Plotter
-This function generates a boxplot of observed and expected rejection rates
-for the provided kBET output list object}
+\title{kBET Rejection Plotter}
 \usage{
 plot_kBET(kBET_res)
 }
@@ -15,7 +13,6 @@ plot_kBET(kBET_res)
 ggplot object containing kBET rejection boxplot
 }
 \description{
-kBET Rejection Plotter
 This function generates a boxplot of observed and expected rejection rates
 for the provided kBET output list object
 }
