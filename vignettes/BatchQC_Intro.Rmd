@@ -35,7 +35,7 @@ be done, and how correction should be applied before proceeding with a
 downstream analysis. Moreover, BatchQC interactively applies multiple common
 batch effect approaches to the data, and the user can quickly see the benefits
 of each method. BatchQC is developed as a Shiny App, but is reproducible at the
-command line through the functions contained int he R package. The output of the
+command line through the functions contained in the R package. The output of the
 shiny app is organized into multiple tabs, and each tab features an important 
 part of the batch effect analysis and visualization of the data. The BatchQC 
 interface has the following features:
