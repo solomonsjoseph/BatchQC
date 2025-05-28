@@ -78,13 +78,14 @@ respectively
 without mutual nearest neighbour: \itemize{
 \item \code{index} - index of each outsider sample)
 \item \code{categories} - tabularised labels of outsiders
-\item \code{p.val} - Significance level of outsider batch label distribution
-vs expected frequencies.
+\item \code{p.val} - Significance level of outsider batch label
+distribution vs expected frequencies.
 If the significance level is lower than \code{alpha},
 expected frequencies will be adapted}
 }
 
-If the optimal neighbourhood size (k0) is smaller than 10, NA is returned.
+If the optimal neighbourhood size (k0) is smaller than 10, NA is
+returned.
 }
 \description{
 adapted from kBET package (https://github.com/theislab/kBET).
@@ -93,7 +94,9 @@ the probability of a batch effect.
 }
 \examples{
 batch <- rep(seq_len(10), each = 20)
-data <- matrix(rpois(n = 50000, lambda = 10) * rbinom(50000, 1, prob = 0.5), nrow = 200)
+data <- matrix(rpois(n = 50000, lambda = 10) * rbinom(50000, 1, prob = 0.5),
+    nrow = 200
+)
 
 batch.estimate <- kBET(data, batch)
 }

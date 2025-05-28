@@ -26,13 +26,13 @@ A range of bounds where \code{foo} is maximal.
 }
 \description{
 adapted from kBET package (https://github.com/theislab/kBET).
-Provides recursive bisection algorithm for an arbitrary function. It evaluates the
-function \code{foo} at the bounds and replaces one of the boundaries until a maximum
-is found or the interval becomes too small
+Provides recursive bisection algorithm for an arbitrary function. It
+evaluates the function \code{foo} at the bounds and replaces one of the
+boundaries until a maximum is found or the interval becomes too small
 }
 \examples{
 get_maximum <- bisect(function(x) {
-  -(x - 2)^2
+    -(x - 2)^2
 }, c(-5, 50))
 
 }

@@ -13,6 +13,6 @@ plot_kBET(kBET_res)
 ggplot object containing kBET rejection boxplot
 }
 \description{
-This function generates a boxplot of observed and expected rejection rates
-for the provided kBET output list object
+This function generates a boxplot of observed and expected
+rejection rates for the provided kBET output list object
 }

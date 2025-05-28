@@ -24,6 +24,8 @@ run_kBET(
 \arguments{
 \item{se}{SummarizedExperiment object}
 
+\item{assay_to_normalize}{string; assay from se object to do normalization}
+
 \item{batch}{character string of column name that represents batch}
 
 \item{k0}{integer representing number of nearest neighbors to test on
@@ -72,23 +74,23 @@ respectively
 without mutual nearest neighbour: \itemize{
 \item \code{index} - index of each outsider sample)
 \item \code{categories} - tabularised labels of outsiders
-\item \code{p.val} - Significance level of outsider batch label distribution
-vs expected frequencies.
+\item \code{p.val} - Significance level of outsider batch label
+distribution vs expected frequencies.
 If the significance level is lower than \code{alpha},
 expected frequencies will be adapted}
 }
 }
 \description{
-This function runs the k-nearest neighbor batch effect test (kBET) to
-evaluate whether the data has detectable batch effect.
+This function runs the k-nearest neighbor batch effect test
+(kBET) to evaluate whether the data has detectable batch effect.
 }
 \examples{
 library(scran)
 se <- mockSCE()
 kBET_result <- BatchQC::run_kBET(
-  se = se,
-  assay_to_normalize = "counts",
-  batch = "Treatment"
+    se = se,
+    assay_to_normalize = "counts",
+    batch = "Treatment"
 )
 
 BatchQC::plot_kBET(kBET_result)

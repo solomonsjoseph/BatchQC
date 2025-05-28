@@ -1,3 +1,7 @@
+#Version 2.5.3
+##Major changes
+* Added new kBET tab for testing batch effect
+
 # Version 2.5.2
 ## Major Changes
 * Added edgeR as a normalization method
