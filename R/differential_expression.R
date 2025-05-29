@@ -102,20 +102,19 @@ edgeR_DE <- function(data, design) {
 
 merge_SE <- function(se, data, assay_to_analyze) {
     mat <- as.matrix(data)
-    rownames(mat) <- rownames(se)
-    colnames(mat) <- colnames(se)
-    
-    mat <- mat |> 
+
+    mat_long <- mat |> 
         data.frame() |> 
         rownames_to_column("features") |> 
-        pivot_longer(-"features", values_to = assay_to_analyze, names_to = "samples")
+        pivot_longer(!features, values_to = assay_to_analyze,
+                     names_to = "samples")
     
     fac <- as.matrix(colData(se))
-    fac <- fac |> 
+    fac_long <- fac |> 
         data.frame() |> 
         rownames_to_column("samples")
     
-    merge_df <- merge(mat, fac, by = "samples")
+    merge_df <- merge(mat_long, fac_long, by = "samples")
     feature_list <- split(merge_df, merge_df$features)
 }
 
