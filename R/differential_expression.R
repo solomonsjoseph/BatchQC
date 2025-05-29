@@ -100,6 +100,26 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
+merge_SE <- function(se, data, assay_to_analyze) {
+    mat <- as.matrix(data)
+    rownames(mat) <- rownames(se)
+    colnames(mat) <- colnames(se)
+    
+    mat <- mat |> 
+        data.frame() |> 
+        rownames_to_column("features") |> 
+        pivot_longer(-"features", values_to = assay_to_analyze, names_to = "samples")
+    
+    fac <- as.matrix(colData(se))
+    fac <- fac |> 
+        data.frame() |> 
+        rownames_to_column("samples")
+    
+    merge_df <- merge(mat, fac, by = "samples")
+    feature_list <- split(merge_df, merge_df$features)
+}
+
+
 #' Returns summary table for p-values of explained variation
 #'
 #' @param res_list Differential Expression analysis result (a named list of
@@ -179,3 +199,4 @@ pval_plotter <- function(DE_results) {
         theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
     return(covar_boxplot = covar_boxplot)
 }
+
