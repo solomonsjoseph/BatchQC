@@ -100,22 +100,77 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-merge_SE <- function(se, data, assay_to_analyze) {
-    mat <- as.matrix(data)
-
-    mat_long <- mat |> 
-        data.frame() |> 
+merge_SE <- function(se, assay_to_analyze) {
+    # mat <- as.matrix(data)
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
+    data <- assays(se)[[assay_to_analyze]]
+    mat_long <- data |> 
+        # data.frame() |> 
         rownames_to_column("features") |> 
         pivot_longer(!features, values_to = assay_to_analyze,
                      names_to = "samples")
     
-    fac <- as.matrix(colData(se))
-    fac_long <- fac |> 
-        data.frame() |> 
+    fac_long <- analysis_design |> 
+        # data.frame() |> 
         rownames_to_column("samples")
     
     merge_df <- merge(mat_long, fac_long, by = "samples")
     feature_list <- split(merge_df, merge_df$features)
+    return(feature_list)
+}
+
+anova_DE <- function(feature_list, padj_method, batch, conditions, assay_to_analyze) {
+    res <- list()
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
+    model <- stats::as.formula(paste(assay_to_analyze, "~", paste(colnames(analysis_design), collapse = "+")))
+    for (n in names(feature_list)){
+        feature_df <- feature_list[[n]]
+        anov_model <- aov(counts ~ batch + conditions, data = feature_df)
+        
+        model_summary <- anova(anov_model)
+        result_vars <- rownames(model_summary)[rownames(model_summary) != "Residuals"]
+        
+        for (i in seq_along(result_vars)) {
+            
+            var_name <- result_vars[i]
+            var_levels <- unique(feature_df[[var_name]])
+            pval <- model_summary[var_name, "Pr(>F)"]
+            
+            if (length(var_levels) > 1){
+                ref_level <- var_levels[1]
+                ref_mean <- mean(
+                    feature_df$counts[feature_df[var_name] == ref_level],
+                    na.rm = TRUE
+                )
+                
+                for (j in 2:length(var_levels)) {
+                    current_level <- var_levels[j]
+                    current_mean <- mean(
+                        feature_df$counts[feature_df[var_name] == current_level],
+                        na.rm = TRUE
+                    )
+                    
+                    log2FC <- log2(current_mean/ref_mean)
+                    # comparison = paste0(current_level, "vs", ref_level)
+                    
+                    res[[var_name]] <- rbind(data.frame(
+                        feature = n,
+                        # var_name = var_name,
+                        # setNames(data.frame(log2FC), paste0("log2FoldChange.", comparison)),
+                        log2FoldChange = log2FC,
+                        fvalue = model_summary[var_name, "F value"],
+                        pvalue = pval,
+                        padj = p.adjust(pval, method = padj_method)
+                    ) |> column_to_rownames(var = "feature"), res[[var_name]])
+                    
+                }
+            }
+        }
+        
+    }
+    
+    return(res)      
+    
 }
 
 
