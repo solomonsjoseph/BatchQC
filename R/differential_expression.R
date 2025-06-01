@@ -2,18 +2,19 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 
 #' Differential Expression Analysis
 #'
-#' This function runs DE analysis on a count matrix (DESeq), a normalized log
-#' or log-CPM matrix (limma), or an edgeR-normalized matrix (edgeR)
+#' This function runs DE analysis on a count matrix (DESeq), a normalized log (ANOVA), a normalized log
+#' or log-CPM matrix (limma), or an edgeR TMM-normalized matrix (edgeR)
 #' contained in the se object. 
 #' @param se SummarizedExperiment object
-#' @param method DE analysis method option ('DESeq2', 'limma', or 'edgeR')
+#' @param method DE analysis method option ('DESeq2', 'limma', 'edgeR', or 'ANOVA')
 #' @param batch metadata column in the se object representing batch
 #' @param conditions metadata columns in the se object representing additional
 #'   analysis covariates
 #' @param assay_to_analyze Assay in the se object (either counts for DESeq2 or
 #'   normalized data for limma or edgeR) for DE analysis
+#' @param padj_method correction method for adjusted p-value from p.adjust.methods
 #' @return A named list containing the log2FoldChange, pvalue and adjusted
-#'   pvalue (padj) for each analysis returned by DESeq2 or limma or edgeR
+#'   pvalue (padj) for each analysis returned by DESeq2, limma, edgeR, or ANOVA
 #' @import SummarizedExperiment
 #' @import DESeq2
 #' @import scran
