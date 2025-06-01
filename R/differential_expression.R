@@ -2,9 +2,9 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 
 #' Differential Expression Analysis
 #'
-#' This function runs DE analysis on a count matrix (DESeq) or a normalized log
-#' or log-CPM matrix (limma) or an edgeR-normalized matrix (edgeR)
-#' contained in the se object
+#' This function runs DE analysis on a count matrix (DESeq), a normalized log
+#' or log-CPM matrix (limma), or an edgeR-normalized matrix (edgeR)
+#' contained in the se object. 
 #' @param se SummarizedExperiment object
 #' @param method DE analysis method option ('DESeq2', 'limma', or 'edgeR')
 #' @param batch metadata column in the se object representing batch
@@ -33,7 +33,7 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #' pval_plotter(differential_expression)
 #'
 #' @export
-DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
+DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_method) {
     data <- assays(se)[[assay_to_analyze]]
     rownames(data) <- names(se)
     analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
@@ -78,6 +78,9 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze) {
         }
     }else if (method == 'edgeR') {
         res <- edgeR_DE(data, design)
+    }else if (method == 'ANOVA') {
+        feature_list <- merge_SE(se, data, assay_to_analyze, analysis_design)
+        res <- anova_DE(feature_list, padj_method, assay_to_analyze, analysis_design)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
@@ -100,18 +103,18 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-merge_SE <- function(se, assay_to_analyze) {
+merge_SE <- function(se, data, assay_to_analyze, analysis_design) {
     # mat <- as.matrix(data)
-    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
-    data <- assays(se)[[assay_to_analyze]]
+    # analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
+    # data <- assays(se)[[assay_to_analyze]]
     mat_long <- data |> 
-        # data.frame() |> 
+        data.frame() |>
         rownames_to_column("features") |> 
         pivot_longer(!features, values_to = assay_to_analyze,
                      names_to = "samples")
     
     fac_long <- analysis_design |> 
-        # data.frame() |> 
+        data.frame() |>
         rownames_to_column("samples")
     
     merge_df <- merge(mat_long, fac_long, by = "samples")
@@ -119,13 +122,12 @@ merge_SE <- function(se, assay_to_analyze) {
     return(feature_list)
 }
 
-anova_DE <- function(feature_list, padj_method, batch, conditions, assay_to_analyze) {
+anova_DE <- function(feature_list, padj_method, assay_to_analyze, analysis_design) {
     res <- list()
-    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
     model <- stats::as.formula(paste(assay_to_analyze, "~", paste(colnames(analysis_design), collapse = "+")))
     for (n in names(feature_list)){
         feature_df <- feature_list[[n]]
-        anov_model <- aov(counts ~ batch + conditions, data = feature_df)
+        anov_model <- aov(model, data = feature_df)
         
         model_summary <- anova(anov_model)
         result_vars <- rownames(model_summary)[rownames(model_summary) != "Residuals"]
@@ -133,30 +135,25 @@ anova_DE <- function(feature_list, padj_method, batch, conditions, assay_to_anal
         for (i in seq_along(result_vars)) {
             
             var_name <- result_vars[i]
-            var_levels <- unique(feature_df[[var_name]])
+            var_levels <- as.character(unique(feature_df[[var_name]]))
             pval <- model_summary[var_name, "Pr(>F)"]
             
             if (length(var_levels) > 1){
                 ref_level <- var_levels[1]
                 ref_mean <- mean(
-                    feature_df$counts[feature_df[var_name] == ref_level],
+                    feature_df[assay_to_analyze][feature_df[var_name] == ref_level],
                     na.rm = TRUE
                 )
-                
                 for (j in 2:length(var_levels)) {
                     current_level <- var_levels[j]
                     current_mean <- mean(
-                        feature_df$counts[feature_df[var_name] == current_level],
+                        feature_df[assay_to_analyze][feature_df[var_name] == current_level],
                         na.rm = TRUE
                     )
-                    
+
                     log2FC <- log2(current_mean/ref_mean)
-                    # comparison = paste0(current_level, "vs", ref_level)
-                    
                     res[[var_name]] <- rbind(data.frame(
                         feature = n,
-                        # var_name = var_name,
-                        # setNames(data.frame(log2FC), paste0("log2FoldChange.", comparison)),
                         log2FoldChange = log2FC,
                         fvalue = model_summary[var_name, "F value"],
                         pvalue = pval,
@@ -168,9 +165,7 @@ anova_DE <- function(feature_list, padj_method, batch, conditions, assay_to_anal
         }
         
     }
-    
-    return(res)      
-    
+    return(res)
 }
 
 
@@ -235,8 +230,13 @@ pval_plotter <- function(DE_results) {
     }
 
     colnames(pval_table) <- names(DE_results)
+    
+    if ("(Intercept)" %in% colnames(pval_table)){
+        pval_table <- pval_table |> 
+            select(-"(Intercept)")
+    }
 
-    pval_table <- pivot_longer(pval_table, 2:length(colnames(pval_table)),
+    pval_table <- pivot_longer(pval_table, 1:length(colnames(pval_table)),
         names_to = "effects",
         values_to = "pval")
 
