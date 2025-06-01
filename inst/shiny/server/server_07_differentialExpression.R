@@ -28,7 +28,7 @@ observeEvent(input$DE_analyze, {
     withBusyIndicatorServer("DE_analyze", {
         reactivevalue$DE_results <- DE_analyze(reactivevalue$se,
                      input$DE_method, input$DE_batch, input$DE_conditions,
-                     input$DE_assay)
+                     input$DE_assay, input$padj_method)
         display_covariate <- names(reactivevalue$DE_results)[length(reactivevalue$DE_results)]
 
         output$DE_results <- renderDT({
