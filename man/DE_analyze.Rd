@@ -16,16 +16,17 @@ DE_analyze(se, method, batch, conditions, assay_to_analyze)
 \item{conditions}{metadata columns in the se object representing additional
 analysis covariates}
 
-\item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or edgeR or
-normalized data for limma) for DE analysis}
+\item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or
+normalized data for limma or edgeR) for DE analysis}
 }
 \value{
 A named list containing the log2FoldChange, pvalue and adjusted
 pvalue (padj) for each analysis returned by DESeq2 or limma or edgeR
 }
 \description{
-This function runs DE analysis on a count matrix (DESeq, edgeR) or a normalized log
-or log-CPM matrix (limma) contained in the se object
+This function runs DE analysis on a count matrix (DESeq) or a normalized log
+or log-CPM matrix (limma) or an edgeR-normalized matrix (edgeR)
+contained in the se object
 }
 \examples{
 library(scran)
