@@ -37,6 +37,19 @@ setupSelections <- function() {
         options = list(placeholder = "Please select an option below",
             onInitialize = I('function() { this.setValue(""); }')))
 
+    # Lambda Statistic
+    updateSelectizeInput(session = session, inputId = "lambda_matrix",
+        choices = assayNames((reactivevalue$se)),
+        selected = NULL,
+        options = list(placeholder = "Please select an option below",
+            onInitialize = I('function() { this.setValue(""); }')))
+    updateSelectizeInput(session = session, inputId = "batch_ind",
+        choices = names(colData(reactivevalue$se)),
+        selected = NULL)
+    updateSelectizeInput(session = session, inputId = "group_ind",
+        choices = names(colData(reactivevalue$se)),
+        selected = NULL)
+
     # Batch Correction
     updateSelectizeInput(session = session,
         inputId = "correction_batch",
@@ -297,6 +310,20 @@ observeEvent(input$nb_check, {
         output$reference <- renderText(check_res$reference)
     })
 })
+
+## Compute Lambda Statistic
+observeEvent(input$lambda_stat, {
+    req(input$lambda_matrix,
+        input$batch_ind,
+        input$group_ind)
+    withBusyIndicatorServer("lambda_stat", {
+        lambda_res <- compute_lambda(dat = assays(reactivevalue$se)[[input$lambda_matrix]],
+            batchind = colData(reactivevalue$se)[, input$batch_ind],
+            groupind = colData(reactivevalue$se)[, input$group_ind])
+        output$lambda_table <- renderDataTable(data.table(lambda_res))
+    })
+})
+
 ## Normalize a selected assay
 observeEvent(input$normalize, {
     req(input$normalization_method, input$normalization_assay,
