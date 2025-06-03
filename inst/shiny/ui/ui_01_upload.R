@@ -122,7 +122,7 @@ tabPanel("Upload Data",
                         selected = NULL),
                     textInput(inputId = 'normalized_assay_name', 'Name for the normalized assay',
                         value = ''),
-                    checkboxInput('log', 'Log transform the results'),
+                    checkboxInput('log', 'log(x+1) transform the results'),
                     withBusyIndicatorUI(actionButton(inputId = 'normalize',
                         label = 'Normalize')),
                     br()
