@@ -6,6 +6,9 @@
 #'   normalization method
 #' @param assay_to_normalize Which SE assay to do normalization on
 #' @param output_assay_name name for the resulting normalized assay
+#' @param zero_treat boolean value indicating if an assay should be incremented
+#'   by 1 to protect against 0s before log transformation; default it TRUE,
+#'   FALSE would mean there are NO 0s in the assay
 #' @return the original SE object with normalized assay appended
 #' @import SummarizedExperiment
 #' @import EBSeq
@@ -29,11 +32,11 @@
 #'
 #' @export
 normalize_SE <- function(se, method, log_bool, assay_to_normalize,
-    output_assay_name) {
+    output_assay_name, zero_treat = TRUE) {
     se <- se
     if (method == 'CPM') {
         assays(se)[[output_assay_name]] <-
-            (assays(se)[[assay_to_normalize]] + 1) /
+            (assays(se)[[assay_to_normalize]]) /
             colSums(assays(se)[[assay_to_normalize]]) * (10^6)
 
     }else if (method == 'DESeq') {
@@ -51,7 +54,16 @@ normalize_SE <- function(se, method, log_bool, assay_to_normalize,
     }
 
     if (log_bool) {
-        assays(se)[[output_assay_name]] <- log(assays(se)[[output_assay_name]])
+        if (zero_treat) {
+            assays(se)[[output_assay_name]] <- log(
+                assays(se)[[output_assay_name]] + 1
+            )
+
+        }else {
+            assays(se)[[output_assay_name]] <-
+                log(assays(se)[[output_assay_name]])
+
+        }
     }
     return(se)
 }
