@@ -80,7 +80,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
     }else if (method == 'edgeR') {
         res <- edgeR_DE(data, design)
     }else if (method == 'ANOVA') {
-        feature_list <- merge_SE(se, data, assay_to_analyze, analysis_design)
+        feature_list <- transform_SE(se, data, assay_to_analyze, analysis_design)
         res <- anova_DE(feature_list, padj_method, assay_to_analyze, analysis_design)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
@@ -104,10 +104,7 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-merge_SE <- function(se, data, assay_to_analyze, analysis_design) {
-    # mat <- as.matrix(data)
-    # analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
-    # data <- assays(se)[[assay_to_analyze]]
+transform_SE <- function(se, data, assay_to_analyze, analysis_design) {
     mat_long <- data |>
         data.frame() |>
         rownames_to_column("features") |>
@@ -165,7 +162,33 @@ anova_DE <- function(feature_list, padj_method, assay_to_analyze, analysis_desig
     return(res)
 }
 
+kw_DE <- function(feature_list, padj_method, assay_to_analyze, batch) {
+    res <- list()
+    for (n in names(feature_list)){
+        feature_df <- feature_list[[n]]
+        kw_model <- kruskal.test(assay_to_analyze ~ batch, data = feature_df)
 
+        var_name <- batch
+        var_levels <- as.character(unique(feature_df[[var_name]]))
+        pval <- model_summary[var_name, "Pr(>F)"]
+        if (length(var_levels) > 1) {
+            ref_level <- var_levels[1]
+            ref_mean <- mean(
+                feature_df[assay_to_analyze][feature_df[var_name] == ref_level],
+                na.rm = TRUE
+            )
+            for (j in 2:length(var_levels)) {
+                current_level <- var_levels[j]
+                current_mean <- mean(
+                    feature_df[assay_to_analyze][feature_df[var_name] == current_level],
+                    na.rm = TRUE
+                )
+                
+                log2FC <- log2(current_mean / ref_mean)
+            }
+        }
+    }
+}
 #' Returns summary table for p-values of explained variation
 #'
 #' @param res_list Differential Expression analysis result (a named list of
