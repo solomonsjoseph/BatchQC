@@ -104,20 +104,16 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-transform_SE <- function(se, data, assay_to_analyze, analysis_design) {
-    mat_long <- data |>
-        data.frame() |>
-        rownames_to_column("features") |>
-        pivot_longer(!features, values_to = assay_to_analyze,
-                     names_to = "samples")
+datatable_SE <- function(data, assay_to_analyze, analysis_design) {
+    features <- rownames(data)
 
-    fac_long <- analysis_design |>
-        data.frame() |>
-        rownames_to_column("samples")
+    assay_dt <- data.table::as.data.table(data, keep.rownames = "features")
+    design_dt <- data.table::as.data.table(analysis_design, keep.rownames = "samples")
 
-    merge_df <- merge(mat_long, fac_long, by = "samples")
-    feature_list <- split(merge_df, merge_df$features)
-    return(feature_list)
+    assay_long <- data.table::melt(dt, id.vars = "features", variable.name = "samples", value.name = assay_to_analyze)
+
+    merged_dt <- assay_long[design_dt, on = "samples"]
+    return(merged_dt)
 }
 
 anova_DE <- function(feature_list, padj_method, assay_to_analyze, analysis_design) {
