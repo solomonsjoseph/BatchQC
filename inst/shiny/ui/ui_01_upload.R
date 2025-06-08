@@ -122,7 +122,7 @@ tabPanel("Upload Data",
                         selected = NULL),
                     textInput(inputId = 'normalized_assay_name', 'Name for the normalized assay',
                         value = ''),
-                    checkboxInput('log', 'Log transform the results'),
+                    checkboxInput('log', 'log(x+1) transform the results'),
                     withBusyIndicatorUI(actionButton(inputId = 'normalize',
                         label = 'Normalize')),
                     br()
@@ -183,6 +183,45 @@ tabPanel("Upload Data",
                     textOutput('reference'),
                     br()
                 ),
+                tabPanel('Lambda Statistic',
+                    h4(strong("Usage")),
+                    h5("An experiment with an unbalanced design will always be
+                    improved with a batch correction applies. However, when an
+                    experiment has a balanced design, anadjusted lambda
+                    statistic greater than -2 indicates a need for batch
+                    correction."),
+                    selectizeInput('lambda_matrix',
+                        'Choose the array data to compute lambda',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    selectizeInput('batch_ind',
+                        'Select the batch variable',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL, options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    selectizeInput('group_ind',
+                        'Select the experimental variable',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL, options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    withBusyIndicatorUI(actionButton(inputId = 'lambda_stat',
+                        label = 'Calculate Lambda')),
+                    DTOutput('lambda_table')
+                    ),
                 tabPanel('Batch Effect Correction',
                     h4(strong("Usage")),
                     h5("ComBat-Seq uses a negative binomial regression to model batch effects. It requires untransformed, raw count data to adjust for batch effect. Please use this option with a counts assay"),
