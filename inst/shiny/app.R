@@ -42,7 +42,7 @@ server <- function(input, output, session) {
                                     DE_results = NULL)
     output$confounding_table <- NULL
     output$metadata <- NULL
-    #source(file.path("server/", "server.R"),  local = TRUE)$value
+    source(file.path("server/", "server_00_setUpSelections.R"),  local = TRUE)$value
     source(file.path("server/", "server_01_upload.R"), local = TRUE)$value
     source(file.path("server/", "server_02_experimentalDesign.R"),
         local = TRUE)$value

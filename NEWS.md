@@ -2,7 +2,7 @@
 ## Major Changes
 * Added lambda statistic
 
-# Bug Fix
+## Bug Fix
 * Corrected log to be log(x+1) and changed CPM(x+1) to CPM(x)
 
 # Version 2.5.2
