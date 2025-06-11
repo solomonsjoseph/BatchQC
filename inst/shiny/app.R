@@ -21,7 +21,7 @@ ui <- navbarPage(
   source(file.path("ui", "ui_01_upload.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_02_experimental_design.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_03_variation.R"),  local = TRUE)$value,
-  # source(file.path("ui", "ui_04_median_correlations.R"),  local = TRUE)$value,
+  source(file.path("ui", "ui_03_batch_correction.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_05_heatmaps.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_06_dendrogram.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_07_pca.R"),  local = TRUE)$value,
@@ -47,6 +47,8 @@ server <- function(input, output, session) {
     source(file.path("server/", "server_02_experimentalDesign.R"),
         local = TRUE)$value
     source(file.path("server/", "server_03_variationAnalysis.R"),
+        local = TRUE)$value
+    source(file.path("server/", "server_03_batch_correction.R"),
         local = TRUE)$value
     source(file.path("server/", "server_04_heatmap.R"), local = TRUE)$value
     source(file.path("server/", "server_05_dendrogram.R"), local = TRUE)$value
