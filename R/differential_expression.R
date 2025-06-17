@@ -80,7 +80,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
     }else if (method == 'edgeR') {
         res <- edgeR_DE(data, design)
     }else if (method == 'ANOVA') {
-        feature_list <- transform_SE(se, data, assay_to_analyze, analysis_design)
+        feature_list <- datatable_DE(se, data, assay_to_analyze, analysis_design)
         res <- anova_DE(feature_list, padj_method, assay_to_analyze, analysis_design)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
@@ -104,57 +104,74 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-datatable_SE <- function(data, assay_to_analyze, analysis_design) {
+datatable_DE <- function(se, assay_to_analyze, conditions, batch) {
+    data <- assays(se)[[assay_to_analyze]]
     features <- rownames(data)
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
 
-    assay_dt <- data.table::as.data.table(data, keep.rownames = "features")
-    design_dt <- data.table::as.data.table(analysis_design, keep.rownames = "samples")
+    assay_dt <- as.data.table(data, keep.rownames = "features")
+    design_dt <- as.data.table(analysis_design, keep.rownames = "samples")
 
-    assay_long <- data.table::melt(dt, id.vars = "features", variable.name = "samples", value.name = assay_to_analyze)
+    assay_long <- data.table::melt(assay_dt, id.vars = "features", variable.name = "samples", value.name = assay_to_analyze)
 
     merged_dt <- assay_long[design_dt, on = "samples"]
-    return(merged_dt)
+    feature_list <- split(merged_dt, by = "features", keep.by = FALSE)
+    return(feature_list)
 }
 
-anova_DE <- function(feature_list, padj_method, assay_to_analyze, analysis_design) {
-    res <- list()
+anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, conditions) {
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
     model <- stats::as.formula(paste(assay_to_analyze, "~", paste(colnames(analysis_design), collapse = "+")))
-    for (n in names(feature_list)){
-        feature_df <- feature_list[[n]]
-        anov_model <- aov(model, data = feature_df)
-
+    res <- list()
+    all_res <- list()
+    for (feature in names(feature_list)) {
+        feature_dt <- data.table::as.data.table(feature_list[[feature]])
+        
+        anov_model <- aov(model, data = feature_dt)
         model_summary <- anova(anov_model)
-        result_vars <- rownames(model_summary)[rownames(model_summary) != "Residuals"]
-
-        for (i in seq_along(result_vars)) {
-            var_name <- result_vars[i]
-            var_levels <- as.character(unique(feature_df[[var_name]]))
-            pval <- model_summary[var_name, "Pr(>F)"]
+        
+        result_vars <- setdiff(rownames(model_summary), "Residuals")
+        
+        for (var_name in result_vars) {
+            var_levels <- as.character(unique(feature_dt[[var_name]]))
             if (length(var_levels) > 1) {
+                pval <- model_summary[var_name, "Pr(>F)"]
+                fval <- model_summary[var_name, "F value"]
+                
+                means_dt <- feature_dt[, .(mean_val = mean(get(assay_to_analyze))), by = var_name]
+                
+                
                 ref_level <- var_levels[1]
-                ref_mean <- mean(
-                    feature_df[assay_to_analyze][feature_df[var_name] == ref_level],
-                    na.rm = TRUE
-                )
-                for (j in 2:length(var_levels)) {
-                    current_level <- var_levels[j]
-                    current_mean <- mean(
-                        feature_df[assay_to_analyze][feature_df[var_name] == current_level],
-                        na.rm = TRUE
-                    )
-
-                    log2FC <- log2(current_mean / ref_mean)
-                    res[[var_name]] <- rbind(data.frame(
-                        feature = n,
-                        log2FoldChange = log2FC,
-                        fvalue = model_summary[var_name, "F value"],
-                        pvalue = pval,
-                        padj = p.adjust(pval, method = padj_method)
-                    ) |> column_to_rownames(var = "feature"), res[[var_name]])
-                }
+                ref_mean <- means_dt[get(var_name) == ref_level, mean_val]
+                non_ref_results <- means_dt[get(var_name) != ref_level, .(feature = feature,
+                                                                       log2FoldChange = log2(mean_val / ref_mean),
+                                                                       fvalue = fval,
+                                                                       pvalue = pval,
+                                                                       var = var_name,
+                                                                       reflevel = ref_level,
+                                                                       currentlevel = get(var_name))]
+                all_res[[length(all_res) + 1]] <- non_ref_results
+            }else{
+                stop("Each factor needs to have more than two levels!")
             }
         }
     }
+    if (length(all_res) > 0) {
+        combined_dt <- rbindlist(all_res)
+        
+        combined_dt[, padj := p.adjust(pvalue, method = padj_method), by = var]
+        
+        combined_dt[, comparison := paste0(currentlevel, ":", reflevel)]
+        combined_dt[, comparison := paste0(var, ":", comparison)]
+        
+        for (i in unique(combined_dt$comparison)) {
+            var_data <- combined_dt[comparison == i]
+            var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue, padj)])
+            rownames(var_df) <- var_data$feature
+            res[[i]] <- var_df
+        }
+    }
+    
     return(res)
 }
 
