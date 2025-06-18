@@ -9,13 +9,6 @@ setupSelections <- function() {
         choices = names(colData(reactivevalue$se)),
         selected = NULL)
 
-    # Normalization
-    updateSelectizeInput(session = session, inputId = "normalization_assay",
-        choices = assayNames((reactivevalue$se)),
-        selected = NULL,
-        options = list(placeholder = "Please select an option below",
-            onInitialize = I('function() { this.setValue(""); }')))
-
     # Negative Binomial Check
     updateSelectizeInput(session = session, inputId = "counts_matrix",
         choices = assayNames((reactivevalue$se)),

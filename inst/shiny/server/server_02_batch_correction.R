@@ -67,3 +67,28 @@ observeEvent(input$correct, {
     setupSelections()
     showNotification('Batch Correction Completed', type = "message")
 })
+
+## Update normalized assay name
+observe({
+    req(input$normalization_method, input$correction_assay)
+    updateTextInput(session = session, inputId = 'normalized_assay_name',
+        'Name for the normalized Assay',
+        value = paste(input$correction_assay,
+            input$normalization_method, sep = '_'))
+})
+
+
+## Normalize a selected assay
+observeEvent(input$normalize, {
+    req(input$normalization_method, input$correction_assay,
+        input$normalized_assay_name)
+    withBusyIndicatorServer("normalize", {
+        reactivevalue$se <- normalize_SE(reactivevalue$se,
+            input$normalization_method,
+            input$log,
+            input$correction_assay,
+            input$normalized_assay_name)
+        setupSelections()
+    })
+})
+

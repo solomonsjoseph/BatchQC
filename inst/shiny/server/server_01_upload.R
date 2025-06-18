@@ -137,15 +137,6 @@ observeEvent(input$submit, {
     })
 })
 
-## Update normalized assay name
-observe({
-    req(input$normalization_method, input$normalization_assay)
-    updateTextInput(session = session, inputId = 'normalized_assay_name',
-        'Name for the normalized Assay',
-        value = paste(input$normalization_assay,
-            input$normalization_method, sep = '_'))
-})
-
 ## Complete NB Check
 observeEvent(input$nb_check, {
     req(input$nb_test, input$counts_matrix,
@@ -172,19 +163,5 @@ observeEvent(input$lambda_stat, {
             batchind = colData(reactivevalue$se)[, input$batch_ind],
             groupind = colData(reactivevalue$se)[, input$group_ind])
         output$lambda_table <- renderDataTable(data.table(lambda_res))
-    })
-})
-
-## Normalize a selected assay
-observeEvent(input$normalize, {
-    req(input$normalization_method, input$normalization_assay,
-        input$normalized_assay_name)
-    withBusyIndicatorServer("normalize", {
-        reactivevalue$se <- normalize_SE(reactivevalue$se,
-            input$normalization_method,
-            input$log,
-            input$normalization_assay,
-            input$normalized_assay_name)
-        setupSelections()
     })
 })
