@@ -104,7 +104,7 @@ edgeR_DE <- function(data, design) {
     return(res)
 }
 
-datatable_DE <- function(se, assay_to_analyze, conditions, batch) {
+datatable_DE <- function(se, assay_to_analyze, batch, conditions) {
     data <- assays(se)[[assay_to_analyze]]
     features <- rownames(data)
     analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
@@ -126,10 +126,8 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
     all_res <- list()
     for (feature in names(feature_list)) {
         feature_dt <- data.table::as.data.table(feature_list[[feature]])
-        
         anov_model <- aov(model, data = feature_dt)
         model_summary <- anova(anov_model)
-        
         result_vars <- setdiff(rownames(model_summary), "Residuals")
         
         for (var_name in result_vars) {
@@ -137,25 +135,36 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
             if (length(var_levels) > 1) {
                 pval <- model_summary[var_name, "Pr(>F)"]
                 fval <- model_summary[var_name, "F value"]
-                
                 means_dt <- feature_dt[, .(mean_val = mean(get(assay_to_analyze))), by = var_name]
                 
-                
-                ref_level <- var_levels[1]
-                ref_mean <- means_dt[get(var_name) == ref_level, mean_val]
-                non_ref_results <- means_dt[get(var_name) != ref_level, .(feature = feature,
-                                                                       log2FoldChange = log2(mean_val / ref_mean),
-                                                                       fvalue = fval,
-                                                                       pvalue = pval,
-                                                                       var = var_name,
-                                                                       reflevel = ref_level,
-                                                                       currentlevel = get(var_name))]
-                all_res[[length(all_res) + 1]] <- non_ref_results
+                for (i in 1:(length(var_levels) - 1)) {
+                    for (j in (i+1):length(var_levels)) {
+                        ref_level <- var_levels[i]
+                        current_level <- var_levels[j]
+                        ref_mean <- means_dt[get(var_name) == ref_level, mean_val]
+                        current_mean <- means_dt[get(var_name) == current_level, mean_val]
+                        
+                        comp_res <- data.table(
+                            feature = feature,
+                            log2FoldChange = log2(current_mean / ref_mean),
+                            fvalue = fval,
+                            pvalue = pval,
+                            var = var_name,
+                            reflevel = ref_level,
+                            currentlevel = current_level
+                        )
+                        all_res[[length(all_res) + 1]] <- comp_res
+                    }
+                }
             }else{
                 stop("Each factor needs to have more than two levels!")
             }
         }
     }
+    res <- format_anova_DE(all_res, padj_method)
+}
+
+format_anova_DE <- function(all_res, padj_method) {
     if (length(all_res) > 0) {
         combined_dt <- rbindlist(all_res)
         
@@ -177,30 +186,9 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
 
 kw_DE <- function(feature_list, padj_method, assay_to_analyze, batch) {
     res <- list()
-    for (n in names(feature_list)){
-        feature_df <- feature_list[[n]]
+
         kw_model <- kruskal.test(assay_to_analyze ~ batch, data = feature_df)
 
-        var_name <- batch
-        var_levels <- as.character(unique(feature_df[[var_name]]))
-        pval <- model_summary[var_name, "Pr(>F)"]
-        if (length(var_levels) > 1) {
-            ref_level <- var_levels[1]
-            ref_mean <- mean(
-                feature_df[assay_to_analyze][feature_df[var_name] == ref_level],
-                na.rm = TRUE
-            )
-            for (j in 2:length(var_levels)) {
-                current_level <- var_levels[j]
-                current_mean <- mean(
-                    feature_df[assay_to_analyze][feature_df[var_name] == current_level],
-                    na.rm = TRUE
-                )
-                
-                log2FC <- log2(current_mean / ref_mean)
-            }
-        }
-    }
 }
 #' Returns summary table for p-values of explained variation
 #'
