@@ -43,6 +43,22 @@ observe( {
     }
 })
 
+## Complete NB Check
+observeEvent(input$nb_check, {
+    req(input$nb_test, input$correction_assay,
+        input$condition_of_interest)
+    withBusyIndicatorServer("nb_check", {
+        check_res <- goodness_of_fit_DESeq2(reactivevalue$se,
+            input$correction_assay,
+            input$condition_of_interest,
+            input$nb_variables,
+            input$num_genes)
+        output$recommendation <- renderText(check_res$recommendation)
+        output$nb_histogram <- renderPlot(check_res$res_histogram)
+        output$reference <- renderText(check_res$reference)
+    })
+})
+
 ## Run batch effect correction
 observeEvent(input$correct, {
     req(input$correction_assay, input$correction_batch, input$correction_method)

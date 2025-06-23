@@ -136,32 +136,3 @@ observeEvent(input$submit, {
         setupSelections()
     })
 })
-
-## Complete NB Check
-observeEvent(input$nb_check, {
-    req(input$nb_test, input$counts_matrix,
-        input$condition_of_interest)
-    withBusyIndicatorServer("nb_check", {
-        check_res <- goodness_of_fit_DESeq2(reactivevalue$se,
-            input$counts_matrix,
-            input$condition_of_interest,
-            input$nb_variables,
-            input$num_genes)
-        output$recommendation <- renderText(check_res$recommendation)
-        output$nb_histogram <- renderPlot(check_res$res_histogram)
-        output$reference <- renderText(check_res$reference)
-    })
-})
-
-## Compute Lambda Statistic
-observeEvent(input$lambda_stat, {
-    req(input$lambda_matrix,
-        input$batch_ind,
-        input$group_ind)
-    withBusyIndicatorServer("lambda_stat", {
-        lambda_res <- compute_lambda(dat = assays(reactivevalue$se)[[input$lambda_matrix]],
-            batchind = colData(reactivevalue$se)[, input$batch_ind],
-            groupind = colData(reactivevalue$se)[, input$group_ind])
-        output$lambda_table <- renderDataTable(data.table(lambda_res))
-    })
-})

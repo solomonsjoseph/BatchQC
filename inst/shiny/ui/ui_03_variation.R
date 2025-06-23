@@ -1,9 +1,9 @@
 
 tabPanel(
-    "Variation Analysis",
+    "lambda/Variation Analysis",
 
     # Application title
-    titlePanel("Variation Analysis"),
+    titlePanel("lambda/Variation Analysis"),
 
     sidebarLayout(sidebarPanel(
         h3("Variation Analysis"),
@@ -13,7 +13,8 @@ tabPanel(
         selectizeInput('variation_batch', 'Select Batch Variable', choices = "",
             options = list(placeholder = 'Please select an option below',
             onInitialize = I('function() { this.setValue(""); }'))),
-        selectizeInput('variation_condition', 'Select Covariate', choices = "",
+        selectizeInput('variation_condition', 'Select Condition Variable(s)',
+            choices = "",
             multiple = TRUE,
             options = list(placeholder = 'Please select an option below',
             onInitialize = I('function() { this.setValue(""); }'))),
@@ -21,6 +22,15 @@ tabPanel(
     ),
     mainPanel(
         tabsetPanel(
+            tabPanel('Lambda Statistic',
+                h4(strong("Usage")),
+                h5("An experiment with an unbalanced design will always be
+                    improved with a batch correction applies. However, when an
+                    experiment has a balanced design, anadjusted lambda
+                    statistic greater than -2 indicates a need for batch
+                    correction."),
+                DTOutput('lambda_table')
+            ),
             tabPanel("Explained Variation - Individual Variable",
                 h5("The boxplot and p-value table display the individual, or raw
                     variation, explained by each variable."),
@@ -38,15 +48,25 @@ tabPanel(
                     variation, divided by the batch. A ratio less that 0
                     indicates that batch has a stronger affect than the
                     variable of interest."),
-                plotOutput('EV_ratio_plot'),
-                dataTableOutput('EV_ratio_table')
+                conditionalPanel(condition = "input.variation_condition == ''",
+                    h5(strong("Condition is required for ratio"))
+                ),
+                conditionalPanel(condition = "input.variation_condition != ''",
+                    plotOutput('EV_ratio_plot'),
+                    dataTableOutput('EV_ratio_table')
+                    )
             ),
             tabPanel("Residual Variation Variable/Batch Ratio",
                 h5("The boxplot and table display the residual divided by the
                     batch. A ratio less that 1 indicates that batch has a
                     stronger affect than the variable of interest."),
-                plotOutput('EV_residual_ratio_plot'),
-                dataTableOutput('EV_residual_ratio_table')
+                conditionalPanel(condition = "input.variation_condition == ''",
+                    h5(strong("Condition is required for residual ratio"))
+                ),
+                conditionalPanel(condition = "input.variation_condition != ''",
+                    plotOutput('EV_residual_ratio_plot'),
+                    dataTableOutput('EV_residual_ratio_table')
+                )
             )
         )
         )

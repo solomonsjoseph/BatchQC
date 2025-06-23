@@ -3,7 +3,7 @@ tabPanel('Batch Correction/Normalization',
     sidebarLayout(
         sidebarPanel(
             selectizeInput('correction_assay',
-                'Choose the assay to modify',
+                'Choose the assay of interest',
                 multiple = FALSE,
                 choices = c(''),
                 selected = NULL,
@@ -15,6 +15,52 @@ tabPanel('Batch Correction/Normalization',
         ),
         mainPanel(
             tabsetPanel(
+                tabPanel('Negative Binomial Check',
+                    h4(strong("Usage")),
+                    h5("This features allows you to check your data (must be counts/whole number data) to see if it conforms to the required negative binomial assumption needed for various downstream analysis. If The negative binomial assumption is not met, you should normalize your data or perform other preprocessing step and/or use other more appropraite analysis tools."),
+                    selectizeInput('nb_test',
+                        'Choose the test to perform',
+                        multiple = FALSE,
+                        choices = c('nb_DESeq2'),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    selectizeInput('condition_of_interest',
+                        'Select the variable you are interested in analyzing',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL, options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    selectizeInput('nb_variables',
+                        'Select other variables you would like to include in your analysis',
+                        multiple = TRUE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    checkboxInput('nb_advanced_options', 'Advanced Options',
+                        value = FALSE),
+                    conditionalPanel(condition = "input.nb_advanced_options == 1",
+                        numericInput('num_genes',
+                            'Number of genes to analyze (downsampling)',
+                            value = 500,
+                            min = 2)),
+                    withBusyIndicatorUI(actionButton(inputId = 'nb_check',
+                        label = 'Check Distribution')),
+                    textOutput('recommendation'),
+                    plotOutput('nb_histogram'),
+                    textOutput('reference'),
+                    br()
+                ),
                 tabPanel('Batch Correction',
                     h4(strong("Usage")),
                     conditionalPanel(condition = "input.correction_method == 'ComBat-Seq'",
