@@ -25,19 +25,19 @@ tabPanel("Upload Data",
         sidebarPanel(
             h4("Select the type of input you would like to provide:"),
             radioButtons("uploadChoice", "",
-                c("Count File and Metadata File" = "countFile",
+                c("Feature File and Metadata File" = "countFile",
                     "Summarized Experiment Object" = "seObject",
                     "Example Data" = "example"
                 )),
             #Only show panel if uploading count and metadata files
             conditionalPanel(condition = "input.uploadChoice == 'countFile'",
-                h4("Upload counts and metadata table"),
+                h4("Upload feature and metadata table"),
                 tags$div(tags$p(
                     'Metadata file must be a table with headers and sample names.'
                 )),
                 fileInput(
                     "counts",
-                    "Counts table",
+                    "Feature table",
                     multiple = FALSE,
                     accept = accepted
                 ),
