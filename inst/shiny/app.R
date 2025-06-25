@@ -19,9 +19,9 @@ ui <- navbarPage(
   fluid = TRUE,
   theme = shinytheme("yeti"),
   source(file.path("ui", "ui_01_upload.R"),  local = TRUE)$value,
+  source(file.path("ui", "ui_02_batch_correction.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_02_experimental_design.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_03_variation.R"),  local = TRUE)$value,
-  # source(file.path("ui", "ui_04_median_correlations.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_05_heatmaps.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_06_dendrogram.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_07_pca.R"),  local = TRUE)$value,
@@ -42,8 +42,10 @@ server <- function(input, output, session) {
                                     DE_results = NULL)
     output$confounding_table <- NULL
     output$metadata <- NULL
-    #source(file.path("server/", "server.R"),  local = TRUE)$value
+    source(file.path("server/", "server_00_setUpSelections.R"),  local = TRUE)$value
     source(file.path("server/", "server_01_upload.R"), local = TRUE)$value
+    source(file.path("server/", "server_02_batch_correction.R"),
+        local = TRUE)$value
     source(file.path("server/", "server_02_experimentalDesign.R"),
         local = TRUE)$value
     source(file.path("server/", "server_03_variationAnalysis.R"),

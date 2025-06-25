@@ -19,17 +19,41 @@ observeEvent(input$variation, {
                 EV_results <- batchqc_explained_variation(se = reactivevalue$se,
                     batch = input$variation_batch,
                     assay_name = input$variation_assay)
+                lambda_res <- "Condition is required for lambda analysis."
+                EV_ratios <- NULL
+                EV_residual_ratios <- NULL
             } else {
                 EV_results <- batchqc_explained_variation(se = reactivevalue$se,
                     batch = input$variation_batch,
                     condition = input$variation_condition,
                     assay_name = input$variation_assay)
+                EV_ratios <- variation_ratios(EV_results$EV_table_ind,
+                    input$variation_batch)
+                EV_residual_ratios <- variation_ratios(EV_results$EV_table_type2,
+                    input$variation_batch)
+                lambda_res <- compute_lambda(dat = assays(reactivevalue$se)[[input$variation_assay]],
+                    batchind = colData(reactivevalue$se)[, input$variation_batch],
+                    groupind = colData(reactivevalue$se)[, input$variation_condition])
+
+                output$EV_ratio_plot <- renderPlot({
+                    ratio_plotter(EV_ratios)
+                })
+
+                output$EV_ratio_table <- renderDataTable({
+                    EV_ratios
+                })
+
+                output$EV_residual_ratio_plot <- renderPlot({
+                    ratio_plotter(EV_residual_ratios)
+                })
+
+                output$EV_residual_ratio_table <- renderDataTable({
+                    EV_residual_ratios
+                })
             }
-            EV_ratios <- variation_ratios(EV_results$EV_table_ind,
-                input$variation_batch)
-            EV_residual_ratios <- variation_ratios(EV_results$EV_table_type2,
-                input$variation_batch)
         })
+
+        output$lambda_table <- renderDataTable(data.table(lambda_res))
 
         output$EV_show_plot <- renderPlot({
             EV_plotter(EV_results$EV_table_ind)
@@ -44,22 +68,6 @@ observeEvent(input$variation, {
 
         output$EV_residual_show_table <- renderDataTable({
             EV_table(EV_results$EV_table_type2)
-        })
-
-        output$EV_ratio_plot <- renderPlot({
-            ratio_plotter(EV_ratios)
-        })
-
-        output$EV_ratio_table <- renderDataTable({
-            EV_ratios
-        })
-
-        output$EV_residual_ratio_plot <- renderPlot({
-            ratio_plotter(EV_residual_ratios)
-        })
-
-        output$EV_residual_ratio_table <- renderDataTable({
-            EV_residual_ratios
         })
     })
 })
