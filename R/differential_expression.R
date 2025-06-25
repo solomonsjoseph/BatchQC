@@ -80,8 +80,8 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
     }else if (method == 'edgeR') {
         res <- edgeR_DE(data, design)
     }else if (method == 'ANOVA') {
-        feature_list <- datatable_DE(se, data, assay_to_analyze, analysis_design)
-        res <- anova_DE(feature_list, padj_method, assay_to_analyze, analysis_design)
+        feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
+        res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch, conditions)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
@@ -184,12 +184,7 @@ format_anova_DE <- function(all_res, padj_method) {
     return(res)
 }
 
-kw_DE <- function(feature_list, padj_method, assay_to_analyze, batch) {
-    res <- list()
 
-        kw_model <- kruskal.test(assay_to_analyze ~ batch, data = feature_df)
-
-}
 #' Returns summary table for p-values of explained variation
 #'
 #' @param res_list Differential Expression analysis result (a named list of
