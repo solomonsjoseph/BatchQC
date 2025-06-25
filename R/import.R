@@ -21,7 +21,7 @@ summarized_experiment <- function(counts, columndata) {
     counts <- counts[, mutual_sample]
     columndata <- columndata[mutual_sample, ]
 
-    se <- SummarizedExperiment(assays = list(counts = counts),
+    se <- SummarizedExperiment(assays = list(features = counts),
                                 colData = columndata,
                                 metadata = list(metadata = columndata))
     se <- se[which(rownames(se) != 'NA')]
