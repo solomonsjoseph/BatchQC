@@ -29,7 +29,8 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #'                                                 batch = "Treatment",
 #'                                                 conditions = c(
 #'                                                 "Mutation_Status"),
-#'                                                 assay_to_analyze = "counts")
+#'                                                 assay_to_analyze = "counts",
+#'                                                 padj_method = "BH")
 #' pval_summary(differential_expression)
 #' pval_plotter(differential_expression)
 #'
@@ -130,21 +131,21 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
         anov_model <- aov(model, data = feature_dt)
         model_summary <- anova(anov_model)
         result_vars <- setdiff(rownames(model_summary), "Residuals")
-        
+
         for (var_name in result_vars) {
             var_levels <- as.character(unique(feature_dt[[var_name]]))
             if (length(var_levels) > 1) {
                 pval <- model_summary[var_name, "Pr(>F)"]
                 fval <- model_summary[var_name, "F value"]
                 means_dt <- feature_dt[, .(mean_val = mean(get(assay_to_analyze))), by = var_name]
-                
+
                 for (i in 1:(length(var_levels) - 1)) {
-                    for (j in (i+1):length(var_levels)) {
+                    for (j in (i + 1):length(var_levels)) {
                         ref_level <- var_levels[i]
                         current_level <- var_levels[j]
                         ref_mean <- means_dt[get(var_name) == ref_level, mean_val]
                         current_mean <- means_dt[get(var_name) == current_level, mean_val]
-                        
+
                         comp_res <- data.table(
                             feature = feature,
                             log2FoldChange = log2(current_mean / ref_mean),
@@ -157,7 +158,7 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
                         all_res[[length(all_res) + 1]] <- comp_res
                     }
                 }
-            }else{
+            }else {
                 stop("Each factor needs to have more than two levels!")
             }
         }
@@ -170,12 +171,12 @@ format_anova_DE <- function(all_res, padj_method) {
     res <- list()
     if (length(all_res) > 0) {
         combined_dt <- rbindlist(all_res)
-        
+
         combined_dt[, padj := p.adjust(pvalue, method = padj_method), by = var]
-        
+
         combined_dt[, comparison := paste0(currentlevel, ":", reflevel)]
         combined_dt[, comparison := paste0(var, ":", comparison)]
-        
+
         for (i in unique(combined_dt$comparison)) {
             var_data <- combined_dt[comparison == i]
             var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue, padj)])
