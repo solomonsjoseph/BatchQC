@@ -63,7 +63,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
             imp_data <- data.frame("log2FoldChange" =
                     DESeq2::results(dds, name = covar)$log2FoldChange,
                 "pvalue" =  DESeq2::results(dds, name = covar)$pvalue,
-                "padj" = DESeq2::results(dds, name = covar)$padj,
+                "padj" = DESeq2::results(dds, name = covar, pAdjustMethod = padj_method)$padj,
                 row.names = rownames(DESeq2::results(dds, name = covar)))
             res[[covar]] <- imp_data
         }
@@ -72,14 +72,15 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
         eBayes_res <- limma::eBayes(fit)
 
         for (i in seq_len(length(colnames(eBayes_res$coefficients)))){
-            results <- limma::topTable(eBayes_res, coef = i, number = Inf) %>%
+            results <- limma::topTable(eBayes_res, coef = i, number = Inf, adjust.method = padj_method) %>%
                 select(c(1, P.Value, adj.P.Val))
             colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
             res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
         }
     }else if (method == 'edgeR') {
-        res <- edgeR_DE(data, design)
+        res <- edgeR_DE(data, design, padj_method)
     }else if (method == 'ANOVA') {
+        browser()
         feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
         res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch, conditions)
     }else {
@@ -89,14 +90,14 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
 }
 
 
-edgeR_DE <- function(data, design) {
+edgeR_DE <- function(data, design, padj_method) {
     fit <- edgeR::glmQLFit(data, design)
     res <- list()
 
     for (i in seq_len(length(colnames(design)))){
         quasi_likelihood <- edgeR::glmQLFTest(fit, coef = i)
         results <- edgeR::topTags(quasi_likelihood,
-            n = Inf, adjust.method = "BH")$table %>%
+            n = Inf, adjust.method = padj_method)$table %>%
             select(logFC, PValue, FDR)
         colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
         res[[quasi_likelihood$comparison]] <- results
@@ -162,9 +163,11 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
         }
     }
     res <- format_anova_DE(all_res, padj_method)
+    return(res)
 }
 
 format_anova_DE <- function(all_res, padj_method) {
+    res <- list()
     if (length(all_res) > 0) {
         combined_dt <- rbindlist(all_res)
         
@@ -180,7 +183,6 @@ format_anova_DE <- function(all_res, padj_method) {
             res[[i]] <- var_df
         }
     }
-    
     return(res)
 }
 
@@ -252,7 +254,7 @@ pval_plotter <- function(DE_results) {
             select(-"(Intercept)")
     }
 
-    pval_table <- pivot_longer(pval_table, 1:length(colnames(pval_table)),
+    pval_table <- tidyr::pivot_longer(pval_table, 1:length(colnames(pval_table)),
         names_to = "effects",
         values_to = "pval")
 
