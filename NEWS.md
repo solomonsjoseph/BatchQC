@@ -1,3 +1,7 @@
+# Version 2.5.4
+## Major Changes
+* Added ANOVA as a differential expression analysis method
+
 # Version 2.5.3
 ## Major Changes
 * Added lambda statistic
