@@ -26,7 +26,8 @@ differential_expression <- BatchQC::DE_analyze(se = se,
                                                 batch = "Treatment",
                                                 conditions = c(
                                                 "Mutation_Status"),
-                                                assay_to_analyze = "counts")
+                                                assay_to_analyze = "counts",
+                                                padj_method = "BH")
 pval_summary(differential_expression)
 pval_plotter(differential_expression)
 
