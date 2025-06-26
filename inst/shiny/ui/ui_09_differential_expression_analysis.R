@@ -35,7 +35,7 @@ tabPanel("Differential Expression Analysis",
             withBusyIndicatorUI(actionButton('DE_analyze', label = 'Here we go!'))),
            mainPanel(
              h4(strong("Usage")),
-             h5("Each differential expression method requires a specific type of input. Please provide raw counts data or DESeq-normalized data for DESeq, normalized log or log-CPM data for limma, edgeR-normalized data for edgeR, and normalized log data for ANOVA."),
+             h5("Each differential expression method requires a specific type of input. Please provide raw counts data or DESeq-normalized data for DESeq, normalized log or log-CPM data for limma, edgeR-normalized data for edgeR, and normalized data for ANOVA."),
              tabsetPanel(
                tabPanel("Results Table",
                        selectizeInput("result_to_view",
