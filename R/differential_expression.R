@@ -108,12 +108,11 @@ limma_DE <- function(data, design, padj_method) {
 edgeR_DE <- function(data, design, padj_method) {
     fit <- edgeR::glmQLFit(data, design)
     res <- list()
-
     for (i in seq_len(length(colnames(design)))){
         quasi_likelihood <- edgeR::glmQLFTest(fit, coef = i)
         results <- edgeR::topTags(quasi_likelihood,
-            n = Inf, adjust.method = padj_method)$table %>%
-            select(logFC, PValue, FDR)
+            n = Inf, adjust.method = padj_method)$table |>
+            select(logFC, PValue, 5)
         colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
         res[[quasi_likelihood$comparison]] <- results
     }
