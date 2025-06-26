@@ -1,26 +1,33 @@
-globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
+globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval", ".",
+                ".", "mean_val", "as.data.table", "rbindlist", ":=", "padj",
+                "p.adjust", "pvalue", "var", "comparison", "currentlevel",
+                "reflevel", "log2FoldChange", "fvalue"))
 
 #' Differential Expression Analysis
 #'
-#' This function runs DE analysis on a count matrix (DESeq), a normalized log (ANOVA), a normalized log
-#' or log-CPM matrix (limma), or an edgeR TMM-normalized matrix (edgeR)
-#' contained in the se object.
+#' This function runs DE analysis on a count matrix (DESeq), a normalized log or
+#' log-CPM matrix (limma), an edgeR TMM-normalized matrix (edgeR) or perform
+#' ANOVA on the data contained in the se object.
 #' @param se SummarizedExperiment object
-#' @param method DE analysis method option ('DESeq2', 'limma', 'edgeR', or 'ANOVA')
+#' @param method DE analysis method option
+#' ('DESeq2', 'limma', 'edgeR', or 'ANOVA')
 #' @param batch metadata column in the se object representing batch
 #' @param conditions metadata columns in the se object representing additional
 #'   analysis covariates
 #' @param assay_to_analyze Assay in the se object (either counts for DESeq2 or
 #'   normalized data for limma or edgeR) for DE analysis
-#' @param padj_method correction method for adjusted p-value from p.adjust.methods
-#' @return A named list containing the log2FoldChange, pvalue and adjusted
-#'   pvalue (padj) for each analysis returned by DESeq2, limma, edgeR, or ANOVA
+#' @param padj_method correction method for adjusted p-value from
+#' p.adjust.methods
+#' @return A named list containing the log2FoldChange, fvalue (ANOVA only),
+#' pvalue and adjusted pvalue (padj) for each analysis returned by DESeq2,
+#' limma, edgeR, or ANOVA.
 #' @import SummarizedExperiment
 #' @import DESeq2
 #' @import scran
 #' @import edgeR
-#' @importFrom stats model.matrix as.formula t.test aov coef
+#' @importFrom stats model.matrix as.formula t.test aov coef p.adjust var
 #' @importFrom limma lmFit eBayes topTable makeContrasts contrasts.fit
+#' @importFrom data.table as.data.table rbindlist :=
 #' @examples
 #' library(scran)
 #' se <- mockSCE()
@@ -35,7 +42,8 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval"))
 #' pval_plotter(differential_expression)
 #'
 #' @export
-DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_method) {
+DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
+                        padj_method) {
     data <- assays(se)[[assay_to_analyze]]
     rownames(data) <- names(se)
     analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
@@ -64,32 +72,38 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze, padj_met
             imp_data <- data.frame("log2FoldChange" =
                     DESeq2::results(dds, name = covar)$log2FoldChange,
                 "pvalue" =  DESeq2::results(dds, name = covar)$pvalue,
-                "padj" = DESeq2::results(dds, name = covar, pAdjustMethod = padj_method)$padj,
+                "padj" = DESeq2::results(dds, name = covar,
+                                        pAdjustMethod = padj_method)$padj,
                 row.names = rownames(DESeq2::results(dds, name = covar)))
             res[[covar]] <- imp_data
         }
     }else if (method == 'limma') {
-        fit <- limma::lmFit(data, design)
-        eBayes_res <- limma::eBayes(fit)
-
-        for (i in seq_len(length(colnames(eBayes_res$coefficients)))){
-            results <- limma::topTable(eBayes_res, coef = i, number = Inf, adjust.method = padj_method) %>%
-                select(c(1, P.Value, adj.P.Val))
-            colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
-            res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
-        }
+        res <- limma_DE(data, design, padj_method)
     }else if (method == 'edgeR') {
         res <- edgeR_DE(data, design, padj_method)
     }else if (method == 'ANOVA') {
-        browser()
         feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
-        res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch, conditions)
+        res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch,
+                        conditions)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
     return(res)
 }
 
+limma_DE <- function(data, design, padj_method) {
+    fit <- limma::lmFit(data, design)
+    eBayes_res <- limma::eBayes(fit)
+    res <- list()
+    for (i in seq_len(length(colnames(eBayes_res$coefficients)))){
+        results <- limma::topTable(eBayes_res, coef = i, number = Inf,
+                                    adjust.method = padj_method) %>%
+            select(c(1, P.Value, adj.P.Val))
+        colnames(results) <- c("log2FoldChange", "pvalue", "padj" )
+        res[[colnames(eBayes_res$coefficients)[[i]]]] <- results
+    }
+    return(res)
+}
 
 edgeR_DE <- function(data, design, padj_method) {
     fit <- edgeR::glmQLFit(data, design)
@@ -114,16 +128,21 @@ datatable_DE <- function(se, assay_to_analyze, batch, conditions) {
     assay_dt <- as.data.table(data, keep.rownames = "features")
     design_dt <- as.data.table(analysis_design, keep.rownames = "samples")
 
-    assay_long <- data.table::melt(assay_dt, id.vars = "features", variable.name = "samples", value.name = assay_to_analyze)
+    assay_long <- data.table::melt(assay_dt, id.vars = "features",
+                                    variable.name = "samples",
+                                    value.name = assay_to_analyze)
 
     merged_dt <- assay_long[design_dt, on = "samples"]
     feature_list <- split(merged_dt, by = "features", keep.by = FALSE)
     return(feature_list)
 }
 
-anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, conditions) {
+anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch,
+                    conditions) {
     analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
-    model <- stats::as.formula(paste(assay_to_analyze, "~", paste(colnames(analysis_design), collapse = "+")))
+    model <- stats::as.formula(paste(assay_to_analyze, "~",
+                                    paste(colnames(analysis_design),
+                                            collapse = "+")))
     res <- list()
     all_res <- list()
     for (feature in names(feature_list)) {
@@ -137,14 +156,16 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch, con
             if (length(var_levels) > 1) {
                 pval <- model_summary[var_name, "Pr(>F)"]
                 fval <- model_summary[var_name, "F value"]
-                means_dt <- feature_dt[, .(mean_val = mean(get(assay_to_analyze))), by = var_name]
-
-                for (i in 1:(length(var_levels) - 1)) {
+                means_dt <- feature_dt[, .(mean_val = mean(get(assay_to_analyze)
+                                                            )), by = var_name]
+                for (i in seq_len(length(var_levels) - 1)) {
                     for (j in (i + 1):length(var_levels)) {
                         ref_level <- var_levels[i]
                         current_level <- var_levels[j]
-                        ref_mean <- means_dt[get(var_name) == ref_level, mean_val]
-                        current_mean <- means_dt[get(var_name) == current_level, mean_val]
+                        ref_mean <- means_dt[get(var_name) == ref_level,
+                                            mean_val]
+                        current_mean <- means_dt[get(var_name) == current_level,
+                                                mean_val]
 
                         comp_res <- data.table(
                             feature = feature,
@@ -179,7 +200,8 @@ format_anova_DE <- function(all_res, padj_method) {
 
         for (i in unique(combined_dt$comparison)) {
             var_data <- combined_dt[comparison == i]
-            var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue, padj)])
+            var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue,
+                                                padj)])
             rownames(var_df) <- var_data$feature
             res[[i]] <- var_df
         }
@@ -202,7 +224,8 @@ format_anova_DE <- function(all_res, padj_method) {
 #'                                                 batch = "Treatment",
 #'                                                 conditions = c(
 #'                                                 "Mutation_Status"),
-#'                                                 assay_to_analyze = "counts")
+#'                                                 assay_to_analyze = "counts",
+#'                                                 padj_method = "BH")
 #' pval_summary(differential_expression)
 #'
 #' @export
@@ -237,7 +260,8 @@ pval_summary <- function(res_list) {
 #'                                                 batch = "Treatment",
 #'                                                 conditions = c(
 #'                                                 "Mutation_Status"),
-#'                                                 assay_to_analyze = "counts")
+#'                                                 assay_to_analyze = "counts",
+#'                                                 padj_method = "BH")
 #' pval_summary(differential_expression)
 #' pval_plotter(differential_expression)
 #'
@@ -255,7 +279,8 @@ pval_plotter <- function(DE_results) {
             select(-"(Intercept)")
     }
 
-    pval_table <- tidyr::pivot_longer(pval_table, 1:length(colnames(pval_table)),
+    pval_table <- tidyr::pivot_longer(pval_table,
+                                        seq_along(colnames(pval_table)),
         names_to = "effects",
         values_to = "pval")
 
