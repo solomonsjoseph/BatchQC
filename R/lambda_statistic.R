@@ -11,7 +11,7 @@
 #' @param groupind Factor or numeric vector of length = ncol(dat); biological
 #'   group label/indicator for each sample.
 #' @importFrom stats lm anova
-#' @return Named numeric vector with elements:
+#' @return dataframe with columns:
 #'   \describe{
 #'     \item{BatchV}{Proportion of total variance explained by batch effects.}
 #'     \item{GroupV}{Proportion of total variance explained by group effects.}
@@ -49,4 +49,96 @@ compute_lambda <- function(dat, batchind, groupind) {
 
     res <- t(data.frame(res))
     return(res)
+}
+
+#' Check if the experimental design is balanced or unbalanced
+#'
+#' Used in conjunction with the lambda
+#'
+#' @param se summarized experiment object
+#' @param covariate string, biological covariate
+#' @param batch string, batch variable
+#' @return Boolean Value, TRUE if the experimental design is balanced, FALSE if
+#'   the experimental design is not balanced
+#' @examples
+#'
+#' library(scran)
+#' se <- mockSCE()
+#' balanced_design_check <- is_design_balanced(se, batch = "Mutation_Status",
+#'                                                 covariate = "Treatment")
+#' balanced_design_check
+#'
+#' @export
+
+is_design_balanced <- function(se, batch, covariate) {
+    balanced <- FALSE
+    b_design <- batch_design(se, batch, covariate)
+    pearson <- std_pearson_corr_coef(b_design)
+    cramers <- cramers_v(b_design)
+
+    if (pearson == 0 & cramers == 0) {
+        balanced <- TRUE
+    }
+
+    return(balanced)
+}
+
+#' Provide a recommendation on batch correction based on lambda calculation
+#'
+#' This functions determines if an experimental design is balanced, then
+#' calculates the lambda statistic for balanced designs and provides a
+#' recommendation on if batch correction should be utilized. In general,
+#' unbalanced designs always benefit from batch correction, while balanced
+#' designs with a lambda greater than -2 benefit from batch correction.
+#'
+#' @param se summarized experiment object
+#' @param assay string, the assay to analyze
+#' @param condition string, condition variable
+#' @param batch string, batch variable
+#' @return a named list with:
+#'   \describe{
+#'     \item{lambda_stat}{provides the output of `compute_lambda` function}
+#'     \item{correction_recommendation}{string, rec for batch correction}
+#'     }
+#' @examples
+#'
+#' library(scran)
+#' se <- mockSCE()
+#' lambda_calculation <- run_lambda(se,
+#'                                  assay = "counts",
+#'                                  batch = "Mutation_Status",
+#'                                  condition = "Treatment")
+#'  print(lambda_calculation$correction_recommendation)
+#'  print(lambda_calculation$lambda_stat)
+#'
+#' @return a list with 2 parametes, 'lambda_stat' which contains the table of
+#'   results from compute_lambda function or 'NULL' if the design is balanced,
+#'   and 'correction_recommendation' whcih contains a string with a
+#'   recommendation on if batch correction should be completed
+#' @export
+
+run_lambda <- function(se, assay, batch, condition) {
+    recommendation <- NULL
+    lambda_res <- NULL
+    LAMBDA_THRESHOLD <- -2
+    if (is_design_balanced(se, batch, condition)) {
+        lambda_res <- data.frame(compute_lambda(assays(se)[[assay]],
+            colData(se)[, batch],
+            colData(se)[, condition]))
+        if (lambda_res$lambda_adj > LAMBDA_THRESHOLD) {
+            recommendation <- "The experimental design is balanced and the
+            lambda statistic is greater than -2. Therefore, batch correction is
+            recommended."
+        }else {
+            recommendation <- "The experimental design is balanced and the
+            lambda statistic is less than or equal to -2. Therefore, batch
+            correction is NOT recommended."
+        }
+    }else {
+        recommendation <- "The experimental design is unbalanced. Therefore, it
+        is recommended that you apply a batch correction method to your data."
+    }
+
+    return(list(lambda_stat = lambda_res,
+        correction_recommendation = recommendation))
 }
