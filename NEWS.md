@@ -1,3 +1,7 @@
+# Version 2.5.5
+## Major Changes
+* Added ANOVA as a differential expression analysis method
+
 # Version 2.5.4
 ## Major Changes
 * Redesigned tab flow; upload tab reduced, batch correction tab created, and

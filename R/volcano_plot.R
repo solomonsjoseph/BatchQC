@@ -18,7 +18,8 @@
 #'                                                 conditions = c(
 #'                                                 "Mutation_Status",
 #'                                                 "Cell_Cycle"),
-#'                                                 assay_to_analyze = "counts")
+#'                                                 assay_to_analyze = "counts",
+#'                                                 padj_method = "BH")
 #' value <- round((max(abs(
 #'     differential_expression[[length(differential_expression)]][, 1]))
 #'     + min(abs(
