@@ -1,6 +1,19 @@
-# Version 2.5.4
+# Version 2.5.5
 ## Major Changes
 * Added ANOVA as a differential expression analysis method
+
+# Version 2.5.4
+## Major Changes
+* Redesigned tab flow; upload tab reduced, batch correction tab created, and
+  lambda stat and neg binomial distribution check moved to appropriate tabs
+
+## Minor Changes
+* Updated lambda statistic to provide a recommendation and to check for balanced
+  experimental design
+* Abbreviated Normalization usage description
+
+## Bug Fix
+* Updated "counts" language to "assay" for uploaded data
 
 # Version 2.5.3
 ## Major Changes

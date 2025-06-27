@@ -17,7 +17,7 @@ indicator for each sample}
 group label/indicator for each sample.}
 }
 \value{
-Named numeric vector with elements:
+dataframe with columns:
 \describe{
 \item{BatchV}{Proportion of total variance explained by batch effects.}
 \item{GroupV}{Proportion of total variance explained by group effects.}

@@ -7,11 +7,11 @@
 batch_design(se, batch, covariate)
 }
 \arguments{
-\item{se}{summarized experiment}
+\item{se}{summarized experiment object}
 
-\item{batch}{batch variable}
+\item{batch}{string, batch variable}
 
-\item{covariate}{biological covariate}
+\item{covariate}{string, biological covariate}
 }
 \value{
 design table
