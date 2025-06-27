@@ -1,7 +1,7 @@
 #' This function allows you to make a batch design matrix
-#' @param se summarized experiment
-#' @param covariate biological covariate
-#' @param batch batch variable
+#' @param se summarized experiment object
+#' @param covariate string, biological covariate
+#' @param batch string, batch variable
 #' @import tidyverse
 #' @import dplyr
 #' @import tidyr

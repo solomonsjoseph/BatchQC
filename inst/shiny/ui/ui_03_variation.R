@@ -24,11 +24,7 @@ tabPanel(
         tabsetPanel(
             tabPanel('Lambda Statistic',
                 h4(strong("Usage")),
-                h5("An experiment with an unbalanced design will always be
-                    improved with a batch correction applies. However, when an
-                    experiment has a balanced design, anadjusted lambda
-                    statistic greater than -2 indicates a need for batch
-                    correction."),
+                textOutput('lambda_rec'),
                 DTOutput('lambda_table')
             ),
             tabPanel("Explained Variation - Individual Variable",

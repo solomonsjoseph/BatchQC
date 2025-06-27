@@ -70,7 +70,7 @@ observeEvent(input$exampleData, {
         output$metadata_header <- renderDT(datatable(reactivevalue$metadata))
     }else if (input$exampleData == "bladderData") {
         bladder_data <- bladder_data_upload()
-        reactivevalue$counts <- assays(bladder_data)$counts
+        reactivevalue$counts <- assays(bladder_data)$features
         output$counts_header <- renderDT(datatable(reactivevalue$counts))
         output$counts_dimensions <- renderText(paste(dim(reactivevalue$counts),
             c('observations and', 'samples')))
