@@ -22,9 +22,9 @@ a named list with:
 \item{correction_recommendation}{string, rec for batch correction}
 }
 
-a list with 2 parametes, 'lambda_stat' which contains the table of
-results from compute_lambda function or 'NULL' if the design is balanced,
-and 'correction_recommendation' whcih contains a string with a
+a list with 2 parameters, 'lambda_stat' which contains the adj lambda
+value from lambda_compute (ln(lambda)) or 'NULL' if the design is balanced,
+and 'correction_recommendation' which contains a string with a
 recommendation on if batch correction should be completed
 }
 \description{
