@@ -24,8 +24,7 @@ tabPanel(
         tabsetPanel(
             tabPanel('Lambda Statistic',
                 h4(strong("Usage")),
-                textOutput('lambda_rec'),
-                DTOutput('lambda_table')
+                textOutput('lambda_rec')
             ),
             tabPanel("Explained Variation - Individual Variable",
                 h5("The boxplot and p-value table display the individual, or raw

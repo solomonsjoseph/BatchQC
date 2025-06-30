@@ -20,7 +20,8 @@ analysis covariates}
 \item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or
 normalized data for limma or edgeR) for DE analysis}
 
-\item{padj_method}{correction method for adjusted p-value from p.adjust.methods}
+\item{padj_method}{correction method for adjusted p-value from
+p.adjust.methods}
 }
 \value{
 A named list containing the log2FoldChange, fvalue (ANOVA only),

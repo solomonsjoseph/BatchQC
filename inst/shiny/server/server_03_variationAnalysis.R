@@ -58,7 +58,6 @@ observeEvent(input$variation, {
         })
 
         output$lambda_rec <- renderText(lambda_res$correction_recommendation)
-        output$lambda_table <- renderDataTable(data.table(lambda_res$lambda_stat))
 
         output$EV_show_plot <- renderPlot({
             EV_plotter(EV_results$EV_table_ind)
