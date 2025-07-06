@@ -85,6 +85,10 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
         feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
         res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch,
                         conditions)
+    }else if (method == "Kruskal-Wallis"){
+        feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
+        res <- kw_DE(se, feature_list, padj_method, assay_to_analyze, batch,
+                    conditions)
     }else {
         stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
     }
@@ -183,11 +187,11 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch,
             }
         }
     }
-    res <- format_anova_DE(all_res, padj_method)
+    res <- format_DE(all_res, padj_method, method = "ANOVA")
     return(res)
 }
 
-format_anova_DE <- function(all_res, padj_method) {
+format_DE <- function(all_res, padj_method, method) {
     res <- list()
     if (length(all_res) > 0) {
         combined_dt <- rbindlist(all_res)
@@ -199,14 +203,70 @@ format_anova_DE <- function(all_res, padj_method) {
 
         for (i in unique(combined_dt$comparison)) {
             var_data <- combined_dt[comparison == i]
-            var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue,
-                                                padj)])
+            if (method == "ANOVA"){
+                var_df <- as.data.frame(var_data[, .(log2FoldChange,
+                                                     fvalue,
+                                                     pvalue,
+                                                     padj)])
+            }else if (method == "Kruskal-Wallis"){
+                var_df <- as.data.frame(var_data[, .(log2FoldChange,
+                                                     pvalue,
+                                                     padj)])
+            }
             rownames(var_df) <- var_data$feature
             res[[i]] <- var_df
         }
     }
     return(res)
 }
+
+kw_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch,
+                    conditions) {
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
+    res <- list()
+    all_res <- list()
+    for (feature in names(feature_list)) {
+        feature_dt <- data.table::as.data.table(feature_list[[feature]])
+        for (var_name in colnames(analysis_design)){
+            model <- stats::as.formula(paste(assay_to_analyze, "~", var_name))
+            kw_res <- kruskal.test(model, data = feature_dt)
+            var_levels <- as.character(unique(feature_dt[[var_name]]))
+            if (length(var_levels) > 1) {
+                pval <- kw_res$p.value
+                median_dt <- feature_dt[,
+                                        .(median_val =
+                                            median(get(assay_to_analyze))),
+                                        by = var_name]
+                for (i in seq_len(length(var_levels) - 1)) {
+                    for (j in (i + 1):length(var_levels)) {
+                        ref_level <- var_levels[i]
+                        current_level <- var_levels[j]
+                        
+                        ref_median <- median_dt[get(var_name) == ref_level,
+                                                median_val]
+                        current_median <- median_dt[get(var_name)
+                                                    == current_level,
+                                                    median_val]
+                        comp_res <- data.table(
+                            feature = feature,
+                            log2FoldChange = log2(current_median / ref_median),
+                            pvalue = pval,
+                            var = var_name,
+                            reflevel = ref_level,
+                            currentlevel = current_level
+                        )
+                        all_res[[length(all_res) + 1]] <- comp_res
+                    }
+                }
+            }else {
+                stop("Each factor needs to have more than two levels!")
+            }
+        }
+    }
+    res <- format_DE(all_res, padj_method, method = "Kruskal-Wallis")
+    return(res)
+}
+
 
 
 #' Returns summary table for p-values of explained variation
