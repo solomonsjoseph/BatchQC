@@ -4,12 +4,13 @@
 \alias{DE_analyze}
 \title{Differential Expression Analysis}
 \usage{
-DE_analyze(se, method, batch, conditions, assay_to_analyze)
+DE_analyze(se, method, batch, conditions, assay_to_analyze, padj_method)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{method}{DE analysis method option ('DESeq2', 'limma', or 'edgeR')}
+\item{method}{DE analysis method option
+('DESeq2', 'limma', 'edgeR', or 'ANOVA')}
 
 \item{batch}{metadata column in the se object representing batch}
 
@@ -18,15 +19,19 @@ analysis covariates}
 
 \item{assay_to_analyze}{Assay in the se object (either counts for DESeq2 or
 normalized data for limma or edgeR) for DE analysis}
+
+\item{padj_method}{correction method for adjusted p-value from
+p.adjust.methods}
 }
 \value{
-A named list containing the log2FoldChange, pvalue and adjusted
-pvalue (padj) for each analysis returned by DESeq2 or limma or edgeR
+A named list containing the log2FoldChange, fvalue (ANOVA only),
+pvalue and adjusted pvalue (padj) for each analysis returned by DESeq2,
+limma, edgeR, or ANOVA.
 }
 \description{
-This function runs DE analysis on a count matrix (DESeq) or a normalized log
-or log-CPM matrix (limma) or an edgeR-normalized matrix (edgeR)
-contained in the se object
+This function runs DE analysis on a count matrix (DESeq), a normalized log or
+log-CPM matrix (limma), an edgeR TMM-normalized matrix (edgeR) or perform
+ANOVA on the data contained in the se object.
 }
 \examples{
 library(scran)
@@ -36,7 +41,8 @@ differential_expression <- BatchQC::DE_analyze(se = se,
                                                 batch = "Treatment",
                                                 conditions = c(
                                                 "Mutation_Status"),
-                                                assay_to_analyze = "counts")
+                                                assay_to_analyze = "counts",
+                                                padj_method = "BH")
 pval_summary(differential_expression)
 pval_plotter(differential_expression)
 

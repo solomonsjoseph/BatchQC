@@ -1,6 +1,26 @@
-#Version 2.5.3
-##Major changes
-* Added new kBET tab for testing batch effect
+# Version 2.5.5
+## Major Changes
+* Added ANOVA as a differential expression analysis method
+
+# Version 2.5.4
+## Major Changes
+* Redesigned tab flow; upload tab reduced, batch correction tab created, and
+  lambda stat and neg binomial distribution check moved to appropriate tabs
+
+## Minor Changes
+* Updated lambda statistic to provide a recommendation and to check for balanced
+  experimental design
+* Abbreviated Normalization usage description
+
+## Bug Fix
+* Updated "counts" language to "assay" for uploaded data
+
+# Version 2.5.3
+## Major Changes
+* Added lambda statistic
+
+## Bug Fix
+* Corrected log to be log(x+1) and changed CPM(x+1) to CPM(x)
 
 # Version 2.5.2
 ## Major Changes

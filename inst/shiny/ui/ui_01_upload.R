@@ -25,19 +25,19 @@ tabPanel("Upload Data",
         sidebarPanel(
             h4("Select the type of input you would like to provide:"),
             radioButtons("uploadChoice", "",
-                c("Count File and Metadata File" = "countFile",
+                c("Feature File and Metadata File" = "countFile",
                     "Summarized Experiment Object" = "seObject",
                     "Example Data" = "example"
                 )),
             #Only show panel if uploading count and metadata files
             conditionalPanel(condition = "input.uploadChoice == 'countFile'",
-                h4("Upload counts and metadata table"),
+                h4("Upload feature and metadata table"),
                 tags$div(tags$p(
                     'Metadata file must be a table with headers and sample names.'
                 )),
                 fileInput(
                     "counts",
-                    "Counts table",
+                    "Feature table",
                     multiple = FALSE,
                     accept = accepted
                 ),
@@ -99,139 +99,7 @@ tabPanel("Upload Data",
                     DTOutput('metadata_header'),
                     DTOutput('se_meta'),
                     br()
-                ),
-                tabPanel('Normalization',
-                    h4(strong("Usage")),
-                    h5("CPM calculates the counts mapped to a feature relative to the total counts mapped to a sample times one million. CPM may be used to adjust expression count biases introduced by sequencing depth. CPM adjusted values are not recommended for differential expression analysis or within sample comparison."),
-                    h5("DESeq calculates the counts mapped to a feature divided by sample-specific size factors. Size factors are determined by the median ratio of gene counts relative to the geometric mean per feature. DESeq may be used to adjust expression count biases introduced by sequencing depth and RNA composition. DESeq adjusted values are not recommended for within sample comparison."),
-                    h5("edgeR calculates scale factors using a trimmed mean of M-values between each pair of samples and multiplies the scale factors with the original library size to get the normalized library size. This normalization method should be selected when you plan to use edgeR for differential expression analysis. The original read (raw) counts should be the provided input for this normalization method."),
-                    selectizeInput('normalization_method',
-                        'Choose normalization method',
-                        multiple = FALSE,
-                        choices = c('CPM', 'DESeq', 'edgeR', 'none'),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    selectizeInput('normalization_assay',
-                        'Choose the assay on which to do normalization',
-                        multiple = FALSE,
-                        choices = c(''),
-                        selected = NULL),
-                    textInput(inputId = 'normalized_assay_name', 'Name for the normalized assay',
-                        value = ''),
-                    checkboxInput('log', 'Log transform the results'),
-                    withBusyIndicatorUI(actionButton(inputId = 'normalize',
-                        label = 'Normalize')),
-                    br()
-                ),
-                tabPanel('Negative Binomial Check',
-                    h4(strong("Usage")),
-                    h5("This features allows you to check your data to see if it conforms to the required negative binomial assumption needed for various downstream analysis. If The negative binomial assumption is not met, you should normalize your data or perform other preprocessing step and/or use other more appropraite analysis tools."),
-                    selectizeInput('nb_test',
-                        'Choose the test to perform',
-                        multiple = FALSE,
-                        choices = c('nb_DESeq2'),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    selectizeInput('counts_matrix',
-                        'Choose the array data to check',
-                        multiple = FALSE,
-                        choices = c(''),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    selectizeInput('condition_of_interest',
-                        'Select the variable you are interested in analyzing',
-                        multiple = FALSE,
-                        choices = c(''),
-                        selected = NULL, options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    selectizeInput('nb_variables',
-                        'Select other variables you would like to include in your analysis',
-                        multiple = TRUE,
-                        choices = c(''),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    checkboxInput('nb_advanced_options', 'Advanced Options',
-                        value = FALSE),
-                    conditionalPanel(condition = "input.nb_advanced_options == 1",
-                        numericInput('num_genes',
-                            'Number of genes to analyze (downsampling)',
-                            value = 500,
-                            min = 2)),
-                    withBusyIndicatorUI(actionButton(inputId = 'nb_check',
-                        label = 'Check Distribution')),
-                    textOutput('recommendation'),
-                    plotOutput('nb_histogram'),
-                    textOutput('reference'),
-                    br()
-                ),
-                tabPanel('Batch Effect Correction',
-                    h4(strong("Usage")),
-                    h5("ComBat-Seq uses a negative binomial regression to model batch effects. It requires untransformed, raw count data to adjust for batch effect. Please use this option with a counts assay"),
-                    h5("ComBat corrects for Batch effect using a parametric empirical Bayes framework and data should be cleaned and normalized. Therefore, please select a normalized assay to run this on."),
-                    h5("limma batch correction fits a linear model to the data, including batch and regular treatments, then removes the component due to the batch effects. Please run limma on log expression data."),
-                    selectizeInput('correction_method', 'Choose correction method',
-                        multiple = FALSE,
-                        choices = c('ComBat-Seq', 'ComBat', 'limma', 'sva'),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }'
-                            ))),
-                    selectizeInput('correction_assay',
-                        'Choose the assay on which to do correction',
-                        multiple = FALSE,
-                        choices = c(''),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }')
-                        )),
-                    selectizeInput('correction_batch',
-                        'Select the variable that represents batch (or the experimental variable for sva)',
-                        multiple = FALSE,
-                        choices = c(''),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }')
-                        )),
-                    selectizeInput('correction_covariates',
-                        'Choose the covariates you would like to preserve (or for sva, include as adjustment variables)',
-                        multiple = TRUE,
-                        choices = c(''),
-                        selected = NULL,
-                        options = list(placeholder =
-                                'Please select an option below',
-                            onInitialize = I(
-                                'function() { this.setValue(""); }')
-                        )),
-                    textInput(inputId = 'corrected_assay_name',
-                        'Name for the corrected assay'),
-                    actionButton(inputId = 'correct', label = 'Correct')
                 )
-
             )
         )
     )
