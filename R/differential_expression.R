@@ -53,7 +53,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
             paste(colnames(analysis_design), collapse = "+"))),
             data = analysis_design)
     if (method == 'DESeq2') {
-        res <- DESeq_DE(data, design, padj_method, analysis_design)
+        res <- DESeq(data, design, padj_method)
     }else if (method == 'limma') {
         res <- limma_DE(data, design, padj_method)
     }else if (method == 'edgeR') {
@@ -72,25 +72,23 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
     return(res)
 }
 
-DESeq_DE <- function(data, design, padj_method, analysis_design) {
+DESeq_DE <- function(data, design, padj_method) {
     for (item in data){
-        for (number in item) {
-            if (round(number) != number) {
-                stop("Data contains non-integers")
-            }else if (number < 0) {
-                stop("Data: data contains negative integers")
-            }
+        if (round(item) != item) {
+            stop("Data contains non-integers")
+        }else if (item < 0) {
+            stop("Data: data contains negative integers")
         }
     }
     colnames(data) <- rownames(analysis_design)
     res <- list()
     data[is.na(data)] <- 0
-    dds <- DESeq2::DESeqDataSetFromMatrix(countData = data,
+    dds <- DESeqDataSetFromMatrix(countData = data,
                                     colData = analysis_design,
                                     design = stats::as.formula(paste(" ~ ",
                                                 paste(colnames(analysis_design),
                                                 collapse = "+"))))
-    dds <- DESeq2::DESeq(dds)
+    dds <- DESeq(dds)
     for (covar in DESeq2::resultsNames(dds)){
         imp_data <- data.frame("log2FoldChange" =
                                 DESeq2::results(dds,
