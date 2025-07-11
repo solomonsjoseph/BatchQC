@@ -1,7 +1,8 @@
 globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval", ".",
                 ".", "mean_val", "as.data.table", "rbindlist", ":=", "padj",
                 "p.adjust", "pvalue", "var", "comparison", "currentlevel",
-                "reflevel", "log2FoldChange", "fvalue", "median_val"))
+                "reflevel", "log2FoldChange", "fvalue", "median_val",
+                "analysis_design"))
 
 #' Differential Expression Analysis
 #'
@@ -53,7 +54,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
             paste(colnames(analysis_design), collapse = "+"))),
             data = analysis_design)
     if (method == 'DESeq2') {
-        res <- DESeq_DE(data, design, padj_method)
+        res <- DESeq_DE(data, analysis_design, padj_method)
     }else if (method == 'limma') {
         res <- limma_DE(data, design, padj_method)
     }else if (method == 'edgeR') {
@@ -75,7 +76,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
     return(res)
 }
 
-DESeq_DE <- function(data, design, padj_method) {
+DESeq_DE <- function(data, analysis_design, padj_method) {
     for (item in data){
         if (round(item) != item) {
             stop("Data contains non-integers")
