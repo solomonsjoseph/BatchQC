@@ -67,7 +67,10 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
         res <- kw_DE(se, feature_list, padj_method, assay_to_analyze, batch,
                     conditions)
     }else {
-        stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
+        stop(
+        "Please select a method:
+        'DESeq2', 'limma', 'edgeR', 'ANOVA', or 'Kruskal-Wallis'"
+        )
     }
     return(res)
 }
