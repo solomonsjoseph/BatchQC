@@ -161,14 +161,9 @@ kBET <- function(
     initialize.kbet.res <- initialize.kbet(df, batch, k0, knn, testSize, do.pca,
                                            dim.pca, heuristic, n_repeat, alpha, 
                                            addTest, verbose, adapt)
-
     if (addTest) {
-        kbet.res <- run.kbet.addTest(dim.dataset, testSize, k0, adapt, 
-                                     is.imbalanced, new.class.frequency, 
-                                     class.frequency, batch, dof, alpha, 
-                                     batch.shuff, kBET.expected, kBET.observed, 
-                                     kBET.signif, rejection, n_repeat)
-        
+        kbet.res <- run.kbet.addTest(initialize.kbet.res, adapt, alpha, 
+                                     n_repeat)
         rejection <- summarize.kbet.results(rejection, kBET.expected, 
                                             kBET.observed, kBET.signif, 
                                             lrt.expected, lrt.observed,
@@ -190,7 +185,6 @@ kBET <- function(
         kBET.expected <- kbet.res$kBET.expected
         kBET.observed <- kbet.res$kBET.observed
         kBET.signif <- kbet.res$kBET.signif
-        
         rejection <- summarize.kbet.results(rejection, kBET.expected, 
                                             kBET.observed, kBET.signif,
                                             n_repeat, addTest)
@@ -204,7 +198,6 @@ kBET <- function(
                              dim.pca = dim.pca, heuristic = heuristic, 
                              n_repeat = n_repeat, alpha = alpha, 
                              addTest = addTest, verbose = verbose, plot = plot)
-
     # add outsiders
     if (adapt) {
         rejection$outsider <- list(index = outsider,
