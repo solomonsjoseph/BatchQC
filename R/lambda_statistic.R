@@ -127,19 +127,22 @@ run_lambda <- function(se, assay, batch, condition) {
             colData(se)[, batch],
             colData(se)[, condition]))
         if (lambda_res$lambda_adj > LAMBDA_THRESHOLD) {
-            recommendation <- paste0("The experimental design is balanced and
-            the lambda statistic is ", round(lambda_res$lambda_adj, digits = 2),
-            ", which is greater than -7. Therefore, you should consider batch
-            correction.")
+            recommendation <- paste0("The experimental design is balanced and ",
+                "the lambda statistic is ",
+                round(lambda_res$lambda_adj, digits = 2),
+                ", which is greater than -7. Therefore, you should consider ",
+                "batch correction.")
         }else {
-            recommendation <- paste0("The experimental design is balanced and
-            the lambda statistic is ", round(lambda_res$lambda_adj, digits = 2),
-            ", which is less than or equal to -7. Therefore, you should consider
-            using your data WITHOUT batch correction.")
+            recommendation <- paste0("The experimental design is balanced and ",
+                "the lambda statistic is ",
+                round(lambda_res$lambda_adj, digits = 2),
+                ", which is less than or equal to -7. Therefore, you should ",
+                "consider using your data WITHOUT batch correction.")
         }
     }else {
-        recommendation <- "The experimental design is unbalanced. Therefore, you
-        should condsider applying a batch correction method to your data."
+        recommendation <- paste0("The experimental design is unbalanced. ",
+            "Therefore, you should condsider applying a batch correction ",
+            "method to your data.")
     }
 
     return(list(lambda_stat = lambda_res$lambda_adj,
