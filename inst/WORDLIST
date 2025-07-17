@@ -13,8 +13,10 @@ JT
 LTBI
 Limma
 Preprocess
+ResidV
 SVA
 SummarizedExperiment
+TMM
 VanValkenburg
 al
 ann
@@ -24,6 +26,7 @@ colData
 colNames
 csv
 curatedTBData
+dat
 dendextend
 devtools
 doi
@@ -31,13 +34,16 @@ downsample
 edgeR
 et
 fimmu
+fvalue
 ggplot
 github
 glm
 indata
 limma
+ln
 mTCC
 nb
+ncol
 normalizations
 padj
 pca
@@ -47,7 +53,6 @@ psva
 pval
 pvalue
 pvalues
-reproducibility
 sTCC
 sapply
 se
@@ -56,6 +61,4 @@ sva
 tibble
 umap
 umaps
-unadjusted
-untransformed
 vapply
