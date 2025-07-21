@@ -1,8 +1,12 @@
-# Version 2.5.6
+# Version 2.5.7
 ## Minor Changes
 * Added a data onject with subject IDs and BMI info to match the original study
   with the curatedTBData info and provide missing BMI info
   
+# Version 2.5.6
+## Major Changes
+* Added Kruskal-Wallis test as a differential expression analysis method
+
 # Version 2.5.5
 ## Major Changes
 * Added ANOVA as a differential expression analysis method
