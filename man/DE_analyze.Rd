@@ -10,7 +10,7 @@ DE_analyze(se, method, batch, conditions, assay_to_analyze, padj_method)
 \item{se}{SummarizedExperiment object}
 
 \item{method}{DE analysis method option
-('DESeq2', 'limma', 'edgeR', or 'ANOVA')}
+('DESeq2', 'limma', 'edgeR', 'ANOVA', or 'Kruskal-Wallis')}
 
 \item{batch}{metadata column in the se object representing batch}
 
@@ -26,12 +26,12 @@ p.adjust.methods}
 \value{
 A named list containing the log2FoldChange, fvalue (ANOVA only),
 pvalue and adjusted pvalue (padj) for each analysis returned by DESeq2,
-limma, edgeR, or ANOVA.
+limma, edgeR, ANOVA, or Kruskal-Wallis.
 }
 \description{
 This function runs DE analysis on a count matrix (DESeq), a normalized log or
 log-CPM matrix (limma), an edgeR TMM-normalized matrix (edgeR) or perform
-ANOVA on the data contained in the se object.
+ANOVA or Kruskal-Wallis test on the data contained in the se object.
 }
 \examples{
 library(scran)

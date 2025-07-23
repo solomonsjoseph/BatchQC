@@ -1,5 +1,5 @@
 globalVariables(c("protein_sample_info", "protein_data", "batch_indicator",
-    "signature_data", "bladder_meta", "bladder_data"))
+    "signature_data", "bladder_meta", "bladder_data", "merged_IDs"))
 
 #' Batch and Condition indicator for protein expression data
 #'
@@ -94,6 +94,25 @@ bladder_data_upload <- function() {
     return(se_object)
 }
 
+#' BMI and matched sample names for TB data
+#'
+#' This is support data for the TB data set that contains the BMI data and ID
+#' numbers from both the curatedTBData database and the original study the data
+#' was used in
+#'
+#' @name merged_IDs
+#' @docType data
+#' @format A data frame with 91 rows and 3 columns
+#' \describe{
+#'     \item{subjectID_curatedTBData}{Subject ID found in curatedTBData}
+#'     \item{subjectID_TB_Paper}{Subject ID in the original paper}
+#'     \item{BMI}{subject's BMI from the original study}
+#' }
+#' @keywords datasets
+#' @usage data(merged_IDs)
+"merged_IDs"
+
+
 #' TB data upload
 #' This function uploads the TB data set from the curatedTBData package.
 #'
@@ -126,19 +145,19 @@ tb_data_upload <- function() {
     batch1_metadata$Experiment <- rep("GSE152218", length(batch1_metadata[, 1]))
     batch1_metadata <- batch1_metadata %>% as.data.frame() %>%
         select("TBStatus", "HIVStatus", "BMI", "Experiment")
-
     batch2_data <- MultiAssayExperiment::experiments(
-        curatedData$GSE101705)$assay_reprocess_hg38
+        curatedData$GSE101705)$assay_reprocess_hg38 %>%
+        as.data.frame() %>%
+        select(-"GSM2712712")
     batch2_metadata <- MultiAssayExperiment::colData(curatedData$GSE101705)
+    batch2_metadata <-
+        batch2_metadata[-which(rownames(batch2_metadata) == "GSM2712712"), ]
     batch2_metadata$Experiment <- rep("GSE101705", length(batch2_metadata[, 1]))
 
-    # need to get actual batch data, function calls "made up" data
-    batch2_bmi <- BMI_data()
-    batch2_metadata$BMI <- batch2_bmi
+    batch2_metadata <- BMI_data(batch2_metadata)
     batch2_metadata <- batch2_metadata %>% as.data.frame() %>%
         select("TBStatus", "HIVStatus", "BMI", "Experiment")
 
-    # Merge data and metadata from both experiments
     all_data <- merge(batch1_data, batch2_data, by = 0)
     rownames(all_data) <- all_data$Row.names
     all_data <- all_data %>% select(-1) %>% as.matrix()
@@ -159,15 +178,24 @@ tb_data_upload <- function() {
     return(se)
 }
 
-#' This function returns BMI data that comes form the indata object provided to
-#' Jessica from Evan
-#' @usage BMI_data()
-#' @return a SE object with raw counts data and metadata
+#' This function returns BMI data that comes form the data in "Comparing
+#' tuberculosis gene signatures in malnourished individuals using the
+#' TBSignatureProfiler" paper. Subject IDs were matched as shown on
+#' "github.com/jessmcc22/BatchQCv2_Manuscript/blob/devel/R/subjectID_match.R"
 #'
-BMI_data <- function() {
-    return(c(20.40, 23.20, 21.70, 18.90, 19.30, 18.60, 19.40, 19.20,
-        21.50, 20.10, 19.00, 20.30, 19.20, 26.00, 20.90, 24.90, 15.10, 13.80,
-        14.20, 15.10, 21.40, 11.50, 15.60, 14.30, 15.60, 20.40, 23.20, 21.70,
-        21.80, 23.50, 25.00, 24.80, 24.10, 24.30, 26.30, 28.80, 22.30, 38.70,
-        21.70, 26.00, 28.3, 22.30, 38.7, 21.7))
+#' @param meta dataframe; metadata that needs to be matched to BMI
+#' @usage BMI_data(meta)
+#' @return dataframe provided as input with BMI info added
+#'
+BMI_data <- function(meta) {
+    data("merged_IDs", envir = environment())
+    subjectID_curatedTBData <- merged_IDs$subjectID_curatedTBData
+    BMI <- merged_IDs$BMI
+    IDs <- data.frame(subjectID_curatedTBData, BMI)
+    meta$BMI <- rep(NA, length(meta$Experiment))
+    for (i in seq_len(nrow(meta))){
+        position <- which(IDs$subjectID_curatedTBData == rownames(meta)[i])
+        meta$BMI[i] <- IDs$BMI[position]
+    }
+    return(meta)
 }

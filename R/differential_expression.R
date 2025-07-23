@@ -1,16 +1,17 @@
 globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval", ".",
                 ".", "mean_val", "as.data.table", "rbindlist", ":=", "padj",
                 "p.adjust", "pvalue", "var", "comparison", "currentlevel",
-                "reflevel", "log2FoldChange", "fvalue"))
+                "reflevel", "log2FoldChange", "fvalue", "median_val",
+                "analysis_design"))
 
 #' Differential Expression Analysis
 #'
 #' This function runs DE analysis on a count matrix (DESeq), a normalized log or
 #' log-CPM matrix (limma), an edgeR TMM-normalized matrix (edgeR) or perform
-#' ANOVA on the data contained in the se object.
+#' ANOVA or Kruskal-Wallis test on the data contained in the se object.
 #' @param se SummarizedExperiment object
 #' @param method DE analysis method option
-#' ('DESeq2', 'limma', 'edgeR', or 'ANOVA')
+#' ('DESeq2', 'limma', 'edgeR', 'ANOVA', or 'Kruskal-Wallis')
 #' @param batch metadata column in the se object representing batch
 #' @param conditions metadata columns in the se object representing additional
 #'   analysis covariates
@@ -20,12 +21,13 @@ globalVariables(c("chosen", "P.Value", "adj.P.Val", "effects", "pval", ".",
 #' p.adjust.methods
 #' @return A named list containing the log2FoldChange, fvalue (ANOVA only),
 #' pvalue and adjusted pvalue (padj) for each analysis returned by DESeq2,
-#' limma, edgeR, or ANOVA.
+#' limma, edgeR, ANOVA, or Kruskal-Wallis.
 #' @import SummarizedExperiment
 #' @import DESeq2
 #' @import scran
 #' @import edgeR
 #' @importFrom stats model.matrix as.formula t.test aov coef p.adjust var
+#' @importFrom stats kruskal.test median
 #' @importFrom limma lmFit eBayes topTable makeContrasts contrasts.fit
 #' @importFrom data.table as.data.table rbindlist :=
 #' @examples
@@ -52,31 +54,7 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
             paste(colnames(analysis_design), collapse = "+"))),
             data = analysis_design)
     if (method == 'DESeq2') {
-        # Check if the assay contains counts (e.g. non negative integer data),
-        for (item in data){
-            if (round(item) != item) {
-                stop("Data contains non-integers")
-            }else if (item < 0) {
-                stop("Data: data contains negative integers")
-            }
-        }
-        colnames(data) <- rownames(analysis_design)
-        data[is.na(data)] <- 0
-            dds <- DESeqDataSetFromMatrix(countData = data,
-                                        colData = analysis_design,
-                                        design = stats::as.formula(paste(" ~ ",
-                                            paste(colnames(analysis_design),
-                                            collapse = "+"))))
-        dds <- DESeq(dds)
-        for (covar in DESeq2::resultsNames(dds)){
-            imp_data <- data.frame("log2FoldChange" =
-                    DESeq2::results(dds, name = covar)$log2FoldChange,
-                "pvalue" =  DESeq2::results(dds, name = covar)$pvalue,
-                "padj" = DESeq2::results(dds, name = covar,
-                                        pAdjustMethod = padj_method)$padj,
-                row.names = rownames(DESeq2::results(dds, name = covar)))
-            res[[covar]] <- imp_data
-        }
+        res <- DESeq_DE(data, analysis_design, padj_method)
     }else if (method == 'limma') {
         res <- limma_DE(data, design, padj_method)
     }else if (method == 'edgeR') {
@@ -85,8 +63,50 @@ DE_analyze <- function(se, method, batch, conditions, assay_to_analyze,
         feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
         res <- anova_DE(se, feature_list, padj_method, assay_to_analyze, batch,
                         conditions)
+    }else if (method == "Kruskal-Wallis") {
+        feature_list <- datatable_DE(se, assay_to_analyze, batch, conditions)
+        res <- kw_DE(se, feature_list, padj_method, assay_to_analyze, batch,
+                    conditions)
     }else {
-        stop("Please select a method: 'DESeq2', 'limma', or 'edgeR'")
+        stop(
+        "Please select a method:
+        'DESeq2', 'limma', 'edgeR', 'ANOVA', or 'Kruskal-Wallis'"
+        )
+    }
+    return(res)
+}
+
+DESeq_DE <- function(data, analysis_design, padj_method) {
+    for (item in data){
+        if (round(item) != item) {
+            stop("Data contains non-integers")
+        }else if (item < 0) {
+            stop("Data: data contains negative integers")
+        }
+    }
+    colnames(data) <- rownames(analysis_design)
+    res <- list()
+    data[is.na(data)] <- 0
+    dds <- DESeq2::DESeqDataSetFromMatrix(countData = data,
+                                    colData = analysis_design,
+                                    design = stats::as.formula(paste(" ~ ",
+                                                paste(colnames(analysis_design),
+                                                collapse = "+"))))
+    dds <- DESeq2::DESeq(dds)
+    for (covar in DESeq2::resultsNames(dds)){
+        imp_data <- data.frame("log2FoldChange" =
+                                DESeq2::results(dds,
+                                                name = covar)$log2FoldChange,
+                                "pvalue" = DESeq2::results(dds,
+                                                        name = covar)$pvalue,
+                                "padj" = DESeq2::results(dds, name = covar,
+                                                        pAdjustMethod =
+                                                        padj_method)$padj,
+                                row.names = rownames(DESeq2::results(
+                                                                dds,
+                                                                name = covar)
+                                                    ))
+        res[[covar]] <- imp_data
     }
     return(res)
 }
@@ -183,11 +203,11 @@ anova_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch,
             }
         }
     }
-    res <- format_anova_DE(all_res, padj_method)
+    res <- format_DE(all_res, padj_method, method = "ANOVA")
     return(res)
 }
 
-format_anova_DE <- function(all_res, padj_method) {
+format_DE <- function(all_res, padj_method, method) {
     res <- list()
     if (length(all_res) > 0) {
         combined_dt <- rbindlist(all_res)
@@ -199,14 +219,69 @@ format_anova_DE <- function(all_res, padj_method) {
 
         for (i in unique(combined_dt$comparison)) {
             var_data <- combined_dt[comparison == i]
-            var_df <- as.data.frame(var_data[, .(log2FoldChange, fvalue, pvalue,
-                                                padj)])
+            if (method == "ANOVA") {
+                var_df <- as.data.frame(var_data[, .(log2FoldChange,
+                                                    fvalue,
+                                                    pvalue,
+                                                    padj)])
+            }else if (method == "Kruskal-Wallis") {
+                var_df <- as.data.frame(var_data[, .(log2FoldChange,
+                                                    pvalue,
+                                                    padj)])
+            }
             rownames(var_df) <- var_data$feature
             res[[i]] <- var_df
         }
     }
     return(res)
 }
+
+kw_DE <- function(se, feature_list, padj_method, assay_to_analyze, batch,
+                    conditions) {
+    analysis_design <- as.data.frame(colData(se)[c(conditions, batch)])
+    res <- list()
+    all_res <- list()
+    for (feature in names(feature_list)) {
+        feature_dt <- data.table::as.data.table(feature_list[[feature]])
+        for (var_name in colnames(analysis_design)){
+            model <- stats::as.formula(paste(assay_to_analyze, "~", var_name))
+            kw_res <- kruskal.test(model, data = feature_dt)
+            var_levels <- as.character(unique(feature_dt[[var_name]]))
+            if (length(var_levels) > 1) {
+                pval <- kw_res$p.value
+                median_dt <- feature_dt[,
+                                        .(median_val =
+                                            median(get(assay_to_analyze))),
+                                        by = var_name]
+                for (i in seq_len(length(var_levels) - 1)) {
+                    for (j in (i + 1):length(var_levels)) {
+                        ref_level <- var_levels[i]
+                        current_level <- var_levels[j]
+                        ref_median <- median_dt[get(var_name) == ref_level,
+                                                median_val]
+                        current_median <- median_dt[get(var_name)
+                                                    == current_level,
+                                                    median_val]
+                        comp_res <- data.table(
+                            feature = feature,
+                            log2FoldChange = log2(current_median / ref_median),
+                            pvalue = pval,
+                            var = var_name,
+                            reflevel = ref_level,
+                            currentlevel = current_level
+                        )
+                        all_res[[length(all_res) + 1]] <- comp_res
+                    }
+                }
+            }else {
+                stop("Each factor needs to have more than two levels!")
+            }
+        }
+    }
+    res <- format_DE(all_res, padj_method, method = "Kruskal-Wallis")
+    return(res)
+}
+
 
 
 #' Returns summary table for p-values of explained variation

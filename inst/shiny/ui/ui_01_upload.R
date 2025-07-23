@@ -83,7 +83,7 @@ tabPanel("Upload Data",
                         ),
                         conditionalPanel(condition = "input.exampleData == 'TBData'",
                             h5("This data set is from a TB cohort study from Pondicherry India and contains RNA-seq counts data."),
-                            h6("Reference: VanValkenburg A, et al. Malnutrition leads to increased inflammation and expression of tuberculosis risk signatures in recently exposed household contacts of pulmonary tuberculosis. Front Immunol. 2022 Sep 28;13:1011166. doi: 10.3389/fimmu.2022.1011166")
+                            h6("Reference: Johnson WE, et al. Comparing tuberculosis gene signatures in malnourished individuals using the TBSignatureProfiler. BMC Infect Dis. 2021 Jan 22;21(1):106. doi: 10.1186/s12879-020-05598-z. PMID: 33482742; PMCID: PMC7821401.")
                         )),
                     h4(strong("Data Preview")),
                     DTOutput('counts_header'),

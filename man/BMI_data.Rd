@@ -2,15 +2,22 @@
 % Please edit documentation in R/data.R
 \name{BMI_data}
 \alias{BMI_data}
-\title{This function returns BMI data that comes form the indata object provided to
-Jessica from Evan}
+\title{This function returns BMI data that comes form the data in "Comparing
+tuberculosis gene signatures in malnourished individuals using the
+TBSignatureProfiler" paper. Subject IDs were matched as shown on
+"github.com/jessmcc22/BatchQCv2_Manuscript/blob/devel/R/subjectID_match.R"}
 \usage{
-BMI_data()
+BMI_data(meta)
+}
+\arguments{
+\item{meta}{dataframe; metadata that needs to be matched to BMI}
 }
 \value{
-a SE object with raw counts data and metadata
+dataframe provided as input with BMI info added
 }
 \description{
-This function returns BMI data that comes form the indata object provided to
-Jessica from Evan
+This function returns BMI data that comes form the data in "Comparing
+tuberculosis gene signatures in malnourished individuals using the
+TBSignatureProfiler" paper. Subject IDs were matched as shown on
+"github.com/jessmcc22/BatchQCv2_Manuscript/blob/devel/R/subjectID_match.R"
 }
