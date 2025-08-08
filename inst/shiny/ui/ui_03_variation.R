@@ -24,6 +24,10 @@ tabPanel(
         tabsetPanel(
             tabPanel('Lambda Statistic',
                 h4(strong("Usage")),
+                h5("The laambda statistic should be applied to uncorrected data
+                    sets to aid in determining if a batch correction should be
+                    applied to the uncorrected data. It is not appropriate to
+                    use on corrected data sets."),
                 textOutput('lambda_rec')
             ),
             tabPanel("Explained Variation - Individual Variable",
