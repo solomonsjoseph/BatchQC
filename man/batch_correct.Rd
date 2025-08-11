@@ -11,7 +11,8 @@ covar, output_assay_name)
 \arguments{
 \item{se}{SummarizedExperiment object}
 
-\item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva")}
+\item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva",
+svaseq)}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
@@ -22,6 +23,9 @@ covar, output_assay_name)
 \item{covar}{list of covariates}
 
 \item{output_assay_name}{name of results assay}
+
+\item{...}{Arguments to be passed to specific methods, such as \code{num_sv} for
+\code{svaseq_correction}}
 }
 \value{
 a summarized experiment object with normalized assay appended
