@@ -1,3 +1,7 @@
+# Version 2.5.8
+## Major Changes
+* Added svaseq as a batch correction method
+
 # Version 2.5.7
 ## Minor Changes
 * Added a data onject with subject IDs and BMI info to match the original study
