@@ -97,7 +97,6 @@ tabPanel('Batch Correction/Normalization',
                             onInitialize = I(
                                 'function() { this.setValue(""); }')
                         )),
-                    
                     selectizeInput('correction_covariates',
                         'Choose the covariates you would like to preserve (or for sva, include as adjustment variables)',
                         multiple = TRUE,
@@ -111,9 +110,9 @@ tabPanel('Batch Correction/Normalization',
                     textInput(inputId = 'corrected_assay_name',
                         'Name for the corrected assay'),
                     conditionalPanel(condition = "input.correction_method == 'svaseq'",
-                                     checkboxInput('num_sv', 
+                                     checkboxInput('num_sv',
                                                    'Uncheck this if the number of samples is small (the number of latent factors that need to be estimated (n.sv) is set to 1);
-                                                   otherwise, svaseq function will estimate n.sv for you.', 
+                                                   otherwise, svaseq function will estimate n.sv for you.',
                                                    value = FALSE)
                     ),
                     actionButton(inputId = 'correct', label = 'Correct')

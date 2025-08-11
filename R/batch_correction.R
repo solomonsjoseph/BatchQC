@@ -11,7 +11,7 @@
 #' @param ... Arguments to be passed to specific methods, such as `num_sv` for
 #' `svaseq_correction`
 #' @usage batch_correct(se, method, assay_to_normalize, batch, group = NULL,
-#' covar, output_assay_name)
+#' covar, output_assay_name, ...)
 #' @return a summarized experiment object with normalized assay appended
 #' @import SummarizedExperiment
 #' @import sva
@@ -34,7 +34,7 @@
 #'
 #' @export
 batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
-    covar, output_assay_name) {
+    covar, output_assay_name, ...) {
     se <- se
     var_of_interest <- batch
     batch <- data.frame(colData(se))[, batch]
@@ -302,7 +302,7 @@ svaseq_correction <- function(se, assay_to_normalize, var_of_interest,
             data = colData(se)
             )
     }
-    if (num_sv){
+    if (num_sv) {
         batch_unsup_sva <- svaseq(dat, mod1, mod0)$sv
     } else {
         batch_unsup_sva <- svaseq(dat, mod1, mod0, n.sv = 1)$sv
@@ -310,10 +310,9 @@ svaseq_correction <- function(se, assay_to_normalize, var_of_interest,
     colnames(batch_unsup_sva) <- paste('sv', seq_len(ncol(batch_unsup_sva)))
     mod1Sv <- cbind(mod1, batch_unsup_sva)
     psva.fit <- lmFit(dat, mod1Sv)
-    
-    sv_coef <- psva.fit$coefficients[, colnames(batch_unsup_sva)]
+    sv_coef <- psva.fit$coefficients[, colnames(batch_unsup_sva), drop = FALSE]
     sv_effects <- sv_coef %*% t(batch_unsup_sva)
-    sva_assay <- dat - sv_effects
+    svaseq_assay <- dat - sv_effects
     assays(se)[[output_assay_name]] <- svaseq_assay
     return(se)
 }

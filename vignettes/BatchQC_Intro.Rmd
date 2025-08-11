@@ -238,7 +238,8 @@ se_object <- BatchQC::batch_correct(se = se_object, method = "ComBat",
 ```
 
 ComBat-Seq (or limma or sva or svaseq) can be applied to a data set by providing
-"ComBat-Seq" (or "limma" or "sva" or "svaseq") to the method parameter in the function call.
+"ComBat-Seq" (or "limma" or "sva" or "svaseq") to the method parameter in the
+function call.
 
 ## 4. Experimental Design
 ### Batch Design
