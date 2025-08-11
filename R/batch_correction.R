@@ -1,12 +1,15 @@
 #' Batch Correct
 #' This function allows you to Add batch corrected count matrix to the SE object
 #' @param se SummarizedExperiment object
-#' @param method Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva")
+#' @param method Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva",
+#' svaseq)
 #' @param assay_to_normalize Which assay use to do normalization
 #' @param batch The batch
 #' @param group The group variable
 #' @param covar list of covariates
 #' @param output_assay_name name of results assay
+#' @param ... Arguments to be passed to specific methods, such as `num_sv` for
+#' `svaseq_correction`
 #' @usage batch_correct(se, method, assay_to_normalize, batch, group = NULL,
 #' covar, output_assay_name)
 #' @return a summarized experiment object with normalized assay appended
@@ -47,6 +50,9 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
     } else if (method == 'sva') {
         se <- sva_correction(se, assay_to_normalize, var_of_interest, covar,
             output_assay_name)
+    } else if (method == "svaseq") {
+        se <- svaseq_correction(se, assay_to_normalize, var_of_interest, covar,
+            output_assay_name, num_sv = FALSE)
     }
     return(se)
 }
@@ -261,5 +267,53 @@ sva_correction <- function(se, assay_to_normalize, var_of_interest,
     }
     colnames(sva_assay) <- colnames(assays(se)[[assay_to_normalize]])
     assays(se)[[output_assay_name]] <- sva_assay
+    return(se)
+}
+
+#' svaseq Correction
+#' This function applies sva correction to a summarized experiment object
+#' with count based RNA-seq data
+#' @param se SummarizedExperiment object
+#' @param assay_to_normalize string; name of assay that should be corrected
+#' @param var_of_interest string; name of  experimental variable of interest
+#' @param covar list; sting list  of covariates to include in sva analysis
+#' @param output_assay_name string; name of results assay
+#' @param num_sv boolean; Default is FALSE: the number of estimated latent
+#' factor is set to 1 for a small number of samples. If set to TRUE, svaseq
+#' function will estimate the number of latent factors for you.
+#' @return SE object with an added sva corrected array
+#' @import SummarizedExperiment
+#' @import sva
+
+svaseq_correction <- function(se, assay_to_normalize, var_of_interest,
+    covar, output_assay_name, num_sv = FALSE) {
+    dat <- assays(se)[[assay_to_normalize]]
+    if (is.null(covar)) {
+        mod0 <- model.matrix(~1, data = colData(se))
+        mod1 <- model.matrix(~as.factor(get(var_of_interest)),
+                            data = colData(se)
+                            )
+    } else {
+        mod1 <- model.matrix(
+            ~as.factor(get(var_of_interest)) + as.factor(get(covar)),
+            data = colData(se))
+        mod0 <- model.matrix(
+            ~as.factor(get(covar)),
+            data = colData(se)
+            )
+    }
+    if (num_sv){
+        batch_unsup_sva <- svaseq(dat, mod1, mod0)$sv
+    } else {
+        batch_unsup_sva <- svaseq(dat, mod1, mod0, n.sv = 1)$sv
+    }
+    colnames(batch_unsup_sva) <- paste('sv', seq_len(ncol(batch_unsup_sva)))
+    mod1Sv <- cbind(mod1, batch_unsup_sva)
+    psva.fit <- lmFit(dat, mod1Sv)
+    
+    sv_coef <- psva.fit$coefficients[, colnames(batch_unsup_sva)]
+    sv_effects <- sv_coef %*% t(batch_unsup_sva)
+    sva_assay <- dat - sv_effects
+    assays(se)[[output_assay_name]] <- svaseq_assay
     return(se)
 }
