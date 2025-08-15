@@ -214,6 +214,7 @@ of variation. It is appropriate when you know your experimental variable of
 interest (like the disease state of samples), but unknown sources of variation.
 It should be run on cleaned and log transformed data. This can be run with or
 without additional adjustment variables.
+5. **svaseq** svaseq is a variant of sva for sequencing data.
 
 To apply your desired batch effect correction model, select the method from the 
 drop down menu, then select the appropriate assay in the second drop down menu,
@@ -236,8 +237,9 @@ se_object <- BatchQC::batch_correct(se = se_object, method = "ComBat",
     covar = c("condition"), output_assay_name = "ComBat_corrected")
 ```
 
-ComBat-Seq (or limma or sva) can be applied to a data set by providing
-"ComBat-Seq" (or "limma" or "sva") to the method parameter in the function call.
+ComBat-Seq (or limma or sva or svaseq) can be applied to a data set by providing
+"ComBat-Seq" (or "limma" or "sva" or "svaseq") to the method parameter in the
+function call.
 
 ## 4. Experimental Design
 ### Batch Design

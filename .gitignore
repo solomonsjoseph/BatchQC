@@ -12,9 +12,7 @@ $RECYCLE.BIN/
 *.msp
 # Windows shortcuts
 *.lnk
-
 # Operating System Files
-
 # OSX
 .DS_Store
 .AppleDouble
@@ -38,3 +36,4 @@ inst/doc
 .Ruserdata
 .project
 .git
+.RDataTmp
