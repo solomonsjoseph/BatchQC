@@ -1,3 +1,7 @@
+# Version 2.5.9
+## Major Changes
+* Added AIC under batch correction tab
+
 # Version 2.5.8
 ## Major Changes
 * Added svaseq as a batch correction method
