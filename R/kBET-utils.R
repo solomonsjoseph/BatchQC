@@ -543,125 +543,44 @@ calculate.nb.size <- function(scan_nb, k0, dataset, batch, knn, verbose) {
 }
 
 run.kbet.addTest <- function(initialize.kbet.res, adapt, alpha, n_repeat) {
-    rejection <- initialize.kbet.res$rejection
-    dim.dataset <- initialize.kbet.res$dim.dataset
-    testSize <- initialize.kbet.res$testSize
-    k0 <- initialize.kbet.res$k0
-    knn <- initialize.kbet.res$knn
-    is.imbalanced <- initialize.kbet.res$is.imbalanced
-    new.class.frequency <- initialize.kbet.res$new.class.frequency
-    class.frequency <- initialize.kbet.res$class.frequency
-    batch <- initialize.kbet.res$batch
-    dof <- initialize.kbet.res$dof
-    batch.shuff <- initialize.kbet.res$batch.shuff
-    kBET.expected <- initialize.kbet.res$kBET.expected
-    kBET.observed <- initialize.kbet.res$kBET.observed
-    kBET.signif <- initialize.kbet.res$kBET.signif
 
     # initialize result list
-    kbet.addTest.res <- initialize.kbet.addTest(rejection, k0, dof, batch)
+    kbet.addTest.res <- initialize.kbet.addTest(
+        rejection=initialize.kbet.res$rejection,
+        k0=initialize.kbet.res$k0,
+        dof=initialize.kbet.res$dof,
+        batch=initialize.kbet.res$batch)
 
-    for (i in seq_len(n_repeat)) {
-        # choose a random sample from dataset
-        idx.runs <- sample.int(dim.dataset[1], size=testSize)
-        env <- cbind(knn[idx.runs, seq_len(k0 - 1)], idx.runs)
-
-        # perform test
-        if (adapt && is.imbalanced) {
-            p.val.test <- apply(env, 1,
-                FUN=chi_batch_test,
-                new.class.frequency, batch, dof
-            )
-        } else {
-            p.val.test <- apply(env, 1,
-                FUN=chi_batch_test,
-                class.frequency, batch, dof
-            )
-        }
-
-        is.rejected <- p.val.test < alpha
-
-        p.val.test.null <- apply(apply(
-            batch.shuff, 2,
-            function(x, freq, dof, envir) {
-                apply(envir, 1, FUN=chi_batch_test, freq, x, dof)
-            },
-            class.frequency, dof, env
-        ), 1, mean, na.rm=TRUE)
-
-        # summarise test results
-        kBET.expected[i] <- sum(p.val.test.null < alpha,
-            na.rm=TRUE
-        ) / sum(!is.na(p.val.test.null))
-        kBET.observed[i] <- sum(is.rejected, na.rm=TRUE) /
-            sum(!is.na(p.val.test))
-
-        # compute significance
-        kBET.signif[i] <-
-            1 - ptnorm(kBET.observed[i],
-                mu=kBET.expected[i],
-                sd=sqrt(
-                    kBET.expected[i] * (1 - kBET.expected[i]) / testSize
-                ),
-                alpha=alpha
-            )
-
-        # assign results to result table
-        rejection$results$tested[idx.runs] <- 1
-        rejection$results$kBET.pvalue.test[idx.runs] <- p.val.test
-        rejection$results$kBET.pvalue.null[idx.runs] <- p.val.test.null
-
-        # compute likelihood-ratio test
-        cf <- if (adapt && is.imbalanced) {
-            new.class.frequency
-        } else {
-            class.frequency
-        }
-        p.val.test.lrt <- apply(env, 1,
-            FUN=lrt_approximation, cf, batch, dof
-        )
-        p.val.test.lrt.null <- apply(apply(
-            batch.shuff, 2,
-            function(x, freq, dof, envir) {
-                apply(envir, 1, FUN=lrt_approximation, freq, x, dof)
-            },
-            class.frequency, dof, env
-        ), 1, mean, na.rm=TRUE)
-
-        lrt.expected[i] <-
-            sum(p.val.test.lrt.null < alpha, na.rm=TRUE) /
-                sum(!is.na(p.val.test.lrt.null))
-        lrt.observed[i] <-
-            sum(p.val.test.lrt < alpha, na.rm=TRUE) /
-                sum(!is.na(p.val.test.lrt))
-
-        lrt.signif[i] <-
-            1 - ptnorm(lrt.observed[i],
-                mu=lrt.expected[i], sd=sqrt(
-                    lrt.expected[i] * (1 - lrt.expected[i]) / testSize
-                ),
-                alpha=alpha
-            )
-
-        rejection$results$lrt.pvalue.test[idx.runs] <- p.val.test.lrt
-        rejection$results$lrt.pvalue.null[idx.runs] <- p.val.test.lrt.null
-
-        if (exists(x="exact.observed")) {
-            exact.observed.res <- run.kbet.exact.observed(
-              adapt, is.imbalanced, env, new.class.frequency, batch, 
-              batch.shuff, alpha, testSize, exact.expected, exact.observed, 
-              exact.signif, rejection, idx.runs
-            )
-            rejection <- exact.observed.res$rejection
-            exact.expected <- exact.observed.res$exact.expected
-            exact.observed <- exact.observed.res$exact.observed
-            exact.signif <- exact.observed.res$exact.signif
-        }
-    }
+    # run kBet test (with addTest)
+    kbet.addTest.res <- kbet.addTest(
+        rejection=kbet.addTest.res$rejection,
+        n_repeat=n_repeat,
+        dim.dataset=initialize.kbet.res$dim.dataset,
+        testSize=initialize.kbet.res$testSize,
+        k0=initialize.kbet.res$k0,
+        knn=initialize.kbet.res$knn,
+        is.imbalanced=initialize.kbet.res$is.imbalanced,
+        class.frequency=initialize.kbet.res$class.frequency,
+        new.class.frequency=initialize.kbet.res$new.class.frequency,
+        dof=initialize.kbet.res$dof,
+        batch=initialize.kbet.res$batch,
+        batch.shuff=initialize.kbet.res$batch.shuff,
+        kBET.expected=initialize.kbet.res$kBET.expected,
+        kBET.observed=initialize.kbet.res$kBET.observed,
+        kBET.signif=initialize.kbet.res$kBET.signif,
+        lrt.expected=kbet.addTest.res$lrt.expected,
+        lrt.observed=kbet.addTest.res$lrt.observed,
+        lrt.signif=kbet.addTest.res$lrt.signif,
+        exact.expected=kbet.addTest.res$exact.expected,
+        exact.observed=kbet.addTest.res$exact.observed,
+        exact.signif=kbet.addTest.res$exact.signif
+    )
 
     return(list(
-        rejection=rejection, kBET.expected=kBET.expected,
-        kBET.observed=kBET.observed, kBET.signif=kBET.signif
+        rejection=kbet.addTest.res$rejection,
+        kBET.expected=kbet.addTest.res$kBET.expected,
+        kBET.observed=kbet.addTest.res$kBET.observed,
+        kBET.signif=kbet.addTest.res$kBET.signif
     ))
 }
 
@@ -695,6 +614,127 @@ initialize.kbet.addTest <- function(rejection, k0, dof, batch) {
         exact.expected=exact.expected, exact.observed=exact.observed,
         exact.signif=exact.signif
     ))
+}
+
+kbet.addTest <- function(
+    rejection, n_repeat, dim.dataset, testSize, k0, knn, is.imbalanced,
+    class.frequency, new.class.frequency, batch, dof, alpha, batch.shuff,
+    kBET.expected, kBET.observed, kBET.signif, lrt.expected, lrt.observed,
+    lrt.signif, exact.expected, exact.observed, exact.signif) {
+    for (i in seq_len(n_repeat)) {
+        idx.runs <- sample.int(dim.dataset[1], size = testSize)
+        env <- cbind(knn[idx.runs, seq_len(k0 - 1)], idx.runs)
+        perform.kbet.addTest.res <- perform.kbet.addTest(
+            env, adapt, is.imbalanced, class.frequency, new.class.frequency,
+            batch, dof, alpha, batch.shuff
+        )
+        p.val.test <- perform.kbet.addTest.res$p.val.test
+        p.val.test.null <- perform.kbet.addTest.res$p.val.test.null
+        is.rejected <- perform.kbet.addTest.res$is.rejected
+        kBET.expected[i] <- sum(p.val.test.null < alpha, na.rm = TRUE) /
+            sum(!is.na(p.val.test.null))
+        kBET.observed[i] <- sum(is.rejected, na.rm = TRUE) / 
+            sum(!is.na(p.val.test))
+        kBET.signif[i] <- 1 - ptnorm(
+            kBET.observed[i], mu = kBET.expected[i],
+            sd = sqrt(kBET.expected[i] * (1 - kBET.expected[i]) / testSize),
+            alpha = alpha
+        )
+        rejection$results$tested[idx.runs] <- 1
+        rejection$results$kBET.pvalue.test[idx.runs] <- p.val.test
+        rejection$results$kBET.pvalue.null[idx.runs] <- p.val.test.null
+        rejection <- compute.LRT(
+            rejection, lrt.expected, lrt.observed, lrt.signif, adapt,
+            is.imbalanced, class.frequency, new.class.frequency, batch, dof,
+            batch.shuff, env, alpha
+        )
+        if (exists(x = "exact.observed")) {
+            exact.observed.res <- run.kbet.exact.observed(
+                adapt, is.imbalanced, env, new.class.frequency, batch,
+                batch.shuff, alpha, testSize, exact.expected, exact.observed,
+                exact.signif, rejection, idx.runs
+            )
+            rejection <- exact.observed.res$rejection
+            exact.expected <- exact.observed.res$exact.expected
+            exact.observed <- exact.observed.res$exact.observed
+            exact.signif <- exact.observed.res$exact.signif
+        }
+    }
+    return(
+        rejection = rejection, kBET.expected = kBET.expected,
+        kBET.observed = kBET.observed, kBET.signif = kBET.signif
+    )
+}
+
+perform.kbet.addTest <- function(
+    env, adapt, is.imbalanced, class.frequency, new.class.frequency, batch, dof,
+    alpha, batch.shuff) {
+
+    # perform test
+    if (adapt && is.imbalanced) {
+        p.val.test <- apply(env, 1,
+            FUN = chi_batch_test,
+            new.class.frequency, batch, dof
+            )
+    } else {
+        p.val.test <- apply(env, 1,
+            FUN = chi_batch_test,
+            class.frequency, batch, dof
+        )
+    }
+
+    is.rejected <- p.val.test < alpha
+
+    p.val.test.null <- apply(apply(
+        batch.shuff, 2,
+        function(x, freq, dof, envir) {
+            apply(envir, 1, FUN = chi_batch_test, freq, x, dof)
+        },
+        class.frequency, dof, env
+    ), 1, mean, na.rm = TRUE)
+    
+    return(p.val.test=p.val.test, p.val.test.null=p.val.test.null)
+}
+
+compute.LRT <- function(
+    rejection, lrt.expected, lrt.observed, lrt.signif, adapt, is.imbalanced, 
+    class.frequency, new.class.frequency, batch, dof, batch.shuff, env, alpha) {
+
+    cf <- if (adapt && is.imbalanced) {
+        new.class.frequency
+    } else {
+        class.frequency
+    }
+    p.val.test.lrt <- apply(env, 1,
+        FUN = lrt_approximation, cf, batch, dof
+    )
+    p.val.test.lrt.null <- apply(apply(
+        batch.shuff, 2,
+        function(x, freq, dof, envir) {
+            apply(envir, 1, FUN = lrt_approximation, freq, x, dof)
+        },
+        class.frequency, dof, env
+    ), 1, mean, na.rm = TRUE)
+
+    lrt.expected[i] <-
+        sum(p.val.test.lrt.null < alpha, na.rm = TRUE) /
+            sum(!is.na(p.val.test.lrt.null))
+    lrt.observed[i] <-
+        sum(p.val.test.lrt < alpha, na.rm = TRUE) /
+            sum(!is.na(p.val.test.lrt))
+
+    lrt.signif[i] <-
+        1 - ptnorm(lrt.observed[i],
+            mu = lrt.expected[i], sd = sqrt(
+                lrt.expected[i] * (1 - lrt.expected[i]) / testSize
+            ),
+            alpha = alpha
+        )
+
+    rejection$results$lrt.pvalue.test[idx.runs] <- p.val.test.lrt
+    rejection$results$lrt.pvalue.null[idx.runs] <- p.val.test.lrt.null
+    
+    return(rejection)
 }
 
 run.kbet.exact.observed <- function(

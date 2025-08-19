@@ -96,28 +96,3 @@ Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Collate: 
-    'Normalization.R'
-    'batch_correction.R'
-    'color_palette.R'
-    'covariates_not_confounded.R'
-    'data.R'
-    'dendrogram.R'
-    'dendrogram_alpha_numeric_check.R'
-    'dendrogram_color_palette.R'
-    'differential_expression.R'
-    'explained_variation.R'
-    'global_vars.R'
-    'heatmap.R'
-    'heatmap_num_to_char_convertor.R'
-    'import.R'
-    'kBET-utils.R'
-    'kBET.R'
-    'negative_binomial_check.R'
-    'pca.R'
-    'preprocess.R'
-    'runApp.R'
-    'summary_statistics.R'
-    'umap.R'
-    'variation_ratios.R'
-    'volcano_plot.R'
