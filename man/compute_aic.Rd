@@ -8,14 +8,16 @@ model and the Voom model}
 compute_aic(se, assay_of_interest, batchind, groupind)
 }
 \arguments{
+\item{se}{SummarizedExperiment object}
+
+\item{assay_of_interest}{The assay name from se that you are interested in
+analyzing.}
+
 \item{batchind}{Factor or numeric vector of length = ncol(dat);
 batch indicator for each sample.}
 
 \item{groupind}{Factor or numeric vector of length = ncol(dat);
 biological group label/indicator for each sample.}
-
-\item{dat}{Numeric matrix of dimension (genes by samples).
-Each row represents one gene's expression across samples.}
 }
 \value{
 A list with the following two elements:
@@ -46,8 +48,10 @@ negative-binomial distribution as well as the Voom transformation.
 It then compares the AICs of the three models across different genes.
 }
 \examples{
-# expr_matrix: genes×samples; batch and group are length(samples)
-compare_aic <- compute_aic(expr_matrix, batchind, groupind)
+library(scran)
+se <- mockSCE()
+compare_aic <- compute_aic(se, assay_of_interest = "counts",
+                            batchind = "Cell_Cycle", groupind = "Treatment")
 print(compare_aic["total_AIC"])
 print(compare_aic["min_AIC"])
 
