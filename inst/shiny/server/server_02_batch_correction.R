@@ -59,6 +59,35 @@ observeEvent(input$nb_check, {
     })
 })
 
+## Run AIC
+
+observeEvent(input$compute_aic, {
+    req(reactivevalue$se, input$correction_assay,
+        input$aic_batch, input$aic_covar)
+    withBusyIndicatorServer("compute_aic", {
+        aic_res <- compute_aic(reactivevalue$se,
+            input$correction_assay,
+            input$aic_batch,
+            input$aic_covar)
+        output$total_aic <- renderTable({
+            total_aic_data <- aic_res[["total_AIC"]]
+
+            # Create a properly formatted data frame
+            df <- data.frame(
+                Model = c("NB_AIC", "Lognormal_AIC", "Voom_AIC"),
+                AIC_Value = round(as.numeric(total_aic_data), 3),
+                stringsAsFactors = FALSE
+            )
+            return(df)
+        }, rownames = FALSE)
+
+        output$min_aic <- renderTable({
+            min_aic_data <- aic_res[["min_AIC"]]
+            return(min_aic_data)
+        }, rownames = FALSE)
+    })
+})
+
 ## Run batch effect correction
 observeEvent(input$correct, {
     req(input$correction_assay, input$correction_batch, input$correction_method)

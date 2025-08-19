@@ -61,6 +61,36 @@ tabPanel('Batch Correction/Normalization',
                     textOutput('reference'),
                     br()
                 ),
+                tabPanel("AIC Computation",
+                    h4(strong("Usage")),
+                    h5("This feature allows you to compute the AIC for lognormal (ComBat) model, negative binomial (ComBat-seq) model, and the Voom model"),
+                    selectizeInput('aic_batch',
+                        'Select the varaible (factor or numeric vector) that represents batch',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                                onInitialize = I(
+                                    'function() { this.setValue(""); }'
+                                ))),
+                    selectizeInput('aic_covar',
+                        'Select the variable(s) (factor or numeric vector) you would like to include as covariates',
+                        multiple = TRUE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                            'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }'
+                            ))),
+                    actionButton(inputId = 'compute_aic', label = 'Compute AIC'),
+                    br(),
+                    h5("total_AIC: The sum of AICs across all genes for the three models in comparison."),
+                    tableOutput('total_aic'),
+                    h5("min_AIC: The number of minimum AIC across the three models in comparison for individual genes."),
+                    tableOutput('min_aic')
+                ),
                 tabPanel('Batch Correction',
                     h4(strong("Usage")),
                     conditionalPanel(condition = "input.correction_method == 'ComBat-Seq'",
