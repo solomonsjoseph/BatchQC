@@ -1,3 +1,4 @@
+globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' Compute the AIC for lognormal (ComBat) model, negative binomial (ComBat-seq)
 #' model and the Voom model
 #'
@@ -5,8 +6,9 @@
 #' negative-binomial distribution as well as the Voom transformation.
 #' It then compares the AICs of the three models across different genes.
 #'
-#' @param dat Numeric matrix of dimension (genes by samples).
-#' Each row represents one gene's expression across samples.
+#' @param se SummarizedExperiment object
+#' @param assay_of_interest The assay name from se that you are interested in
+#' analyzing.
 #' @param batchind Factor or numeric vector of length = ncol(dat);
 #' batch indicator for each sample.
 #' @param groupind Factor or numeric vector of length = ncol(dat);
@@ -34,12 +36,16 @@
 #'     comparison for individual genes.}
 #'   }
 #' @examples
-#' # expr_matrix: genes×samples; batch and group are length(samples)
-#' compare_aic <- compute_aic(expr_matrix, batchind, groupind)
+#' library(scran)
+#' se <- mockSCE()
+#' compare_aic <- compute_aic(se, assay_of_interest = "counts",
+#'                             batchind = "Cell_Cycle", groupind = "Treatment")
 #' print(compare_aic["total_AIC"])
 #' print(compare_aic["min_AIC"])
 #'
 #' @importFrom limma voom
+#' @importFrom stats AIC gaussian glm
+#' @importFrom MASS glm.nb
 #' @import SummarizedExperiment
 #' @export
 compute_aic <- function(se, assay_of_interest, batchind, groupind) {
