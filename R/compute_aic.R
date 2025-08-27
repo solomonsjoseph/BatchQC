@@ -48,7 +48,8 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' @importFrom MASS glm.nb
 #' @import SummarizedExperiment
 #' @export
-compute_aic <- function(se, assay_of_interest, batchind, groupind) {
+compute_aic <- function(se, assay_of_interest, batchind,
+                        groupind, maxit = 1000) {
     dat <- assays(se)[[assay_of_interest]]
     batchind <- as.factor(colData(se)[[batchind]])
     groupind <- as.factor(colData(se)[[groupind]])
@@ -56,7 +57,7 @@ compute_aic <- function(se, assay_of_interest, batchind, groupind) {
     nb_result <- apply(dat, 1, function(x) {
         tryCatch(
             {
-                nb_model <- glm.nb(x ~ 1)
+                nb_model <- glm.nb(x ~ 1, control = glm.control(maxit = maxit))
                 nb_AIC <- AIC(nb_model)
                 return(nb_AIC)
             },
