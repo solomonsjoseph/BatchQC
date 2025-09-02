@@ -61,20 +61,20 @@
 #'
 #' @export
 run_kBET <- function(
-    se, assay_to_normalize, batch, k0=NULL, knn=NULL,
-    testSize=NULL, do.pca=TRUE, dim.pca=50, heuristic=TRUE,
-    n_repeat=100, alpha=0.05, addTest=FALSE, verbose=FALSE,
-    adapt=TRUE) {
+    se, assay_to_normalize, batch, k0 = NULL, knn = NULL,
+    testSize = NULL, do.pca = TRUE, dim.pca = 50, heuristic = TRUE,
+    n_repeat = 100, alpha = 0.05, addTest = FALSE, verbose = FALSE,
+    adapt = TRUE) {
     # run kBET
     batch.estimate <- kBET(
-        df=as.matrix(assays(se)[[assay_to_normalize]]),
-        batch=data.frame(colData(se))[, batch],
-        k0=k0, knn=knn,
-        testSize=testSize, do.pca=do.pca,
-        dim.pca=dim.pca, heuristic=heuristic,
-        n_repeat=n_repeat, alpha=alpha,
-        addTest=addTest, verbose=verbose,
-        plot=FALSE, adapt=adapt
+        df = as.matrix(assays(se)[[assay_to_normalize]]),
+        batch = data.frame(colData(se))[, batch],
+        k0 = k0, knn = knn,
+        testSize = testSize, do.pca = do.pca,
+        dim.pca = dim.pca, heuristic = heuristic,
+        n_repeat = n_repeat, alpha = alpha,
+        addTest = addTest, verbose = verbose,
+        plot = FALSE, adapt = adapt
     )
 
     return(batch.estimate)
@@ -153,9 +153,9 @@ run_kBET <- function(
 #' @name kBET
 #' @export
 kBET <- function(
-    df, batch, k0=NULL, knn=NULL, testSize=NULL, do.pca=TRUE,
-    dim.pca=50, heuristic=TRUE, n_repeat=100, alpha=0.05,
-    addTest=FALSE, verbose=FALSE, plot=TRUE, adapt=TRUE) {
+    df, batch, k0 = NULL, knn = NULL, testSize = NULL, do.pca = TRUE,
+    dim.pca = 50, heuristic = TRUE, n_repeat = 100, alpha = 0.05,
+    addTest = FALSE, verbose = FALSE, plot = TRUE, adapt = TRUE) {
     # preliminaries:
     initialize.kbet.res <- initialize.kbet(
         df, batch, k0, knn, testSize, do.pca, dim.pca, heuristic, n_repeat, 
@@ -185,9 +185,9 @@ kBET <- function(
     }
     # collect parameters
     rejection$params <- list(
-        k0=k0, testSize=testSize, do.pca=do.pca, dim.pca=dim.pca, 
-        heuristic=heuristic, n_repeat=n_repeat, alpha=alpha,
-        addTest=addTest, verbose=verbose, plot=plot
+        k0 = k0, testSize = testSize, do.pca = do.pca, dim.pca = dim.pca, 
+        heuristic = heuristic, n_repeat = n_repeat, alpha = alpha,
+        addTest = addTest, verbose = verbose, plot = plot
     )
     # add outsiders
     if (adapt) {

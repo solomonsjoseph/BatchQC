@@ -2,9 +2,9 @@
 # a wrapper for kBET to fix a neighbourhood size
 scan_nb <- function(x, df, batch, knn) {
     res <- kBET(
-        df=df, batch=batch, k0=x, knn=knn, testSize=NULL,
-        heuristic=FALSE, n_repeat=10, alpha=0.05,
-        addTest=FALSE, plot=FALSE, verbose=FALSE, adapt=FALSE
+        df = df, batch = batch, k0=x, knn = knn, testSize = NULL,
+        heuristic = FALSE, n_repeat = 10, alpha = 0.05,
+        addTest = FALSE, plot = FALSE, verbose = FALSE, adapt = FALSE
     )
     result <- res$summary
     result$kBET.observed[1]
@@ -110,7 +110,7 @@ lrt_approximation <- function(knn.set, class.freq, batch, df) {
 }
 
 # truncated normal distribution distribution function
-ptnorm <- function(x, mu, sd, a=0, b=1, alpha=0.05, verbose=FALSE) {
+ptnorm <- function(x, mu, sd, a = 0, b = 1, alpha = 0.05, verbose = FALSE) {
     # this is the cumulative density of the truncated normal distribution
     # x ~ N(mu, sd^2), but we condition on a <= x <= b
     if (!is.na(x)) {
@@ -150,7 +150,7 @@ findVectors <- function(groups, size) {
     if (groups == 1) {
         mat <- size
     } else {
-        mat <- matrix(rep(0, groups - 1), nrow=1)
+        mat <- matrix(rep(0, groups - 1), nrow = 1)
         for (i in seq_len(size)) {
             mat <- rbind(mat, findVectors(groups - 1, i))
         }
@@ -172,18 +172,18 @@ findVectors <- function(groups, size) {
 ExactMultinomialTest <- function(
     observed, prob, size,
     groups, numEvents, verbose) {
-    pObs <- stats::dmultinom(observed, size=size, prob)
+    pObs <- stats::dmultinom(observed, size = size, prob)
     eventMat <- findVectors(groups, size)
     if (nrow(eventMat) != numEvents) {
         stop("Wrong number of events calculated. \n This is probably a bug.")
     }
     eventProb <- apply(eventMat, 1, function(x) {
         dmultinom(x,
-            size=size, prob=prob
+            size = size, prob = prob
         )
     })
     p.value <- sum(eventProb[eventProb <= pObs])
-    if (round(sum(eventProb), digits=2) != 1) {
+    if (round(sum(eventProb), digits = 2) != 1) {
         stop("Wrong values for probabilities. \n This is probably a bug.")
     }
 
@@ -191,20 +191,20 @@ ExactMultinomialTest <- function(
     if (verbose) {
         head <- paste("\n Exact Multinomial Test, distance measure: p\n\n")
         tab <- as.data.frame(cbind(
-            numEvents, round(pObs, digits=4),
-            round(p.value, digits=4)
+            numEvents, round(pObs, digits = 4),
+            round(p.value, digits = 4)
         ))
         colnames(tab) <- c("   Events", "   pObs", "   p.value")
         cat(head)
-        print(tab, row.names=FALSE)
+        print(tab, row.names = FALSE)
     }
 
     invisible(list(
-        id="Exact Multinomial Test", size=size,
-        groups=groups, stat="lowP", allProb=sort(eventProb,
-            decreasing=TRUE
-        ), ntrial=NULL, p.value=round(p.value,
-            digits=4
+        id = "Exact Multinomial Test", size = size,
+        groups = groups, stat = "lowP", allProb = sort(eventProb,
+            decreasing = TRUE
+        ), ntrial = NULL, p.value = round(p.value,
+            digits = 4
         )
     ))
 }
@@ -212,21 +212,21 @@ ExactMultinomialTest <- function(
 # from EMT package (function needed to run ExactMultinomialTest)
 
 multinomial.test <- function(
-    observed, prob, useChisq=FALSE,
-    MonteCarlo=FALSE, ntrial=1e+05, atOnce=1e+06, verbose=FALSE) {
-    if (!is.vector(observed, mode="numeric")) {
+    observed, prob, useChisq = FALSE,
+    MonteCarlo = FALSE, ntrial = 1e+05, atOnce = 1e+06, verbose = FALSE) {
+    if (!is.vector(observed, mode = "numeric")) {
         stop(
             " Observations have to be stored in a vector, ",
             "e.g.  'observed <- c(5,2,1)'"
         )
     }
-    if (!is.vector(prob, mode="numeric")) {
+    if (!is.vector(prob, mode = "numeric")) {
         stop(
             " Probabilities have to be stored in a vector, ",
             "e.g.  'prob <- c(0.25, 0.5, 0.25)'"
         )
     }
-    if (round(sum(prob), digits=1) != 1) {
+    if (round(sum(prob), digits = 1) != 1) {
         stop("Wrong input: sum of probabilities must not deviate from 1.")
     }
     if (length(observed) != length(prob)) {
@@ -260,7 +260,7 @@ correlate.fun_two <- function(rot.data, batch, batch.levels) {
     result[2] <- summary(a)$coefficients[2, 4] # p-value (significance level)
     t.test.result <- t.test(rot.data[batch == batch.levels[1]],
         rot.data[batch == batch.levels[2]],
-        paired=FALSE
+        paired = FALSE
     )
     result[3] <- t.test.result$p.value
     result
@@ -287,13 +287,13 @@ correlate.fun_gen <- function(rot.data, batch) {
 
 initialize.kbet <- function(
     df, batch, k0, knn, testSize, do.pca, dim.pca, heuristic, n_repeat, 
-    alpha=0.05, addTest, verbose, adapt) {
+    alpha = 0.05, addTest, verbose, adapt) {
     dof <- length(unique(batch)) - 1 # degrees of freedom
     if (is.factor(batch)) batch <- droplevels(batch)
     frequencies <- table(batch) / length(batch)
     batch.shuff <- replicate(3, batch[sample.int(length(batch))])
     class.frequency <- data.frame(
-        class=names(frequencies), freq=as.numeric(frequencies))
+        class = names(frequencies), freq = as.numeric(frequencies))
     inputs <- validate.inputs(df, batch, verbose)
     if (!inputs$valid) return(NA)
     stopifnot(is(n_repeat, "numeric"), n_repeat > 0)
@@ -327,13 +327,13 @@ initialize.kbet <- function(
     score <- k0 * residual_score_batch(env, cf, batch)
     rejection$average.pval <- 1 - pchisq(score, dof)
     return(list(
-        dim.dataset=inputs$dim.dataset, testSize=testSize, k0=k0,
-        is.imbalanced=is.imbalanced, batch=inputs$batch, knn=knn,
-        new.class.frequency=new.class.frequency, outsider=outsider,
-        class.frequency=class.frequency, batch.shuff=batch.shuff,
-        kBET.expected=numeric(n_repeat), kBET.observed=numeric(n_repeat),
-        kBET.signif=numeric(n_repeat), rejection=rejection, dof=dof,
-        p.out=p.out))
+        dim.dataset = inputs$dim.dataset, testSize = testSize, k0=k0,
+        is.imbalanced = is.imbalanced, batch = inputs$batch, knn = knn,
+        new.class.frequency = new.class.frequency, outsider = outsider,
+        class.frequency = class.frequency, batch.shuff = batch.shuff,
+        kBET.expected = numeric(n_repeat), kBET.observed = numeric(n_repeat),
+        kBET.signif = numeric(n_repeat), rejection = rejection, dof = dof,
+        p.out = p.out))
 }
 
 validate.inputs <- function(df, batch, verbose) {
@@ -343,7 +343,7 @@ validate.inputs <- function(df, batch, verbose) {
         msg <- paste(
             "Input matrix and batch information do not match.",
             "Execution halted.",
-            sep=" "
+            sep = " "
         )
         stop(msg)
     }
@@ -364,10 +364,10 @@ validate.inputs <- function(df, batch, verbose) {
         if (verbose) {
             cat("Your dataset has less than 10 samples. Abort and return NA.\n")
         }
-        return(list(valid=FALSE))
+        return(list(valid = FALSE))
     }
 
-    list(dataset=df, batch=batch, dim.dataset=dim.dataset, valid=TRUE)
+    list(dataset = df, batch = batch, dim.dataset = dim.dataset, valid = TRUE)
 }
 
 determine.k0 <- function(k0, heuristic, class.freq, knn, dim.dataset, verbose) {
@@ -385,13 +385,13 @@ determine.k0 <- function(k0, heuristic, class.freq, knn, dim.dataset, verbose) {
             warning(
                 "Your dataset has too few samples to run a heuristic.\n",
                 "Return NA.\n",
-                "Please assign k0 and set heuristic=FALSE."
+                "Please assign k0 and set heuristic = FALSE."
             )
         }
         return(NA)
     }
 
-    list(k0=k0, do_heuristic=do_heuristic)
+    list(k0 = k0, do_heuristic = do_heuristic)
 }
 
 find.knn <- function(dataset, do.pca, k0, verbose, dim.pca, dim.dataset) {
@@ -402,18 +402,18 @@ find.knn <- function(dataset, do.pca, k0, verbose, dim.pca, dim.dataset) {
         }
         # use the nearest neighbour index directly for further use in the
         # package
-        knn <- get.knn(dataset, k=k0, algorithm="cover_tree")$nn.index
+        knn <- get.knn(dataset, k = k0, algorithm = "cover_tree")$nn.index
     } else {
         dim.comp <- min(dim.pca, dim.dataset[2])
         if (verbose) {
             cat("reducing dimensions with svd first...\n")
         }
-        data.pca <- svd(x=dataset, nu=dim.comp, nv=0)
+        data.pca <- svd(x = dataset, nu = dim.comp, nv = 0)
         if (verbose) {
             cat("finding knns...")
             tic <- proc.time()
         }
-        knn <- get.knn(data.pca$u, k=k0, algorithm="cover_tree")
+        knn <- get.knn(data.pca$u, k = k0, algorithm = "cover_tree")
     }
     if (verbose) {
         cat("done. Time:\n")
@@ -434,12 +434,12 @@ knn.graph.backward.compatibility <- function(knn, verbose){
 }
 
 set.number.tests <- function(testSize, dim.dataset, verbose){
-    if (is.null(testSize) || (floor(testSize)<1 || dim.dataset[1]<testSize)) {
+    if (is.null(testSize) || (floor(testSize) < 1 || dim.dataset[1]<testSize)) {
         test.frac <- 0.1
         testSize <- ceiling(dim.dataset[1] * test.frac)
         if (testSize < 25 && dim.dataset[1] > 25) { testSize <- 25 }
         if (verbose) {
-            cat("Number of kBET tests is set to ", testSize, ".\n", sep="")
+            cat("Number of kBET tests is set to ", testSize, ".\n", sep = "")
         }
     }
     
@@ -448,13 +448,13 @@ set.number.tests <- function(testSize, dim.dataset, verbose){
 
 initialize.result.list <- function(dim.dataset){
     rejection <- list()
-    rejection$summary <- data.frame(kBET.expected=numeric(4),
-                                    kBET.observed=numeric(4),
-                                    kBET.signif=numeric(4))
+    rejection$summary <- data.frame(kBET.expected = numeric(4),
+                                    kBET.observed = numeric(4),
+                                    kBET.signif = numeric(4))
     
-    rejection$results <- data.frame(tested=numeric(dim.dataset[1]),
-                                    kBET.pvalue.test=rep(0, dim.dataset[1]),
-                                    kBET.pvalue.null=rep(0, dim.dataset[1]))
+    rejection$results <- data.frame(tested = numeric(dim.dataset[1]),
+                                    kBET.pvalue.test = rep(0, dim.dataset[1]),
+                                    kBET.pvalue.null = rep(0, dim.dataset[1]))
     
     return(rejection)
 }
@@ -473,8 +473,8 @@ adapt.freq <- function(
                 new.frequencies <- table(batch[-outsider]) /
                     length(batch[-outsider])
                 new.class.frequency <- data.frame(
-                    class=names(new.frequencies),
-                    freq=as.numeric(new.frequencies)
+                    class = names(new.frequencies),
+                    freq = as.numeric(new.frequencies)
                 )
                 if (verbose) {
                     percent <- length(outsider) / length(batch)
@@ -492,7 +492,7 @@ adapt.freq <- function(
                             "have been adapted."
                         ),
                         "Cell indexes are saved to result list.",
-                        "", sep="\n"
+                        "", sep = "\n"
                     ))
                 }
             } else {
@@ -503,8 +503,8 @@ adapt.freq <- function(
         }
     }
     return(list(
-        is.imbalanced=is.imbalanced, outsider=outsider, p.out=p.out,
-        new.class.frequency=new.class.frequency
+        is.imbalanced = is.imbalanced, outsider = outsider, p.out = p.out,
+        new.class.frequency = new.class.frequency
     ))
 }
 
@@ -513,7 +513,7 @@ calculate.nb.size <- function(scan_nb, k0, dataset, batch, knn, verbose) {
         cat("Determining optimal neighbourhood size ...")
     }
     opt.k <- bisect(scan_nb,
-        bounds=c(10, k0), known=NULL, dataset, batch,
+        bounds = c(10, k0), known = NULL, dataset, batch,
         knn
     )
     # result
@@ -535,7 +535,7 @@ calculate.nb.size <- function(scan_nb, k0, dataset, batch, knn, verbose) {
                     k0
                 ),
                 "",
-                sep="\n"
+                sep = "\n"
             ))
         }
     }
@@ -546,41 +546,41 @@ run.kbet.addTest <- function(initialize.kbet.res, adapt, alpha, n_repeat) {
 
     # initialize result list
     kbet.addTest.res <- initialize.kbet.addTest(
-        rejection=initialize.kbet.res$rejection,
-        k0=initialize.kbet.res$k0,
-        dof=initialize.kbet.res$dof,
-        batch=initialize.kbet.res$batch)
+        rejection = initialize.kbet.res$rejection,
+        k0 = initialize.kbet.res$k0,
+        dof = initialize.kbet.res$dof,
+        batch = initialize.kbet.res$batch)
 
     # run kBet test (with addTest)
     kbet.addTest.res <- kbet.addTest(
-        rejection=kbet.addTest.res$rejection,
-        n_repeat=n_repeat,
-        dim.dataset=initialize.kbet.res$dim.dataset,
-        testSize=initialize.kbet.res$testSize,
-        k0=initialize.kbet.res$k0,
-        knn=initialize.kbet.res$knn,
-        is.imbalanced=initialize.kbet.res$is.imbalanced,
-        class.frequency=initialize.kbet.res$class.frequency,
-        new.class.frequency=initialize.kbet.res$new.class.frequency,
-        dof=initialize.kbet.res$dof,
-        batch=initialize.kbet.res$batch,
-        batch.shuff=initialize.kbet.res$batch.shuff,
-        kBET.expected=initialize.kbet.res$kBET.expected,
-        kBET.observed=initialize.kbet.res$kBET.observed,
-        kBET.signif=initialize.kbet.res$kBET.signif,
-        lrt.expected=kbet.addTest.res$lrt.expected,
-        lrt.observed=kbet.addTest.res$lrt.observed,
-        lrt.signif=kbet.addTest.res$lrt.signif,
-        exact.expected=kbet.addTest.res$exact.expected,
-        exact.observed=kbet.addTest.res$exact.observed,
-        exact.signif=kbet.addTest.res$exact.signif
+        rejection = kbet.addTest.res$rejection,
+        n_repeat = n_repeat,
+        dim.dataset = initialize.kbet.res$dim.dataset,
+        testSize = initialize.kbet.res$testSize,
+        k0 = initialize.kbet.res$k0,
+        knn = initialize.kbet.res$knn,
+        is.imbalanced = initialize.kbet.res$is.imbalanced,
+        class.frequency = initialize.kbet.res$class.frequency,
+        new.class.frequency = initialize.kbet.res$new.class.frequency,
+        dof = initialize.kbet.res$dof,
+        batch = initialize.kbet.res$batch,
+        batch.shuff = initialize.kbet.res$batch.shuff,
+        kBET.expected = initialize.kbet.res$kBET.expected,
+        kBET.observed = initialize.kbet.res$kBET.observed,
+        kBET.signif = initialize.kbet.res$kBET.signif,
+        lrt.expected = kbet.addTest.res$lrt.expected,
+        lrt.observed = kbet.addTest.res$lrt.observed,
+        lrt.signif = kbet.addTest.res$lrt.signif,
+        exact.expected = kbet.addTest.res$exact.expected,
+        exact.observed = kbet.addTest.res$exact.observed,
+        exact.signif = kbet.addTest.res$exact.signif
     )
 
     return(list(
-        rejection=kbet.addTest.res$rejection,
-        kBET.expected=kbet.addTest.res$kBET.expected,
-        kBET.observed=kbet.addTest.res$kBET.observed,
-        kBET.signif=kbet.addTest.res$kBET.signif
+        rejection = kbet.addTest.res$rejection,
+        kBET.expected = kbet.addTest.res$kBET.expected,
+        kBET.observed = kbet.addTest.res$kBET.observed,
+        kBET.signif = kbet.addTest.res$kBET.signif
     ))
 }
 
@@ -609,10 +609,10 @@ initialize.kbet.addTest <- function(rejection, k0, dof, batch) {
     }
 
     return(list(
-        rejection=rejection, lrt.expected=lrt.expected,
-        lrt.observed=lrt.observed, lrt.signif=lrt.signif,
-        exact.expected=exact.expected, exact.observed=exact.observed,
-        exact.signif=exact.signif
+        rejection = rejection, lrt.expected = lrt.expected,
+        lrt.observed = lrt.observed, lrt.signif = lrt.signif,
+        exact.expected = exact.expected, exact.observed = exact.observed,
+        exact.signif = exact.signif
     ))
 }
 
@@ -693,7 +693,7 @@ perform.kbet.addTest <- function(
         class.frequency, dof, env
     ), 1, mean, na.rm = TRUE)
     
-    return(p.val.test=p.val.test, p.val.test.null=p.val.test.null)
+    return(p.val.test = p.val.test, p.val.test.null = p.val.test.null)
 }
 
 compute.LRT <- function(
@@ -776,8 +776,8 @@ run.kbet.exact.observed <- function(
     rejection$results$exact.pvalue.null[idx.runs] <- p.val.test.exact.null
     
     return(list(
-        rejection=rejection, exact.expected=exact.expected,
-        exact.observed=exact.observed, exact.signif=exact.signif))
+        rejection = rejection, exact.expected = exact.expected,
+        exact.observed = exact.observed, exact.signif = exact.signif))
 }
 
 run.kbet.only <- function(initialize.kbet.res, adapt, alpha, n_repeat) {
@@ -794,7 +794,7 @@ run.kbet.only <- function(initialize.kbet.res, adapt, alpha, n_repeat) {
     kBET.signif <- initialize.kbet.res$kBET.signif
     for (i in seq_len(n_repeat)) {
         # choose a random sample from dataset
-        idx.runs <- sample.int(dim.dataset[1], size=testSize)
+        idx.runs <- sample.int(dim.dataset[1], size = testSize)
         env <- cbind(knn[idx.runs, seq_len(k0 - 1)], idx.runs)
         # perform test
         kbet.res <- perform.kbet.test(
@@ -806,28 +806,28 @@ run.kbet.only <- function(initialize.kbet.res, adapt, alpha, n_repeat) {
         # summarise test results
         kBET.expected[i] <- mean(apply(
             kbet.res$p.val.test.null, 2,
-            function(x) sum(x < alpha, na.rm=TRUE) / sum(!is.na(x))
+            function(x) sum(x < alpha, na.rm = TRUE) / sum(!is.na(x))
         ))
-        kBET.observed[i] <- sum(kbet.res$is.rejected, na.rm=TRUE) /
+        kBET.observed[i] <- sum(kbet.res$is.rejected, na.rm = TRUE) /
             sum(!is.na(kbet.res$p.val.test))
         # compute significance
         kBET.signif[i] <- 1 - ptnorm(
             kBET.observed[i],
-            mu=kBET.expected[i],
-            sd=sqrt(kBET.expected[i] * (1 - kBET.expected[i]) / testSize),
-            alpha=alpha
+            mu = kBET.expected[i],
+            sd = sqrt(kBET.expected[i] * (1 - kBET.expected[i]) / testSize),
+            alpha = alpha
         )
         # assign results to result table
         rejection$results$tested[idx.runs] <- 1
         rejection$results$kBET.pvalue.test[idx.runs] <- kbet.res$p.val.test
         rejection$results$kBET.pvalue.null[idx.runs] <- rowMeans(
             kbet.res$p.val.test.null,
-            na.rm=TRUE
+            na.rm = TRUE
         )
     }
     return(list(
-        rejection=rejection, kBET.expected=kBET.expected,
-        kBET.observed=kBET.observed, kBET.signif=kBET.signif
+        rejection = rejection, kBET.expected = kBET.expected,
+        kBET.observed = kBET.observed, kBET.signif = kBET.signif
     ))
 }
 
@@ -851,19 +851,19 @@ perform.kbet.test <- function(
         }
     )
     return(list(
-        p.val.test=p.val.test, p.val.test.null=p.val.test.null,
-        is.rejected=is.rejected
+        p.val.test = p.val.test, p.val.test.null = p.val.test.null,
+        is.rejected = is.rejected
     ))
 }
 
 mean_ci <- function(x, probs) {
-    c(Mean=mean(x, na.rm=TRUE), quantile(x, probs, na.rm=TRUE))
+    c(Mean = mean(x, na.rm = TRUE), quantile(x, probs, na.rm = TRUE))
 }
 
 summarize.kbet.results <- function(
-    rejection, kBET.expected, kBET.observed, kBET.signif, lrt.expected=NULL,
-    lrt.observed=NULL, lrt.signif=NULL, exact.observed=NULL,
-    exact.expected=NULL, exact.signif=NULL, n_repeat=1, addTest=FALSE) {
+    rejection, kBET.expected, kBET.observed, kBET.signif, lrt.expected = NULL,
+    lrt.observed = NULL, lrt.signif = NULL, exact.observed = NULL,
+    exact.expected = NULL, exact.signif = NULL, n_repeat = 1, addTest = FALSE) {
     if (n_repeat > 1) {
         # summarize chi2-results
         CI95 <- c(0.025, 0.5, 0.975)
@@ -912,42 +912,42 @@ summarize.kbet.results <- function(
 }
 
 plot.kbet <- function(
-    kBET.observed, kBET.expected, lrt.observed=NULL, lrt.expected=NULL, 
-    exact.observed=NULL, exact.expected=NULL, n_repeat) {
+    kBET.observed, kBET.expected, lrt.observed = NULL, lrt.expected = NULL, 
+    exact.observed = NULL, exact.expected = NULL, n_repeat) {
     if (!is.null(exact.observed)) {
         plot.data <- data.frame(
-            class=rep(c(
+            class = rep(c(
                 "kBET", "kBET (random)", "lrt", "lrt (random)",
                 "exact", "exact (random)"
-            ), each=n_repeat),
-            data=c(
+            ), each = n_repeat),
+            data = c(
                 kBET.observed, kBET.expected, lrt.observed,
                 lrt.expected, exact.observed, exact.expected
             )
         )
     } else if (!is.null(lrt.observed)) {
         plot.data <- data.frame(
-            class=rep(c("kBET", "kBET (random)", "lrt", "lrt (random)"),
-                each=n_repeat
+            class = rep(c("kBET", "kBET (random)", "lrt", "lrt (random)"),
+                each = n_repeat
             ),
-            data=c(
+            data = c(
                 kBET.observed, kBET.expected, lrt.observed,
                 lrt.expected
             )
         )
     } else {
         plot.data <- data.frame(
-            class=rep(c("observed(kBET)", "expected(random)"), each=n_repeat),
-            data=c(kBET.observed, kBET.expected)
+            class = rep(c("observed(kBET)", "expected(random)"), each = n_repeat),
+            data = c(kBET.observed, kBET.expected)
         )
     }
 
     g <- ggplot(plot.data, aes(class, data)) +
         geom_boxplot() +
         theme_bw() +
-        labs(x="Test", y="Rejection rate") +
-        theme(axis.text.x=element_text(angle=45, hjust=1)) +
-        scale_y_continuous(limits=c(0, 1))
+        labs(x = "Test", y = "Rejection rate") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+        scale_y_continuous(limits = c(0, 1))
 
     print(g)
 }
