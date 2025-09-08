@@ -63,12 +63,13 @@ observeEvent(input$nb_check, {
 
 observeEvent(input$compute_aic, {
     req(reactivevalue$se, input$correction_assay,
-        input$aic_batch, input$aic_covar)
+        input$aic_batch, input$aic_covar, input$aic_nb_maxit)
     withBusyIndicatorServer("compute_aic", {
         aic_res <- compute_aic(reactivevalue$se,
             input$correction_assay,
             input$aic_batch,
-            input$aic_covar)
+            input$aic_covar,
+            input$aic_nb_maxit)
         output$total_aic <- renderTable({
             total_aic_data <- aic_res[["total_AIC"]]
 

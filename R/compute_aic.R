@@ -13,6 +13,7 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' batch indicator for each sample.
 #' @param groupind Factor or numeric vector of length = ncol(dat);
 #' biological group label/indicator for each sample.
+#' @param maxit Integer giving the maximal number of IWLS iterations.
 #'
 #' @description
 #'   \describe{
@@ -49,11 +50,11 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' @import SummarizedExperiment
 #' @export
 compute_aic <- function(se, assay_of_interest, batchind,
-                        groupind, maxit = 1000) {
+                        groupind, maxit = 25) {
     dat <- assays(se)[[assay_of_interest]]
     batchind <- as.factor(colData(se)[[batchind]])
     groupind <- as.factor(colData(se)[[groupind]])
-
+    browser()
     nb_result <- apply(dat, 1, function(x) {
         tryCatch(
             {

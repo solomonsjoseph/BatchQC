@@ -5,7 +5,7 @@
 \title{Compute the AIC for lognormal (ComBat) model, negative binomial (ComBat-seq)
 model and the Voom model}
 \usage{
-compute_aic(se, assay_of_interest, batchind, groupind)
+compute_aic(se, assay_of_interest, batchind, groupind, maxit = 1000)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
