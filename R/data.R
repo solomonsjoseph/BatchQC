@@ -160,7 +160,7 @@ tb_data_upload <- function() {
 
     all_data <- merge(batch1_data, batch2_data, by = 0)
     rownames(all_data) <- all_data$Row.names
-    all_data <- all_data %>% select(-1) %>% as.matrix()
+    all_data <- all_data %>% select(-1) %>% as.matrix() %>% round()
     all_metadata <- rbind(batch1_metadata, batch2_metadata)
 
     se <- summarized_experiment(all_data, all_metadata)
