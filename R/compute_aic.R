@@ -50,22 +50,23 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' @import SummarizedExperiment
 #' @export
 compute_aic <- function(se, assay_of_interest, batchind,
-                        groupind, maxit = 25) {
+                        groupind, maxit = 1000) {
+    browser()
     dat <- assays(se)[[assay_of_interest]]
     batchind <- as.factor(colData(se)[[batchind]])
     groupind <- as.factor(colData(se)[[groupind]])
-    browser()
+    if (!all(dat == floor(dat)) || any(dat < 0)) {
+        stop("Counts must be non-negative integers only.")
+    }
+    dat <- dat[rowSums(dat) != 0, ]
     nb_result <- apply(dat, 1, function(x) {
-        tryCatch(
-            {
-                nb_model <- glm.nb(x ~ 1, control = glm.control(maxit = maxit))
-                nb_AIC <- AIC(nb_model)
-                return(nb_AIC)
-            },
-            error = function(e) {
-                return(NA)
-            })
-    })
+        tryCatch({
+        nb_model <- glm.nb(x ~ 1, control = glm.control(maxit = maxit))
+        nb_AIC <- AIC(nb_model)
+        return(nb_AIC)
+    }, error = function(e) {
+        return(NA)
+    })})
     lognormal_result <- apply(dat, 1, function(x) {
         tryCatch({
         lognormal_model <- glm(log(x + 1e-100) ~ 1, family = gaussian)
