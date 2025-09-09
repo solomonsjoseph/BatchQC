@@ -5,19 +5,34 @@
 \title{Compute the AIC for lognormal (ComBat) model, negative binomial (ComBat-seq)
 model and the Voom model}
 \usage{
-compute_aic(se, assay_of_interest, batchind, groupind, maxit = 1000)
+compute_aic(
+  se,
+  assay_of_interest,
+  batchind,
+  groupind,
+  maxit = 25,
+  zero_filt_percent = 100
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
 
 \item{assay_of_interest}{The assay name from se that you are interested in
-analyzing.}
+analyzing. This assay need to be a counts assay containing only non-negative
+integers.}
 
 \item{batchind}{Factor or numeric vector of length = ncol(dat);
 batch indicator for each sample.}
 
 \item{groupind}{Factor or numeric vector of length = ncol(dat);
 biological group label/indicator for each sample.}
+
+\item{maxit}{Integer giving the maximal number of IWLS iterations. Default is
+25.}
+
+\item{zero_filt_percent}{Numeric value between 0 and 100, the percentage of
+zeros allowed for each gene to be included in the AIC calculation. Genes with
+more than this percentage of zeros will be filtered out. Default is 100.}
 }
 \value{
 A list with the following two elements:

@@ -1,4 +1,4 @@
-globalVariables(c(glm.nb, AIC, glm, gaussian))
+globalVariables(c(glm.nb, AIC, glm, gaussian, glm.control))
 #' Compute the AIC for lognormal (ComBat) model, negative binomial (ComBat-seq)
 #' model and the Voom model
 #'
@@ -8,12 +8,17 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #'
 #' @param se SummarizedExperiment object
 #' @param assay_of_interest The assay name from se that you are interested in
-#' analyzing.
+#' analyzing. This assay need to be a counts assay containing only non-negative
+#' integers.
 #' @param batchind Factor or numeric vector of length = ncol(dat);
 #' batch indicator for each sample.
 #' @param groupind Factor or numeric vector of length = ncol(dat);
 #' biological group label/indicator for each sample.
-#' @param maxit Integer giving the maximal number of IWLS iterations.
+#' @param maxit Integer giving the maximal number of IWLS iterations. Default is
+#' 25.
+#' @param zero_filt_percent Numeric value between 0 and 100, the percentage of
+#' zeros allowed for each gene to be included in the AIC calculation. Genes with
+#' more than this percentage of zeros will be filtered out. Default is 100.
 #'
 #' @description
 #'   \describe{
@@ -45,13 +50,12 @@ globalVariables(c(glm.nb, AIC, glm, gaussian))
 #' print(compare_aic["min_AIC"])
 #'
 #' @importFrom limma voom
-#' @importFrom stats AIC gaussian glm
+#' @importFrom stats AIC gaussian glm glm.control
 #' @importFrom MASS glm.nb
 #' @import SummarizedExperiment
 #' @export
 compute_aic <- function(se, assay_of_interest, batchind,
-                        groupind, maxit = 1000) {
-    browser()
+                        groupind, maxit = 25, zero_filt_percent = 100) {
     dat <- assays(se)[[assay_of_interest]]
     batchind <- as.factor(colData(se)[[batchind]])
     groupind <- as.factor(colData(se)[[groupind]])
@@ -59,6 +63,7 @@ compute_aic <- function(se, assay_of_interest, batchind,
         stop("Counts must be non-negative integers only.")
     }
     dat <- dat[rowSums(dat) != 0, ]
+    dat <- dat[rowSums(dat == 0) <= zero_filt_percent / 100 * ncol(dat), ]
     nb_result <- apply(dat, 1, function(x) {
         tryCatch({
         nb_model <- glm.nb(x ~ 1, control = glm.control(maxit = maxit))
