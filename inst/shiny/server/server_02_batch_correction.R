@@ -63,17 +63,17 @@ observeEvent(input$nb_check, {
 
 observeEvent(input$compute_aic, {
     req(reactivevalue$se, input$correction_assay,
-        input$aic_batch, input$aic_covar, input$aic_nb_maxit)
+        input$aic_batch, input$aic_covar, input$aic_nb_maxit,
+        input$aic_zero_filt_percent)
     withBusyIndicatorServer("compute_aic", {
         aic_res <- compute_aic(reactivevalue$se,
             input$correction_assay,
             input$aic_batch,
             input$aic_covar,
-            input$aic_nb_maxit)
+            input$aic_nb_maxit,
+            input$aic_zero_filt_percent)
         output$total_aic <- renderTable({
             total_aic_data <- aic_res[["total_AIC"]]
-
-            # Create a properly formatted data frame
             df <- data.frame(
                 Model = c("NB_AIC", "Lognormal_AIC", "Voom_AIC"),
                 AIC_Value = round(as.numeric(total_aic_data), 3),
