@@ -93,10 +93,10 @@ adapted from kBET package (https://github.com/theislab/kBET).
 the probability of a batch effect.
 }
 \examples{
-batch <- rep(seq_len(10), each = 20)
-data <- matrix(rpois(n = 50000, lambda = 10) * rbinom(50000, 1, prob = 0.5),
-    nrow = 200
-)
+library(scran)
+se <- mockSCE()
+df <- as.matrix(assays(se)[["counts"]])
+batch <- data.frame(colData(se))[, "Treatment"]
 
-batch.estimate <- kBET(data, batch)
+batch.estimate <- kBET(df, batch)
 }

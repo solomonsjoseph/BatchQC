@@ -135,12 +135,12 @@ run_kBET <- function(
 #' @return If the optimal neighbourhood size (k0) is smaller than 10, NA is
 #' returned.
 #' @examples
-#' batch <- rep(seq_len(10), each=20)
-#' data <- matrix(rpois(n=50000, lambda=10) * rbinom(50000, 1, prob=0.5),
-#'   nrow=200
-#' )
+#' library(scran)
+#' se <- mockSCE()
+#' df <- as.matrix(assays(se)[["counts"]])
+#' batch <- data.frame(colData(se))[, "Treatment"]
 #'
-#' batch.estimate <- kBET(data, batch)
+#' batch.estimate <- kBET(df, batch)
 
 #' @importFrom FNN get.knn
 #' @import ggplot2
@@ -158,43 +158,44 @@ kBET <- function(
     addTest = FALSE, verbose = FALSE, plot = TRUE, adapt = TRUE) {
     # preliminaries:
     initialize.kbet.res <- initialize.kbet(
-        df, batch, k0, knn, testSize, do.pca, dim.pca, heuristic, n_repeat, 
+        df, batch, k0, knn, testSize, do.pca, dim.pca, heuristic, n_repeat,
         alpha, addTest, verbose, adapt
     )
     if (addTest) {
         kbet.res <- run.kbet.addTest(
             initialize.kbet.res, adapt, alpha, n_repeat
         )
-        rejection <- summarize.kbet.results(rejection, kBET.expected, 
-            kBET.observed, kBET.signif, lrt.expected, lrt.observed, lrt.signif,
-            exact.observed, exact.expected, exact.signif, n_repeat, addTest)
         if (n_repeat > 1 & plot) {
-            plot.kbet(kBET.observed, kBET.expected, lrt.observed,
-                lrt.expected, exact.observed, exact.expected, n_repeat)
+            plot_kbet_helper(
+                kbet.res$kBET.observed, kbet.res$kBET.expected,
+                kbet.res$lrt.observed, kbet.res$lrt.expected,
+                kbet.res$exact.observed, kbet.res$exact.expected, n_repeat)
         }
     } else { # kBET only
         kbet.res <- run.kbet.only(initialize.kbet.res, adapt, alpha, n_repeat)
-        rejection <- kbet.res$rejection
-        rejection <- summarize.kbet.results(rejection, kbet.res$kBET.expected,
-            kbet.res$kBET.observed, kbet.res$kBET.signif, n_repeat=n_repeat,
-            addTest=addTest)
-
         if (n_repeat > 1 & plot) {
-            plot.kbet(kbet.res$kBET.observed, kbet.res$kBET.expected, n_repeat)
+            plot_kbet_helper(
+                kbet.res$kBET.observed, kbet.res$kBET.expected,
+                n_repeat = n_repeat)
         }
     }
+    rejection <- summarize_kbet_results(
+        kbet.res$rejection, kbet.res$kBET.expected, kbet.res$kBET.observed,
+        kbet.res$kBET.signif, kbet.res$lrt.expected, kbet.res$lrt.observed,
+        kbet.res$lrt.signif, kbet.res$exact.observed, kbet.res$exact.expected,
+        kbet.res$exact.signif, n_repeat, addTest)
     # collect parameters
     rejection$params <- list(
-        k0 = k0, testSize = testSize, do.pca = do.pca, dim.pca = dim.pca, 
+        k0 = k0, testSize = testSize, do.pca = do.pca, dim.pca = dim.pca,
         heuristic = heuristic, n_repeat = n_repeat, alpha = alpha,
         addTest = addTest, verbose = verbose, plot = plot
     )
     # add outsiders
     if (adapt) {
         rejection$outsider <- list(
-            index=initialize.kbet.res$outsider,
-            categories=table(batch[initialize.kbet.res$outsider]),
-            p.val=initialize.kbet.res$p.out
+            index = initialize.kbet.res$outsider,
+            categories = table(batch[initialize.kbet.res$outsider]),
+            p.val = initialize.kbet.res$p.out
         )
     }
     rejection
@@ -224,34 +225,34 @@ kBET <- function(
 #' }, c(-5, 50))
 #'
 #' @export
-bisect <- function(foo, bounds, known=NULL, ..., tolx=5, toly=0.01) {
+bisect <- function(foo, bounds, known = NULL, ..., tolx = 5, toly = 0.01) {
     if (is.null(known)) {
         evalFoo <- sapply(bounds, foo, ...)
         if (diff(unlist(evalFoo)) < -toly && diff(bounds) > tolx) {
             # the second bound has a smaller argument than the first bound
             bounds[2] <- round(sum(bounds) / 2, 0)
             known <- c(unlist(evalFoo)[1], 0)
-            bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+            bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (diff(unlist(evalFoo)) > toly && diff(bounds) > tolx) {
             # the first bound has a smaller argument than the second bound
             bounds[1] <- round(sum(bounds) / 2, 0)
             known <- c(0, unlist(evalFoo)[2])
-            bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+            bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (dist(unlist(evalFoo)) < toly) {
-            # check the value in between upper and lower bound
             center <- sapply(round(sum(bounds) / 2, 0), foo, ...)
             dist_center <- sapply(
-                unlist(evalFoo), function(x, y) {dist(c(x, y))}, center)
+                unlist(evalFoo), function(x, y) {
+                    dist(c(x, y))}, center)
             if (max(abs(dist_center)) < toly || dist(bounds) < tolx) {
                 bounds  # return interval and stop recursion
             } else if (dist_center[1] > toly) {
                 bounds[2] <- round(sum(bounds) / 2, 0)
                 known <- c(unlist(evalFoo)[1], 0)
-                bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+                bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
             } else if (dist_center[2] > toly) {
                 bounds[1] <- round(sum(bounds) / 2, 0)
                 known <- c(0, unlist(evalFoo)[2])
-                bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+                bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
             }
         }
     } else {
@@ -264,11 +265,11 @@ bisect <- function(foo, bounds, known=NULL, ..., tolx=5, toly=0.01) {
         if (diff(result) < -toly && diff(bounds) > tolx) {
             bounds[2] <- round(sum(bounds) / 2, 0)
             known <- c(unlist(evalFoo)[1], 0)
-            bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+            bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (diff(result) > toly && diff(bounds) > tolx) {
             bounds[1] <- round(sum(bounds) / 2, 0)
             known <- c(0, unlist(evalFoo)[1])
-            bisect(foo, bounds, known, ..., tolx=tolx, toly=toly)
+            bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (dist(result) < toly || dist(bounds) < tolx) {
             bounds  # return interval and stop recursion
         }
@@ -286,19 +287,19 @@ bisect <- function(foo, bounds, known=NULL, ..., tolx=5, toly=0.01) {
 plot_kBET <- function(kBET_res) {
     # create ggplot object for plotting kBET's rejection rate
     plot.data <- data.frame(
-        class=rep(c("observed", "expected"),
-            each=length(kBET_res$stats$kBET.observed)
+        class = rep(c("observed", "expected"),
+            each = length(kBET_res$stats$kBET.observed)
         ),
-        data=c(
+        data = c(
             kBET_res$stats$kBET.observed,
             kBET_res$stats$kBET.expected
         )
     )
     g <- ggplot(plot.data, aes(class, data)) +
         geom_boxplot() +
-        labs(x="Test", y="Rejection rate", title="kBET test results") +
+        labs(x = "Test", y = "Rejection rate", title = "kBET test results") +
         theme_bw() +
-        scale_y_continuous(limits=c(0, 1))
+        scale_y_continuous(limits = c(0, 1))
 
     return(g)
 }

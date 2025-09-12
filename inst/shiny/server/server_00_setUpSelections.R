@@ -138,7 +138,7 @@ setupSelections <- function() {
     updateSelectizeInput(session = session, inputId = "DE_batch",
         choices = names(colData(reactivevalue$se)),
         selected = NULL)
-    
+
     # kBET Analysis
     updateSelectizeInput(session = session, inputId = "kbet_assay",
                          choices = names(assays(reactivevalue$se)),
