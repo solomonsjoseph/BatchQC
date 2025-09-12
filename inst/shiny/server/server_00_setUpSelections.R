@@ -28,6 +28,19 @@ setupSelections <- function() {
         options = list(placeholder = "Please select an option below",
             onInitialize = I('function() { this.setValue(""); }')))
 
+    # AIC Computation
+    updateSelectizeInput(session = session, inputId = "aic_batch",
+                        choices = names(colData(reactivevalue$se)),
+                        selected = NULL,
+                        options = list(placeholder = "Please select an option below",
+                                        onInitialize = I('function() { this.setValue(""); }')))
+
+    updateSelectizeInput(session = session, inputId = "aic_covar",
+                        choices = names(colData(reactivevalue$se)),
+                        selected = NULL,
+                        options = list(placeholder = "Please select an option below",
+                                        onInitialize = I('function() { this.setValue(""); }')))
+
     # Lambda Statistic
     updateSelectizeInput(session = session, inputId = "lambda_matrix",
         choices = assayNames((reactivevalue$se)),
