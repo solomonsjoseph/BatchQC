@@ -99,4 +99,5 @@ df <- as.matrix(assays(se)[["counts"]])
 batch <- data.frame(colData(se))[, "Treatment"]
 
 batch.estimate <- kBET(df, batch)
+
 }

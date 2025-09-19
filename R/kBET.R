@@ -141,7 +141,7 @@ run_kBET <- function(
 #' batch <- data.frame(colData(se))[, "Treatment"]
 #'
 #' batch.estimate <- kBET(df, batch)
-
+#'
 #' @importFrom FNN get.knn
 #' @import ggplot2
 #' @import tidyverse
@@ -227,22 +227,22 @@ kBET <- function(
 #' @export
 bisect <- function(foo, bounds, known = NULL, ..., tolx = 5, toly = 0.01) {
     if (is.null(known)) {
-        evalFoo <- sapply(bounds, foo, ...)
+        evalFoo <- vapply(bounds, foo, ..., FUN.VALUE = numeric(1))
         if (diff(unlist(evalFoo)) < -toly && diff(bounds) > tolx) {
-            # the second bound has a smaller argument than the first bound
             bounds[2] <- round(sum(bounds) / 2, 0)
             known <- c(unlist(evalFoo)[1], 0)
             bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (diff(unlist(evalFoo)) > toly && diff(bounds) > tolx) {
-            # the first bound has a smaller argument than the second bound
             bounds[1] <- round(sum(bounds) / 2, 0)
             known <- c(0, unlist(evalFoo)[2])
             bisect(foo, bounds, known, ..., tolx = tolx, toly = toly)
         } else if (dist(unlist(evalFoo)) < toly) {
-            center <- sapply(round(sum(bounds) / 2, 0), foo, ...)
-            dist_center <- sapply(
+            center <- vapply(
+                round(sum(bounds) / 2, 0), foo, ..., FUN.VALUE = numeric(1)
+            )
+            dist_center <- vapply(
                 unlist(evalFoo), function(x, y) {
-                    dist(c(x, y))}, center)
+                    dist(c(x, y))}, center, FUN.VALUE = numeric(1))
             if (max(abs(dist_center)) < toly || dist(bounds) < tolx) {
                 bounds  # return interval and stop recursion
             } else if (dist_center[1] > toly) {
@@ -258,7 +258,7 @@ bisect <- function(foo, bounds, known = NULL, ..., tolx = 5, toly = 0.01) {
     } else {
         new.eval <- which(known == 0)
         old.eval <- which(known != 0)
-        evalFoo <- sapply(bounds[new.eval], foo, ...)
+        evalFoo <- vapply(bounds[new.eval], foo, ..., FUN.VALUE = numeric(1))
         result <- numeric(length(known))
         result[new.eval] <- unlist(evalFoo)
         result[old.eval] <- known[old.eval]
@@ -283,6 +283,16 @@ bisect <- function(foo, bounds, known = NULL, ..., tolx = 5, toly = 0.01) {
 #' @param kBET_res list object output from kBET function
 #'
 #' @returns ggplot object containing kBET rejection boxplot
+#'
+#' @examples
+#' library(scran)
+#' se <- mockSCE()
+#' df <- as.matrix(assays(se)[["counts"]])
+#' batch <- data.frame(colData(se))[, "Treatment"]
+#'
+#' batch.estimate <- kBET(df, batch)
+#' plot_kBET(batch.estimate)
+#'
 #' @export
 plot_kBET <- function(kBET_res) {
     # create ggplot object for plotting kBET's rejection rate

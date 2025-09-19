@@ -1,3 +1,7 @@
+# Version 2.5.10
+## Major Changes
+* Added a new kBET tab for measuring batch effect presence
+
 # Version 2.5.9
 ## Major Changes
 * Added AIC under batch correction tab

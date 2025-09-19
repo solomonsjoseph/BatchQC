@@ -16,3 +16,13 @@ ggplot object containing kBET rejection boxplot
 This function generates a boxplot of observed and expected
 rejection rates for the provided kBET output list object
 }
+\examples{
+library(scran)
+se <- mockSCE()
+df <- as.matrix(assays(se)[["counts"]])
+batch <- data.frame(colData(se))[, "Treatment"]
+
+batch.estimate <- kBET(df, batch)
+plot_kBET(batch.estimate)
+
+}

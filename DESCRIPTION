@@ -1,8 +1,8 @@
 Type: Package
 Package: BatchQC
 Title: Batch Effects Quality Control Software
-Version: 2.5.9
-Date: 2025-07-21
+Version: 2.5.10
+Date: 2025-09-19
 Authors@R: c(
     person("Jessica", "Anderson", , "anderson.jessica@rutgers.edu", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0542-9872")),
@@ -42,7 +42,7 @@ License: MIT + file LICENSE
 URL: https://github.com/wejlab/BatchQC
 BugReports: https://github.com/wejlab/BatchQC/issues
 Depends:
-    R (>= 4.4.0)
+    R (>= 4.5.0)
 Imports:
     data.table,
     DESeq2,
@@ -101,6 +101,7 @@ Collate:
     'Normalization.R'
     'batch_correction.R'
     'color_palette.R'
+    'compute_aic.R'
     'covariates_not_confounded.R'
     'data.R'
     'dendrogram.R'

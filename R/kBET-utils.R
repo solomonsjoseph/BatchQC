@@ -196,7 +196,7 @@ ExactMultinomialTest <- function(
         ))
         colnames(tab) <- c("   Events", "   pObs", "   p.value")
         warning(head)
-        print(tab, row.names = FALSE)
+        warning(tab, row.names = FALSE)
     }
 
     invisible(list(
@@ -380,7 +380,8 @@ determine.k0 <- function(k0, heuristic, class.freq, knn, dim.dataset, verbose) {
             ifelse(heuristic, 0.75, 0.25))
 
         if (verbose) {
-            warning(paste0("Initial neighborhood size set to ", k0, ".\n"))
+            msg <- paste0("Initial neighborhood size set to ", k0, ".\n")
+            warning(msg)
         }
     }
 
@@ -492,7 +493,7 @@ adapt.freq <- function(
                 if (verbose) {
                     percent <- length(outsider) / length(batch)
                     outs_percent <- round(percent * 100, 3)
-                    warning(paste(
+                    msg <- paste(
                         sprintf(
                             paste0(
                                 "There are %s cells (%s%%) that do ",
@@ -506,13 +507,14 @@ adapt.freq <- function(
                         ),
                         "Cell indexes are saved to result list.",
                         "", sep = "\n"
-                    ))
+                    )
+                    warning(msg)
                 }
             } else {
-                if (verbose) warning(paste0("No outsiders found."))
+                if (verbose) warning("No outsiders found.")
             }
         } else {
-            if (verbose) warning(paste0("No outsiders found."))
+            if (verbose) warning("No outsiders found.")
         }
     }
     return(list(
@@ -533,10 +535,11 @@ calculate_nb_size <- function(scan_nb, k0, dataset, batch, knn, verbose) {
     if (length(opt.k) > 1) {
         k0 <- opt.k[2]
         if (verbose) {
-            warning(paste0(
+            msg <- paste0(
                 "done.\nNew size of neighbourhood is set to ",
                 k0, ".\n"
-            ))
+            )
+            warning(msg)
         }
     } else {
         if (verbose) {
