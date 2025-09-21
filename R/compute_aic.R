@@ -45,7 +45,8 @@ globalVariables(c(glm.nb, AIC, glm, gaussian, glm.control))
 #' library(scran)
 #' se <- mockSCE()
 #' compare_aic <- compute_aic(se, assay_of_interest = "counts",
-#'                             batchind = "Cell_Cycle", groupind = "Treatment")
+#'                             batchind = "Cell_Cycle",
+#'                             groupind = c("Treatment", "Mutation_Status"))
 #' print(compare_aic["total_AIC"])
 #' print(compare_aic["min_AIC"])
 #'
@@ -57,8 +58,10 @@ globalVariables(c(glm.nb, AIC, glm, gaussian, glm.control))
 compute_aic <- function(se, assay_of_interest, batchind,
                         groupind, maxit = 25, zero_filt_percent = 100) {
     dat <- assays(se)[[assay_of_interest]]
-    batchind <- as.factor(colData(se)[[batchind]])
-    groupind <- as.factor(colData(se)[[groupind]])
+    analysis_design <- as.data.frame(colData(se)[c(groupind, batchind)])
+    design <- stats::model.matrix(stats::as.formula(paste(" ~",
+                            paste(colnames(analysis_design), collapse = "+"))),
+                            data = analysis_design)
     if (!all(dat == floor(dat)) || any(dat < 0)) {
         stop("Counts must be non-negative integers only.")
     }
@@ -66,7 +69,7 @@ compute_aic <- function(se, assay_of_interest, batchind,
     dat <- dat[rowSums(dat == 0) <= zero_filt_percent / 100 * ncol(dat), ]
     nb_result <- apply(dat, 1, function(x) {
         tryCatch({
-        nb_model <- glm.nb(x ~ 1, control = glm.control(maxit = maxit))
+        nb_model <- glm.nb(x ~ design, control = glm.control(maxit = maxit))
         nb_AIC <- AIC(nb_model)
         return(nb_AIC)
     }, error = function(e) {
@@ -74,17 +77,17 @@ compute_aic <- function(se, assay_of_interest, batchind,
     })})
     lognormal_result <- apply(dat, 1, function(x) {
         tryCatch({
-        lognormal_model <- glm(log(x + 1e-100) ~ 1, family = gaussian)
+        lognormal_model <- glm(log(x + 1e-100) ~ design, family = gaussian)
         lognormal_AIC <- AIC(lognormal_model)
         return(lognormal_AIC)
     }, error = function(e) {
         return(NA)
     })})
-    voom_dat <- voom(dat, design = model.matrix(~ groupind + batchind))
+    voom_dat <- voom(dat, design = design)
     voom_dat <- voom_dat$E
     voom_result <- apply(voom_dat, 1, function(x) {
         tryCatch({
-        voom_lm_model <- lm(x ~ 1)
+        voom_lm_model <- lm(x ~ design)
         voom_lm_AIC <- AIC(voom_lm_model)
         return(voom_lm_AIC)
     }, error = function(e) {
