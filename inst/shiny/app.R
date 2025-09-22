@@ -29,7 +29,8 @@ ui <- navbarPage(
   # source(file.path("ui", "ui_08_shape.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_09_differential_expression_analysis.R"),
       local = TRUE)$value,
-  source(file.path("ui", "ui_10_data_download.R"),  local = TRUE)$value
+  source(file.path("ui", "ui_10_data_download.R"),  local = TRUE)$value,
+  source(file.path("ui", "ui_12_kbet.R"),  local = TRUE)$value
 )
 
 server <- function(input, output, session) {
@@ -56,6 +57,7 @@ server <- function(input, output, session) {
     source(file.path("server/", "server_08_umap.R"), local = TRUE)$value
     source(file.path("server/", "server_07_differentialExpression.R"),
         local = TRUE)$value
+    source(file.path("server/", "server_09_kbet.R"), local = TRUE)$value
 }
 
 shinyApp(ui = ui, server = server)
