@@ -18,13 +18,9 @@ Authors@R: c(
     person("Zhaorong", "Li", , "zhaorong@bu.edu", role = "ctb"),
     person("Evan", "Holmes", , "evanjh19@gmail.com", role = "aut"),
     person("Solomon", "Joseph", , "sj1136@njms.rutgers.edu", role = "ctb"),
-<<<<<<< HEAD
     person("Yaoan", "Leng", , "leng@bu.edu", role = "ctb",
     comment = c(ORCID = "0009-0002-3957-5250"))
-=======
-    person("Yaoan", "Leng", , "leng@bu.edu", role = "ctb"),
     person("Howard", "Fan", , "hf268@njms.rutgers.edu", role = "ctb")
->>>>>>> cde74ef8ef71b8dc209b14cf02f6a012cf8e65ac
   )
 Description: Sequencing and microarray samples often are collected or
     processed in multiple batches or at different times. This often
