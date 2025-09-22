@@ -66,7 +66,8 @@ It then compares the AICs of the three models across different genes.
 library(scran)
 se <- mockSCE()
 compare_aic <- compute_aic(se, assay_of_interest = "counts",
-                            batchind = "Cell_Cycle", groupind = "Treatment")
+                            batchind = "Cell_Cycle",
+                            groupind = c("Treatment", "Mutation_Status"))
 print(compare_aic["total_AIC"])
 print(compare_aic["min_AIC"])
 
