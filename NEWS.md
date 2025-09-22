@@ -1,3 +1,7 @@
+# Version 2.5.11
+## Major Changes
+* Allowed AIC function to take multiple covariates as input
+
 # Version 2.5.10
 ## Major Changes
 * Added a new kBET tab for measuring batch effect presence
