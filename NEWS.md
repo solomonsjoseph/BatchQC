@@ -1,3 +1,7 @@
+# Version 2.5.12
+## Minor Changes
+* Fixed sva batch correction function
+
 # Version 2.5.11
 ## Major Changes
 * Allowed AIC function to take multiple covariates as input
