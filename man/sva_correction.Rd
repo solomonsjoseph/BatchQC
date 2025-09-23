@@ -11,7 +11,8 @@ sva_correction(
   assay_to_normalize,
   var_of_interest,
   covar,
-  output_assay_name
+  output_assay_name,
+  psva = FALSE
 )
 }
 \arguments{
@@ -24,6 +25,9 @@ sva_correction(
 \item{covar}{list; sting list  of covariates to include in sva analysis}
 
 \item{output_assay_name}{string; name of results assay}
+
+\item{psva}{boolean; default: FALSE. If set to TRUE and no covariate input,
+psva function from the sva package will be used to remove batch effect.}
 }
 \value{
 SE object with an added sva corrected array

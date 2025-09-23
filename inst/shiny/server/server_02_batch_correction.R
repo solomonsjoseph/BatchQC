@@ -32,6 +32,24 @@ observe( {
                     input$group_for_batch,
                     input$correction_method,
                     sep = '_'))
+        }else if (input$correction_method == 'sva') {
+            updateTextInput(session = session, inputId = 'corrected_assay_name',
+                            'Name for the corrected assay',
+                            value = paste(input$correction_assay,
+                                          input$correction_batch,
+                                          input$group_for_batch,
+                                          input$correction_method,
+                                          input$psva,
+                                          sep = '_'))
+        }else if (input$correction_method == 'svaseq') {
+            updateTextInput(session = session, inputId = 'corrected_assay_name',
+                            'Name for the corrected assay',
+                            value = paste(input$correction_assay,
+                                          input$correction_batch,
+                                          input$group_for_batch,
+                                          input$correction_method,
+                                          input$num_sv,
+                                          sep = '_'))
         }else {
             updateTextInput(session = session, inputId = 'corrected_assay_name',
                 'Name for the corrected assay',

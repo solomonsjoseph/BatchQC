@@ -161,6 +161,12 @@ tabPanel('Batch Correction/Normalization',
                                                    otherwise, svaseq function will estimate n.sv for you.',
                                                    value = FALSE)
                     ),
+                    conditionalPanel(condition = "input.correction_method == 'sva'",
+                                     checkboxInput('psva',
+                                                   'Check this if you have no covariate and want to use psva to remove batch effect. \n
+                                                   Parker HS, Leek JT, Favorov AV, Considine M, Xia X, Chavan S, Chung CH, Fertig EJ (2014) Preserving biological heterogeneity with a permuted surrogate variable analysis for genomics batch correction Bioinformatics doi: 10.1093/bioinformatics/btu375',
+                                                   value = FALSE)
+                    ),
                     actionButton(inputId = 'correct', label = 'Correct')
                     ),
                 tabPanel('Normalization',
