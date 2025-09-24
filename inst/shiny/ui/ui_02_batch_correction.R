@@ -119,7 +119,8 @@ tabPanel('Batch Correction/Normalization',
                         h5("limma batch correction fits a linear model to the data, including batch and regular treatments, then removes the component due to the batch effects. Please run limma on log expression data.")
                     ),
                     conditionalPanel(condition = "input.correction_method == 'sva'",
-                        h5("sva correction identifies suurogate variables to correct for unknown batch effects. This is the two-step implementation available as psva in the sva package.")
+                        h5("sva correction identifies surrogate variables to correct for unknown or known batch effects. This method here estimates the surrogate variables using sva, and use fsva frozen
+                           surrogate variable analysis to remove the surrogate variables inferred from sva. Use of psva, the 2 step approach proposed by Leek and Storey 2007, is available by setting additional argument.")
                     ),
                     conditionalPanel(condition = "input.correction_method == 'svaseq'",
                                      h5("svaseq correction is a variant of sva correction for sequencing data")
@@ -159,6 +160,12 @@ tabPanel('Batch Correction/Normalization',
                                      checkboxInput('num_sv',
                                                    'Uncheck this if the number of samples is small (the number of latent factors that need to be estimated (n.sv) is set to 1);
                                                    otherwise, svaseq function will estimate n.sv for you.',
+                                                   value = FALSE)
+                    ),
+                    conditionalPanel(condition = "input.correction_method == 'sva'",
+                                     checkboxInput('psva',
+                                                   'Check this if you have no covariate and want to use psva to remove batch effect. \n
+                                                   Parker HS, Leek JT, Favorov AV, Considine M, Xia X, Chavan S, Chung CH, Fertig EJ (2014) Preserving biological heterogeneity with a permuted surrogate variable analysis for genomics batch correction Bioinformatics doi: 10.1093/bioinformatics/btu375',
                                                    value = FALSE)
                     ),
                     actionButton(inputId = 'correct', label = 'Correct')

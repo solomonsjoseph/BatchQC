@@ -1,3 +1,4 @@
+globalVariables(c("mod"))
 #' Batch Correct
 #' This function allows you to Add batch corrected count matrix to the SE object
 #' @param se SummarizedExperiment object
@@ -9,7 +10,7 @@
 #' @param covar list of covariates
 #' @param output_assay_name name of results assay
 #' @param ... Arguments to be passed to specific methods, such as `num_sv` for
-#' `svaseq_correction`
+#' `svaseq_correction` and `psva` for `sva_correction`.
 #' @usage batch_correct(se, method, assay_to_normalize, batch, group = NULL,
 #' covar, output_assay_name, ...)
 #' @return a summarized experiment object with normalized assay appended
@@ -49,7 +50,7 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
             output_assay_name)
     } else if (method == 'sva') {
         se <- sva_correction(se, assay_to_normalize, var_of_interest, covar,
-            output_assay_name)
+            output_assay_name, psva = FALSE)
     } else if (method == "svaseq") {
         se <- svaseq_correction(se, assay_to_normalize, var_of_interest, covar,
             output_assay_name, num_sv = FALSE)
@@ -226,47 +227,57 @@ limma_correction <- function(se, assay_to_normalize, batch, covar,
 #' @param var_of_interest string; name of  experimental variable of interest
 #' @param covar list; sting list  of covariates to include in sva analysis
 #' @param output_assay_name string; name of results assay
+#' @param psva boolean; default: FALSE. If set to TRUE and no covariate input,
+#' psva function from the sva package will be used to remove batch effect.
 #' @return SE object with an added sva corrected array
 #' @import SummarizedExperiment
 #' @import sva
 
 sva_correction <- function(se, assay_to_normalize, var_of_interest,
-    covar, output_assay_name) {
+    covar, output_assay_name, psva = FALSE) {
     if (is.null(covar)) {
         mod0 <- model.matrix(~1, data = colData(se))
-        n.sv <- sva::num.sv(assays(se)[[assay_to_normalize]], mod,
+        mod1_formula <- as.formula(paste0("~", var_of_interest))
+        mod1 <- model.matrix(mod1_formula, data = colData(se))
+        n.sv <- sva::num.sv(assays(se)[[assay_to_normalize]], mod1,
             method = "leek")
-        sva_assay <- sva::psva(dat = assays(se)[[assay_to_normalize]],
-            batch = data.frame(colData(se))[, var_of_interest],
-            mod0 = mod0,
-            n.sv = n.sv)
-    }else {
-        str_formula <- ""
-        for (i in seq_len(covar)) {
-            if (i < length(covar)) {
-                str_formula <- paste0(str_formula,
-                    "as.factor(", covar[i], ") + ")
-            }else {
-                str_formula <- paste0(str_formula, "as.factor(", covar[i], ")")
-            }
+        if (psva) {
+            sva_assay <- sva::psva(
+                dat = assays(se)[[assay_to_normalize]],
+                batch = data.frame(colData(se))[, var_of_interest],
+                mod = mod,
+                mod0 = mod0,
+                n.sv = n.sv)
         }
-        form_mod0 <- formula(paste0("~", str_formula))
-        mod0 <- model.matrix(form_mod0, data = colData(se))
-        mod_formula <- formula(paste0("~as.factor(", var_of_interest, ") + ",
-            str_formula))
-        mod <- model.matrix(mod_formula, data = colData(se))
-
-        psva.SV <- sva::sva(assays(se)[[assay_to_normalize]], mod = mod,
-            mod0 = mod0) #, n.sv = n.sv)
-        colnames(psva.SV$sv) <- paste('sv', seq_len(ncol(psva.SV$sv)))
-        psva.fit <- lmFit(assays(se)[[assay_to_normalize]],
-            cbind(mod, psva.SV$sv))
-        sva_assay <- sweep(psva.fit$coefficients[,
-            paste('sv', seq_len(ncol(psva.SV$sv)))] %*% t(psva.SV$sv), 1,
-            psva.fit$coefficients[, "(Intercept)"], FUN = "+")
+    }else {
+        if (length(covar) == 1) {
+            mod1_formula <- as.formula(paste0("~", var_of_interest, "+", covar))
+            mod0_formula <- as.formula(paste0("~", covar))
+        } else {
+            mod1_formula <- as.formula(paste0("~", var_of_interest, "+",
+                                            paste(covar, collapse = "+")))
+            mod0_formula <- as.formula(paste0("~",
+                                            paste(covar, collapse = "+")))
+        }
+        mod1 <- model.matrix(mod1_formula, data = colData(se))
+        mod0 <- model.matrix(mod0_formula, data = colData(se))
     }
-    colnames(sva_assay) <- colnames(assays(se)[[assay_to_normalize]])
-    assays(se)[[output_assay_name]] <- sva_assay
+    sva_object <- sva::sva(
+        dat = assays(se)[[assay_to_normalize]],
+        mod = mod1,
+        mod0 = mod0
+    )
+
+    fsva_object <- sva::fsva(
+        dbdat = assays(se)[[assay_to_normalize]],
+        mod = mod0,
+        sv = sva_object,
+        newdat = assays(se)[[assay_to_normalize]],
+        method = "fast"
+        )
+    fsva_adjust_db <- fsva_object$db
+    colnames(fsva_adjust_db) <- colnames(assays(se)[[assay_to_normalize]])
+    assays(se)[[output_assay_name]] <- fsva_adjust_db
     return(se)
 }
 
@@ -290,17 +301,20 @@ svaseq_correction <- function(se, assay_to_normalize, var_of_interest,
     dat <- assays(se)[[assay_to_normalize]]
     if (is.null(covar)) {
         mod0 <- model.matrix(~1, data = colData(se))
-        mod1 <- model.matrix(~as.factor(get(var_of_interest)),
-                            data = colData(se)
-                            )
-    } else {
-        mod1 <- model.matrix(
-            ~as.factor(get(var_of_interest)) + as.factor(get(covar)),
-            data = colData(se))
-        mod0 <- model.matrix(
-            ~as.factor(get(covar)),
-            data = colData(se)
-            )
+        mod1_formula <- as.formula(paste0("~", var_of_interest))
+        mod1 <- model.matrix(mod1_formula, data = colData(se))
+    }else {
+        if (length(covar) == 1) {
+            mod1_formula <- as.formula(paste0("~", var_of_interest, "+", covar))
+            mod0_formula <- as.formula(paste0("~", covar))
+        } else {
+            mod1_formula <- as.formula(paste0("~", var_of_interest, "+",
+                                            paste(covar, collapse = "+")))
+            mod0_formula <- as.formula(paste0("~",
+                                            paste(covar, collapse = "+")))
+        }
+        mod1 <- model.matrix(mod1_formula, data = colData(se))
+        mod0 <- model.matrix(mod0_formula, data = colData(se))
     }
     if (num_sv) {
         batch_unsup_sva <- svaseq(dat, mod1, mod0)$sv

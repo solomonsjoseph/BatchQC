@@ -25,7 +25,7 @@ svaseq)}
 \item{output_assay_name}{name of results assay}
 
 \item{...}{Arguments to be passed to specific methods, such as \code{num_sv} for
-\code{svaseq_correction}}
+\code{svaseq_correction} and \code{psva} for \code{sva_correction}.}
 }
 \value{
 a summarized experiment object with normalized assay appended
