@@ -18,6 +18,7 @@ observeEvent(input$umap_plot, {
         results <- umap(reactivevalue$se,
             input$umap_assay,
             input$batch_variable,
+            input$covar_variable,
             input$num_neighbors,
             input$distance,
             input$spread,

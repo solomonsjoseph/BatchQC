@@ -8,6 +8,7 @@ umap(
   se_object,
   assay_of_interest,
   batch,
+  covar,
   neighbors = 15,
   min_distance = 0.1,
   spread = 1,
@@ -20,6 +21,8 @@ umap(
 \item{assay_of_interest}{string; the assay in the se_object to plot}
 
 \item{batch}{string; representing batch}
+
+\item{covar}{string; representing biological variable}
 
 \item{neighbors}{integer; number of nearest neighbors, default 15 per umap;
 lower values prioritize local structure, higher values will represent

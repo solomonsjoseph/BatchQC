@@ -128,6 +128,9 @@ setupSelections <- function() {
     updateSelectizeInput(session = session, inputId = 'batch_variable',
         choices = colnames(colData(reactivevalue$se)),
         selected = NULL)
+    updateSelectizeInput(session = session, inputId = 'covar_variable',
+        choices = colnames(colData(reactivevalue$se)),
+        selected = NULL)
     updateNumericInput(session = session, inputId = 'num_neighbors',
         value = 15, min = 2,
         max = dim(reactivevalue$se)[1] - 1)
