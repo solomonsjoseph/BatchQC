@@ -64,6 +64,8 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
         sampled <- sample(row.names(count_matrix), num_genes)
         col_names_prior <- colnames(count_matrix)
         count_matrix <- count_matrix[sampled, ]
+    }else {
+        sampled <- row.names(count_matrix)
     }
     conditions_df <- NULL
     formula_for_DESeq <- ""
