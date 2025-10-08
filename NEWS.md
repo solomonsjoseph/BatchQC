@@ -1,6 +1,16 @@
+# Version 2.5.13
+## Major Changes
+* Updated Vignette to reflect updates to BatchQC (distribution checks, kBET, UMAP)
+* Updated vignette example data to be TB data
+
+## Minor Changes
+* Updated UMAP example to include covar option
+* Changed location of kBET tab
+
 # Version 2.5.12
 ## Minor Changes
 * Fixed sva batch correction function
+* Added covar to UMAP
 
 # Version 2.5.11
 ## Major Changes
