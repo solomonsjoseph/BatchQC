@@ -613,10 +613,10 @@ umap_plot_batch_corrected
 To explore which features are differentially expressed between conditions, use
 the differential expression tab. DE_Seq2 should be used for count data
 (non-negative, integer values) with a negative binomial distribution, edgeR can
-be used for edgeR-normalized data, ANOVA can be used for normal-distributed data,
-Kruskal-Wallis test can be used as a nonparametric equivalent of one-way ANOVA,
-and limma can be used for all other data. edgeR implemented in BatchQC uses glm
-quasi-likelihood F-tests to test for differential expression.
+be used for edgeR-normalized data, ANOVA can be used for normal-distributed
+data, Kruskal-Wallis test can be used as a nonparametric equivalent of one-way
+ANOVA, and limma can be used for all other data. edgeR implemented in BatchQC
+uses glm quasi-likelihood F-tests to test for differential expression.
 
 Our TB data is count data with a log normal distribution, so we will use limma.
 We will select the assay we are interested in, select the batch variable and all
