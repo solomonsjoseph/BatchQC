@@ -19,6 +19,7 @@ SVA
 SummarizedExperiment
 TBSignatureProfiler
 TMM
+UMAP
 VanValkenburg
 Voom
 al
@@ -27,6 +28,7 @@ batchqc
 bladderbatch
 colData
 colNames
+covariable
 csv
 curatedTBData
 dat
@@ -41,14 +43,22 @@ fvalue
 ggplot
 github
 glm
+https
 jessmcc
+kBET
+knn
 limma
 ln
 mTCC
 nb
 ncol
+neighbour
+neighbourhood
+neighbourhoods
+neighbours
 normalizations
 onject
+overfits
 padj
 pca
 pearson
@@ -64,6 +74,8 @@ shinyjs
 subjectID
 sva
 svaseq
+tabularised
+theislab
 tibble
 umap
 umaps

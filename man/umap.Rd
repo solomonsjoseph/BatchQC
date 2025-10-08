@@ -49,7 +49,7 @@ se <- mockSCE()
 se$Treatment <- as.factor(se$Treatment)
 se$Mutation_Status <- as.factor(se$Mutation_Status)
 umap_plot <- BatchQC::umap(se_object = se, assay_of_interest = "counts",
-batch = "Treatment")
+batch = "Treatment", covar = "Mutation_Status")
 umap_plot
 
 }

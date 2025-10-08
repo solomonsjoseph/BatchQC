@@ -22,6 +22,7 @@ ui <- navbarPage(
   source(file.path("ui", "ui_02_batch_correction.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_02_experimental_design.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_03_variation.R"),  local = TRUE)$value,
+  source(file.path("ui", "ui_12_kbet.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_05_heatmaps.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_06_dendrogram.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_07_pca.R"),  local = TRUE)$value,
@@ -29,8 +30,7 @@ ui <- navbarPage(
   # source(file.path("ui", "ui_08_shape.R"),  local = TRUE)$value,
   source(file.path("ui", "ui_09_differential_expression_analysis.R"),
       local = TRUE)$value,
-  source(file.path("ui", "ui_10_data_download.R"),  local = TRUE)$value,
-  source(file.path("ui", "ui_12_kbet.R"),  local = TRUE)$value
+  source(file.path("ui", "ui_10_data_download.R"),  local = TRUE)$value
 )
 
 server <- function(input, output, session) {
@@ -51,13 +51,13 @@ server <- function(input, output, session) {
         local = TRUE)$value
     source(file.path("server/", "server_03_variationAnalysis.R"),
         local = TRUE)$value
+    source(file.path("server/", "server_09_kbet.R"), local = TRUE)$value
     source(file.path("server/", "server_04_heatmap.R"), local = TRUE)$value
     source(file.path("server/", "server_05_dendrogram.R"), local = TRUE)$value
     source(file.path("server/", "server_06_pca.R"), local = TRUE)$value
     source(file.path("server/", "server_08_umap.R"), local = TRUE)$value
     source(file.path("server/", "server_07_differentialExpression.R"),
         local = TRUE)$value
-    source(file.path("server/", "server_09_kbet.R"), local = TRUE)$value
 }
 
 shinyApp(ui = ui, server = server)
