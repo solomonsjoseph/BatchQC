@@ -4,20 +4,33 @@
 \alias{normalize_SE}
 \title{This function allows you to add normalized count matrix to the SE object}
 \usage{
-normalize_SE(se, method, log_bool, assay_to_normalize, output_assay_name)
+normalize_SE(
+  se,
+  method,
+  log_bool,
+  assay_to_normalize,
+  output_assay_name,
+  condition = NULL,
+  batch = NULL
+)
 }
 \arguments{
 \item{se}{SummarizedExperiment Object}
 
-\item{method}{Normalization Method, either 'CPM', 'DESeq', 'edgeR', or 'none'
-for log(x+1) only}
+\item{method}{string; Normalization Method, either 'CPM', 'DESeq', 'edgeR',
+'voom', or 'none' for log(x+1) only}
 
 \item{log_bool}{True or False; True to log normalize the data set after
 normalization method}
 
-\item{assay_to_normalize}{Which SE assay to do normalization on}
+\item{assay_to_normalize}{string; SE assay to do normalization on}
 
-\item{output_assay_name}{name for the resulting normalized assay}
+\item{output_assay_name}{string; name for the resulting normalized assay}
+
+\item{condition}{string; the biological variable of interest, required for
+voom, default 'NULL'}
+
+\item{batch}{string; the batch variable, required for voom, default 'NULL'}
 }
 \value{
 the original SE object with normalized assay appended

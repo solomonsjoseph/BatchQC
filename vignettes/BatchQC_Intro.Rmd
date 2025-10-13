@@ -243,6 +243,9 @@ library size to get the normalized library size. This normalization method
 should be selected when you plan to use edgeR for differential expression
 analysis. The original read (raw) counts should be the provided input for this
 normalization method.
+4. **voom.** Voom calculates logCPM, estimates mean-variance relationship and
+uses this to compute observation-level weights. It is appropriate for count
+data that is to be used with limma batch correction.
 
 To use one of these two methods, select it from the normalization method drop 
 down, select an assay to perform the normalization on from the drop down, and
@@ -613,10 +616,10 @@ umap_plot_batch_corrected
 To explore which features are differentially expressed between conditions, use
 the differential expression tab. DE_Seq2 should be used for count data
 (non-negative, integer values) with a negative binomial distribution, edgeR can
-be used for edgeR-normalized data, ANOVA can be used for normal-distributed data,
-Kruskal-Wallis test can be used as a nonparametric equivalent of one-way ANOVA,
-and limma can be used for all other data. edgeR implemented in BatchQC uses glm
-quasi-likelihood F-tests to test for differential expression.
+be used for edgeR-normalized data, ANOVA can be used for normal-distributed
+data, Kruskal-Wallis test can be used as a nonparametric equivalent of one-way
+ANOVA, and limma can be used for all other data. edgeR implemented in BatchQC
+uses glm quasi-likelihood F-tests to test for differential expression.
 
 Our TB data is count data with a log normal distribution, so we will use limma.
 We will select the assay we are interested in, select the batch variable and all

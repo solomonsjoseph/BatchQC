@@ -151,7 +151,9 @@ observeEvent(input$normalize, {
             input$normalization_method,
             input$log,
             input$correction_assay,
-            input$normalized_assay_name)
+            input$normalized_assay_name,
+            input$normalized_covariate,
+            input$normalized_batch)
         setupSelections()
     })
 })

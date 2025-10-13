@@ -181,16 +181,39 @@ tabPanel('Batch Correction/Normalization',
                     conditionalPanel(condition = "input.normalization_method == 'edgeR'",
                         h5("edgeR calculates scale factors using a trimmed mean of M-values between each pair of samples and multiplies the scale factors with the original library size to get the normalized library size.")
                         ),
+                    conditionalPanel(condition = "input.normalization_method == 'voom'",
+                        h5("voom calculates logCPM, estimates mean-variance relationship and uses this to compute observation-level weights. Appropriate for count data to be used with limma.")
+                    ),
                     selectizeInput('normalization_method',
                         'Choose normalization method',
                         multiple = FALSE,
-                        choices = c('CPM', 'DESeq', 'edgeR', 'none'),
+                        choices = c('CPM', 'DESeq', 'edgeR', 'voom', 'none'),
                         selected = NULL,
                         options = list(placeholder =
                                 'Please select an option below',
                             onInitialize = I(
                                 'function() { this.setValue(""); }'
                             ))),
+                    selectizeInput('normalized_batch',
+                        'Select the variable that represents batch (required for voom)',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }')
+                        )),
+                    selectizeInput('normalized_covariate',
+                        'Choose the covariates you would like to include for voom design)',
+                        multiple = FALSE,
+                        choices = c(''),
+                        selected = NULL,
+                        options = list(placeholder =
+                                'Please select an option below',
+                            onInitialize = I(
+                                'function() { this.setValue(""); }')
+                        )),
                     textInput(inputId = 'normalized_assay_name', 'Name for the normalized assay',
                         value = ''),
                     checkboxInput('log', 'log(x+1) transform the results'),
