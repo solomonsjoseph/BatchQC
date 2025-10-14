@@ -1,3 +1,10 @@
+# Version 2.5.14
+## Minor Changes
+* Added voom as a normalization method
+
+## Bug Fixes
+* Corrected limma correction to allow 1 covariate
+
 # Version 2.5.13
 ## Major Changes
 * Updated Vignette to reflect updates to BatchQC (distribution checks, kBET, UMAP)

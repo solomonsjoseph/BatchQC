@@ -197,6 +197,13 @@ limma_correction <- function(se, assay_to_normalize, batch, covar,
             batch = batch
             #design = model.matrix(~)
         )
+    }else if (length(covar) == 1) {
+        cov <- as.numeric(colData(se)[[covar]])
+        limma_corrected <- limma::removeBatchEffect(
+            assays(se)[[assay_to_normalize]],
+            batch = batch,
+            covariates = cov
+        )
     }else {
         cov <- data.frame(colData(se))[, covar]
 

@@ -18,6 +18,7 @@ ResidV
 SVA
 SummarizedExperiment
 TBSignatureProfiler
+TBStatusPTB
 TMM
 UMAP
 VanValkenburg
@@ -28,6 +29,7 @@ batchqc
 bladderbatch
 colData
 colNames
+covar
 covariable
 csv
 curatedTBData

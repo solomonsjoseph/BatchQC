@@ -1,11 +1,14 @@
 #' This function allows you to add normalized count matrix to the SE object
 #' @param se SummarizedExperiment Object
-#' @param method Normalization Method, either 'CPM', 'DESeq', 'edgeR', or 'none'
-#' for log(x+1) only
+#' @param method string; Normalization Method, either 'CPM', 'DESeq', 'edgeR',
+#'   'voom', or 'none' for log(x+1) only
 #' @param log_bool True or False; True to log normalize the data set after
 #'   normalization method
-#' @param assay_to_normalize Which SE assay to do normalization on
-#' @param output_assay_name name for the resulting normalized assay
+#' @param assay_to_normalize string; SE assay to do normalization on
+#' @param output_assay_name string; name for the resulting normalized assay
+#' @param condition string; the biological variable of interest, required for
+#'   voom, default 'NULL'
+#' @param batch string; the batch variable, required for voom, default 'NULL'
 #' @return the original SE object with normalized assay appended
 #' @import SummarizedExperiment
 #' @import EBSeq
@@ -29,7 +32,7 @@
 #'
 #' @export
 normalize_SE <- function(se, method, log_bool, assay_to_normalize,
-    output_assay_name) {
+    output_assay_name, condition = NULL, batch = NULL) {
     se <- se
     if (method == 'CPM') {
         assays(se)[[output_assay_name]] <-
@@ -46,6 +49,18 @@ normalize_SE <- function(se, method, log_bool, assay_to_normalize,
         dge <- edgeR::normLibSizes(dge)
         assays(se)[[output_assay_name]] <- dge$counts
 
+    }else if (method == "voom") {
+        if (is.null(condition) || is.null(batch)) {
+            warning("You must provide the condition and batch variables.")
+            return()
+        }else {
+            condition <- colData(se)[[condition]]
+            batch <- colData(se)[[batch]]
+            design <- model.matrix(~condition + batch)
+            voom_result <- voom(counts = assays(se)[[assay_to_normalize]],
+                design)
+            assays(se)[[output_assay_name]] <- voom_result$E
+        }
     }else {
         assays(se)[[output_assay_name]] <- assays(se)[[assay_to_normalize]]
     }

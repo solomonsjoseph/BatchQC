@@ -78,6 +78,22 @@ setupSelections <- function() {
             onInitialize =
                 I('function() { this.setValue(""); }')))
 
+    # Normalization
+    updateSelectizeInput(session = session,
+        inputId = "normalized_batch",
+        choices = (names(colData(reactivevalue$se))),
+        selected = NULL,
+        options = list(placeholder = "Please select an option below",
+            onInitialize = I('function() { this.setValue(""); }')))
+    updateSelectizeInput(session = session,
+        inputId = "normalized_covariate",
+        choices = (names(colData(reactivevalue$se))),
+        selected = NULL,
+        options = list(placeholder =
+                'Please select an option below',
+            onInitialize =
+                I('function() { this.setValue(""); }')))
+
     # Heatmap
     updateSelectizeInput(session = session, inputId = 'heatmap_assay_name',
         choices = assayNames((reactivevalue$se)),
