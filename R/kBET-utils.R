@@ -920,7 +920,7 @@ summarize_kbet_results <- function(
             }
         }
         if (n_repeat < 10) {
-            warning("Warning: The quantile computation for", n_repeat,
+            warning("The quantile computation for", n_repeat,
                 "subset results is not meaningful.\n")
         }
     } else {
