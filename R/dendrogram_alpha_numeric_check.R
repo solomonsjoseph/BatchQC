@@ -16,12 +16,11 @@
 #' @export
 #'
 dendrogram_alpha_numeric_check <- function(dendro_var) {
-    numeric_or_alpha <- !is.na(suppressWarnings(as.numeric((levels(
-        factor(dendro_var))))))
+    numeric_or_alpha <- levels(factor(dendro_var))
     all_numeric <- TRUE
 
     for (n in numeric_or_alpha) {
-        if (n == FALSE) {
+        if (!is.numeric(n)) {
             all_numeric <- FALSE
             break
         }

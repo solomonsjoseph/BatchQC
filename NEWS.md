@@ -1,3 +1,12 @@
+# Version 2.5.15
+
+## Minor Changes
+* Added "log_option" to UMAP to allow seemless UMAP plotting for counts data
+
+## Bug Fixes
+* Reworked dendrogram_alpha_numeric_check to use is.numeric() instead of
+  as.numeric() to avoid warning due to coercion 
+
 # Version 2.5.14
 ## Minor Changes
 * Added voom as a normalization method
