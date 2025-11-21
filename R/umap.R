@@ -9,9 +9,12 @@
 #' @param min_distance numeric; how close points appear in final layout; higher
 #'   values puts less emphasis on global structure; must be less than spread
 #' @param spread numeric; dispersion of points in umap
-#' @param exploratory Boolean; default is FALSE, if True, a 5x5 grid with
+#' @param exploratory Boolean; default is FALSE, if TRUE, a 5x5 grid with
 #'   k = 15, 25, 50, 100 and min_distance = 0.1, .2, .5, .75, .99 will
 #'   be plotted
+#' @param log_option Boolean; default is FALSE, if TRUE,
+#'   log(assay_of_interest + 1) is computed and used for plotting; useful for
+#'   count data
 #' @import umap
 #' @return umap plot
 #' @examples
@@ -20,14 +23,18 @@
 #' se$Treatment <- as.factor(se$Treatment)
 #' se$Mutation_Status <- as.factor(se$Mutation_Status)
 #' umap_plot <- BatchQC::umap(se_object = se, assay_of_interest = "counts",
-#' batch = "Treatment", covar = "Mutation_Status")
+#' batch = "Treatment", covar = "Mutation_Status", log_option = TRUE)
 #' umap_plot
 #'
 #' @export
 
 umap <- function(se_object, assay_of_interest, batch, covar, neighbors = 15,
-    min_distance = 0.1, spread = 1, exploratory = FALSE) {
+    min_distance = 0.1, spread = 1, exploratory = FALSE, log_option = FALSE) {
     plot_assay <- t(assays(se_object)[[assay_of_interest]])
+
+    if (log_option) {
+        plot_assay <- log(plot_assay + 1)
+    }
 
     if (!exploratory) {
         umap_data <- umap::umap(plot_assay, n_neighbors = neighbors,
@@ -69,7 +76,6 @@ umap <- function(se_object, assay_of_interest, batch, covar, neighbors = 15,
             facet_grid(min_distance ~ num_neighbors,
                 scales = "free", as.table = FALSE)
     }
-
     return(plot)
 }
 

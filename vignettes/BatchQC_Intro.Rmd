@@ -572,11 +572,13 @@ batch effect is not seen, shapes (batch) should be dispersed throughout and you
 should see clustering by condition (color).
 
 Use the following code to recreate the PCA plot and associated table that lists
-the explained variation of each PC for our TB data set:
+the explained variation of each PC for our TB data set. Please note that count
+data should be log-normalized prior to PCA plotting, so we use the
+log_normalized assay:
 ```{r}
 pca_plot <- BatchQC::PCA_plotter(se = se_object, nfeature = 20, color = batch,
     shape = covar, batch = batch,
-    assays = c(assay_of_interest, "ComBat_corrected"),
+    assays = c("log_normalized_counts", "ComBat_corrected"),
     xaxisPC = 1, yaxisPC = 2, log_option = FALSE)
 pca_plot$plot
 pca_plot$var_explained
@@ -598,7 +600,7 @@ Use the following code to recreate the UMAP for the TB data set:
 ```{r UMAP}
 umap_plot <- BatchQC::umap(se = se_object,
     assay_of_interest = assay_of_interest, batch = batch, covar = covar,
-    neighbors = 15, min_distance = 0.1, spread = 1)
+    neighbors = 15, min_distance = 0.1, spread = 1, log_option = TRUE)
 
 umap_plot
 ```

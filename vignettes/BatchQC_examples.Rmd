@@ -6,10 +6,10 @@ author:
   - Division of Infectious Disease, Department of Medicine, Rutgers University 
   - Director, Center for Data Science, Rutgers University
   email: wj183@njms.rutgers.edu 
-- name: Jessica McClintock
+- name: Jessica Anderson
   affiliation: 
   - Division of Infectious Disease, Department of Medicine, Rutgers University 
-  email: jessica.mcclintock@rutgers.edu
+  email: anderson.jessica@rutgers.edu
 - name: Solaiappan Manimaran
   affiliation:
   - Computational Biomedicine, Department of Medicine, Boston University
