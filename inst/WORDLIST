@@ -51,6 +51,7 @@ kBET
 knn
 limma
 ln
+logCPM
 mTCC
 nb
 ncol
