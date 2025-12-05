@@ -1,7 +1,14 @@
+# Version 2.5.16
+
+## Minor Changes
+* Updated negative binomial test to allow users to set the low sample threshold
+* Created place holder sin negative binomial function for edgeR usability
+* Increased umap point size
+
 # Version 2.5.15
 
 ## Minor Changes
-* Added "log_option" to UMAP to allow seemless UMAP plotting for counts data
+* Added "log_option" to UMAP to allow seamless UMAP plotting for counts data
 
 ## Bug Fixes
 * Reworked dendrogram_alpha_numeric_check to use is.numeric() instead of
