@@ -19,41 +19,15 @@ counts2pvalue <- function(counts, size, mu) {
     return(p.fit)
 }
 
-#' This function calculates goodness-of-fit pvalues for all genes by looking at
-#' how the NB model by DESeq2 fit the data
-#' @import DESeq2
-#' @import SummarizedExperiment
-#' @importFrom S4Vectors DataFrame
-#' @param se the se object where all the data is contained
-#' @param count_matrix name of the assay with gene expression matrix (in counts)
-#' @param condition name of the se colData with the condition status
-#' @param other_variables name of the se colData containing other variables of
-#'   interest that should be considered in the DESeq2 model
-#' @param num_genes downsample value, default is 500 (or all genes if less)
-#' @return a matrix of pvalues where each row is a gene and each column is a
-#'   level within the condition of interest
-#' @export
-#' @examples
-#' # example code
-#' library(scran)
-#' se <- mockSCE(ncells = 20)
-#' se$Treatment <- as.factor(se$Treatment)
-#' se$Mutation_Status <- as.factor(se$Mutation_Status)
-#' nb_results <- goodness_of_fit_DESeq2(se = se, count_matrix = "counts",
-#'   condition = "Treatment", other_variables = "Mutation_Status")
-#' nb_results[1]
-#' nb_results[2]
-#' nb_results[3]
+#' Performs down sampling for negative binomial model fit check.
+#'
+#' @param count_matrix matrix; contains the feature data (should be counts)
+#' @param num_genes integer; number of genes to use in down sampling
+#' @return list containing "sampled" a down sampled assay and "count_matrix"
+#'   with the down sampled count_matrix
+#' @keywords internal
 
-
-goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
-    other_variables = NULL, num_genes = 500) {
-    # Obtain needed data from se object
-    count_matrix <- SummarizedExperiment::assays(se)[[count_matrix]]
-    condition <- SummarizedExperiment::colData(se)[[condition]]
-    condition <- as.factor(condition)
-    num_samples <- dim(count_matrix)[2]
-
+nb_down_sample <- function(count_matrix, num_genes) {
     # Ensure the number of genes is greater than the desired number for sampling
     if (dim(count_matrix)[1] < num_genes) {
         num_genes <- dim(count_matrix)[1]
@@ -67,6 +41,56 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
     }else {
         sampled <- row.names(count_matrix)
     }
+
+    return(list(sampled = sampled, count_matrix = count_matrix))
+}
+
+#' This function calculates goodness-of-fit pvalues for all genes by looking at
+#' how the NB model by DESeq2 fit the data
+#' @import DESeq2
+#' @import SummarizedExperiment
+#' @importFrom S4Vectors DataFrame
+#' @param se the se object; se object where all the data is contained
+#' @param count_matrix string; name of the assay with gene expression matrix
+#'   (in counts)
+#' @param condition string; name of the se colData with the condition status
+#' @param other_variables string; name of the se colData containing other
+#'   variables of interest that should be considered in the model
+#' @param method string; method to use for the parametric or non-parametric
+#'   test;either "DESeq2" or "edgeR"; default is "edgeR"
+#' @param num_genes down sample value, default is 500 (or all genes if less)
+#' @param small_sample_cutoff value at which non-parametric test will be used
+#'   (considered "large sample size") vs parametric will be used (considered
+#'   "small sample size); default is 20
+#' @return a matrix of p-values where each row is a gene and each column is a
+#'   level within the condition of interest
+#' @export
+#' @examples
+#' # example code
+#' library(scran)
+#' se <- mockSCE(ncells = 20)
+#' se$Treatment <- as.factor(se$Treatment)
+#' se$Mutation_Status <- as.factor(se$Mutation_Status)
+#' nb_results <- goodness_of_fit_DESeq2(se = se, count_matrix = "counts",
+#'   condition = "Treatment", other_variables = "Mutation_Status",
+#'   method = "DESeq2")
+#' nb_results[1]
+#' nb_results[2]
+#' nb_results[3]
+
+
+goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
+    other_variables = NULL, method = "edgeR", num_genes = 500,
+    small_sample_cutoff = 20) {
+    # Obtain needed data from se object
+    count_matrix <- SummarizedExperiment::assays(se)[[count_matrix]]
+    condition <- SummarizedExperiment::colData(se)[[condition]]
+    condition <- as.factor(condition)
+    num_samples <- dim(count_matrix)[2]
+
+    dw_sample <- nb_down_sample(count_matrix, num_genes)
+    count_matrix <- dw_sample$count_matrix
+    sampled <- dw_sample$sampled
     conditions_df <- NULL
     formula_for_DESeq <- ""
 
@@ -79,20 +103,29 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
                 other_variables[i])
         }
     }
-
     colnames(conditions_df) <- other_variables
-
     for (i in seq_len(length(colnames(conditions_df)))){
         conditions_df[, i] <- as.factor(conditions_df[, i])
     }
 
-    if (num_samples < 20) {
-        result <- DESeq2_small_size(count_matrix, condition, other_variables,
-            conditions_df, formula_for_DESeq, num_samples)
-    }else {
-        result <- DESeq_large_analysis(count_matrix, condition, other_variables,
-            conditions_df, formula_for_DESeq, num_samples, sampled)
+    if (method == "DESeq2") {
+        if (num_samples < small_sample_cutoff) {
+            result <- DESeq2_small_size(count_matrix, condition,
+                other_variables, conditions_df, formula_for_DESeq, num_samples,
+                small_sample_cutoff)
+        }else {
+            result <- DESeq_large_analysis(count_matrix, condition,
+                other_variables, conditions_df, formula_for_DESeq, num_samples,
+                sampled, small_sample_cutoff)
+        }
+    } else if (method == "edgeR") {
+        if (num_samples < small_sample_cutoff) {
+            result <- NULL # Add Function call for edgeR small sample size
+        }else {
+            result <- NULL # Add Function call for edgeR large sample size
+        }
     }
+
     return(result)
 }
 
@@ -109,10 +142,13 @@ goodness_of_fit_DESeq2 <- function(se, count_matrix, condition,
 #'   variables of interest (columns in order of the other_variables vector)
 #' @param formula_for_DESeq the stat formula to be used in the DESeq analysis
 #' @param num_samples total number of samples to analyze
+#' @param small_sample_cutoff value at which non-parametric test was used
+#'   (considered "large sample size") vs parametric was used (considered
+#'   "small sample size")
 #' @return a list containing the string recommendation, the histogram and a
 #'   reference for the original source of the test
 DESeq2_small_size <- function(count_matrix, condition, other_variables,
-    conditions_df, formula_for_DESeq, num_samples) {
+    conditions_df, formula_for_DESeq, num_samples, small_sample_cutoff) {
     # Use DESeq2 to fit the NB model
     if (is.null(other_variables)) {
         dds <- DESeqDataSetFromMatrix(count_matrix,
@@ -125,10 +161,8 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
     dds <- DESeq(dds)
     # The size parameters estimated by DESeq2 for each gene
     size <- 1 / dispersions(dds)
-
     # The mu parameters estimated by DESeq2 for each count
     mu_matrix <- assays(dds)[["mu"]]
-
     # Count the number of levels in condition
     unique_conditions <- unique(condition)
     num_unique_conditions <- length(unique_conditions)
@@ -151,7 +185,8 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
     all_pvalues <- as.data.frame(all_pvalues, row.names =
             row.names(count_matrix))
     colnames(all_pvalues) <- unique_conditions
-    recommendation <- nb_proportion(all_pvalues, 0.01, 0.42, num_samples)
+    recommendation <- nb_proportion(all_pvalues, 0.01, 0.42, num_samples,
+        small_sample_cutoff, method = "DESeq2")
     res_histogram <- nb_histogram(all_pvalues)
     reference <- paste0("Adapted for small sample sizes from: Li, Y., ",
         "Ge, X., Peng, F. et al. Exaggerated false positives by popular ",
@@ -177,10 +212,14 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
 #' @param formula_for_DESeq the stat formula to be used in the DESeq analysis
 #' @param num_samples total number of samples to analyze
 #' @param sampled the down sampled matrix
+#' @param small_sample_cutoff value at which non-parametric test was used
+#'   (considered "large sample size") vs parametric was used (considered
+#'   "small sample size")
 #' @return a list containing the string recommendation
 
 DESeq_large_analysis <- function(count_matrix, condition, other_variables,
-    conditions_df, formula_for_DESeq, num_samples, sampled) {
+    conditions_df, formula_for_DESeq, num_samples, sampled,
+    small_sample_cutoff) {
     dds <- permuted_DESeq(count_matrix, condition, other_variables,
         conditions_df, formula_for_DESeq)
     res <- results(dds)
@@ -202,16 +241,13 @@ DESeq_large_analysis <- function(count_matrix, condition, other_variables,
     all_padj_values <- stats::na.omit(all_padj_values)
     all_pvalues <- stats::na.omit(all_pvalues)
     num_genes <- dim(count_matrix)[1]
-
     colnames(all_padj_values) <- resultsNames(dds)[2:length(resultsNames(dds))]
     colnames(all_pvalues) <- resultsNames(dds)[2:length(resultsNames(dds))]
     levels_of_condition <- length(levels(condition))
-
     pvals_condition <- as.data.frame(
         all_padj_values[, seq_len(levels_of_condition - 1)])
     colnames(pvals_condition) <- resultsNames(dds)[2:levels_of_condition]
     rownames(pvals_condition) <- rownames(all_padj_values)
-
     adj_pvals_condition <- as.data.frame(
         all_padj_values[, seq_len(levels_of_condition - 1)])
     colnames(adj_pvals_condition) <-
@@ -219,7 +255,8 @@ DESeq_large_analysis <- function(count_matrix, condition, other_variables,
     rownames(adj_pvals_condition) <- rownames(all_padj_values)
     threshold <- floor(0.001 * num_genes)
     recommendation <- nb_proportion(adj_pvals_condition,
-        pvals_condition, 0.05, threshold, num_samples)
+        pvals_condition, 0.05, threshold, num_samples, small_sample_cutoff,
+        method = "DESeq2")
     res_histogram <- nb_histogram(all_padj_values)
     reference <- paste0("Paper Reference: Li, Y., ",
         "Ge, X., Peng, F. et al. Exaggerated false positives by popular ",
@@ -297,18 +334,24 @@ nb_histogram <- function(adj_p_val_table) {
 #' @param threshold the value to compare the proportion of p-values to for data
 #'   sets less than 20, default is 0.42
 #' @param num_samples the number of samples in the analysis
+#' @param small_sample_cutoff value at which non-parametric test will be used
+#'   (considered "large sample size") vs parametric will be used (considered
+#'   "small sample size); default is 20
+#' @param method string; method utilized for the parametric or non-parametric
+#'   test; either "DESeq2" or "edgeR"
 #' @return a statement about whether DESeq2 is appropriate to use for analysis
 
 nb_proportion <- function(adj_p_val_table, p_val_table, low_pval = 0.01,
-    threshold = 0.42, num_samples) {
-    if (num_samples < 20) {
+    threshold = 0.42, num_samples, small_sample_cutoff, method) {
+    if (num_samples < small_sample_cutoff) {
         proportion_below_value <- mean(adj_p_val_table < low_pval, na.rm = TRUE)
         nb_fit <- proportion_below_value < threshold
 
         if (nb_fit) {
-            recommendation <- "may use DESeq2 for your analysis."
+            recommendation <- paste0("may use ", method, " for your analysis.")
         }else {
-            recommendation <- "should not use DESeq2 for your analysis."
+            recommendation <- paste0("should not use ", method,
+                " for your analysis.")
         }
 
         commentary <- paste0("With an adjusted FDR cut off of ", low_pval, ", ",
@@ -340,7 +383,7 @@ nb_proportion <- function(adj_p_val_table, p_val_table, low_pval = 0.01,
         nb_fit <- count_below_value < threshold
         nb_fit_pval <- count_below_value_pval < threshold_pval
         commentary <- commentary(nb_fit, nb_fit_pval, count_below_value,
-            count_below_value_pval, low_pval)
+            count_below_value_pval, low_pval, method)
 
     return(commentary)
     }
@@ -354,33 +397,33 @@ nb_proportion <- function(adj_p_val_table, p_val_table, low_pval = 0.01,
 #' @param count_below_value number of features below threshold
 #' @param count_below_value_pval number of features below p-val threshold
 #' @param low_pval pval threshold
+#' @param method string; method utilized for the parametric or non-parametric
+#'   test; either "DESeq2" or "edgeR"
 #' @return a commentary string statement
 #'
 commentary <- function(nb_fit, nb_fit_pval, count_below_value,
-    count_below_value_pval, low_pval) {
+    count_below_value_pval, low_pval, method) {
     if (nb_fit & nb_fit_pval) {
         if (count_below_value == 0 && count_below_value_pval == 0) {
-            recommendation <- "you may use DESeq2 for your analysis."
+            recommendation <- paste0("you may use ", method,
+                " for your analysis.")
         }else {
             recommendation <- paste0("you should be cautious about using ",
-                "DESeq2 for your analysis. You have significant features,",
+                method, " for your analysis. You have significant features,",
                 " and thus you are at risk of receiving false results.")
         }
     }else {
         recommendation <- paste0(
-            "therefore, we do not recommend that you should use DESeq2 for ",
-            "your analysis.")
+            "therefore, we do not recommend that you should use ", method,
+            " for your analysis.")
     }
 
     commentary <- paste0("With an adjusted FDR cut off of ", low_pval, ", ",
-        count_below_value,
-        " of your condition variable features are below the cutoff. ",
-        "If DESeq's assumptions are met, we would not expect to find any",
-        " significant features. Since ",
-        count_below_value, " features have a significant FDR, and ",
-        count_below_value_pval,
-        " features have a significant pvalue (<0.05), ",
-        recommendation)
+        count_below_value, " of your condition variable features are below the",
+        " cutoff. If ", method, "'s assumptions are met, we would not expect ",
+        "to find any significant features. Since ", count_below_value,
+        " features have a significant FDR, and ", count_below_value_pval,
+        " features have a significant pvalue (<0.05), ", recommendation)
 
     return(commentary)
 }

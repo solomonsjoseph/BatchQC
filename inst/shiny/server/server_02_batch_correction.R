@@ -63,14 +63,17 @@ observe( {
 
 ## Complete NB Check
 observeEvent(input$nb_check, {
-    req(input$nb_test, input$correction_assay,
-        input$condition_of_interest)
+    req(input$correction_assay,
+        input$condition_of_interest, input$nb_method)
     withBusyIndicatorServer("nb_check", {
+        browser()
         check_res <- goodness_of_fit_DESeq2(reactivevalue$se,
             input$correction_assay,
             input$condition_of_interest,
             input$nb_variables,
-            input$num_genes)
+            input$nb_method,
+            input$num_genes,
+            input$small_cutoff)
         output$recommendation <- renderText(check_res$recommendation)
         output$nb_histogram <- renderPlot(check_res$res_histogram)
         output$reference <- renderText(check_res$reference)

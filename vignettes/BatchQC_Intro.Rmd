@@ -208,20 +208,21 @@ by running the DESeq2 negative binomial check.
 
 ```{R Neg Binomial Model Fit TB Data}
 # Set a seed if you would like reproducible results
-set.seed(1)
+set.seed(2)
 
 TB_fit <- goodness_of_fit_DESeq2(se = se_object,
     count_matrix = assay_of_interest,
     condition = covar,
     other_variables = batch,
-    num_genes = 3000)
+    num_genes = 3000,
+    method = "DESeq2")
 
 TB_fit$res_histogram
 TB_fit$recommendation
 ```
 
-The recommendation states that DESeq is not a good option, therefore a negative
-binomial distribution is not a good fit.
+The recommendation states that DESeq may be a good option, therefore we can 
+consider downstream methods that require a negative binomial fit.
 
 ### Apply Normalization methods
 After you have successfully uploaded your data set of interest, you can apply

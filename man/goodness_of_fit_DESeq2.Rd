@@ -10,23 +10,33 @@ goodness_of_fit_DESeq2(
   count_matrix,
   condition,
   other_variables = NULL,
-  num_genes = 500
+  method = "edgeR",
+  num_genes = 500,
+  small_sample_cutoff = 20
 )
 }
 \arguments{
-\item{se}{the se object where all the data is contained}
+\item{se}{the se object; se object where all the data is contained}
 
-\item{count_matrix}{name of the assay with gene expression matrix (in counts)}
+\item{count_matrix}{string; name of the assay with gene expression matrix
+(in counts)}
 
-\item{condition}{name of the se colData with the condition status}
+\item{condition}{string; name of the se colData with the condition status}
 
-\item{other_variables}{name of the se colData containing other variables of
-interest that should be considered in the DESeq2 model}
+\item{other_variables}{string; name of the se colData containing other
+variables of interest that should be considered in the model}
 
-\item{num_genes}{downsample value, default is 500 (or all genes if less)}
+\item{method}{string; method to use for the parametric or non-parametric
+test;either "DESeq2" or "edgeR"; default is "edgeR"}
+
+\item{num_genes}{down sample value, default is 500 (or all genes if less)}
+
+\item{small_sample_cutoff}{value at which non-parametric test will be used
+(considered "large sample size") vs parametric will be used (considered
+"small sample size); default is 20}
 }
 \value{
-a matrix of pvalues where each row is a gene and each column is a
+a matrix of p-values where each row is a gene and each column is a
 level within the condition of interest
 }
 \description{
@@ -40,7 +50,8 @@ se <- mockSCE(ncells = 20)
 se$Treatment <- as.factor(se$Treatment)
 se$Mutation_Status <- as.factor(se$Mutation_Status)
 nb_results <- goodness_of_fit_DESeq2(se = se, count_matrix = "counts",
-  condition = "Treatment", other_variables = "Mutation_Status")
+  condition = "Treatment", other_variables = "Mutation_Status",
+  method = "DESeq2")
 nb_results[1]
 nb_results[2]
 nb_results[3]

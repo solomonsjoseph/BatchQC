@@ -12,7 +12,8 @@ DESeq_large_analysis(
   conditions_df,
   formula_for_DESeq,
   num_samples,
-  sampled
+  sampled,
+  small_sample_cutoff
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ variables of interest (columns in order of the other_variables vector)}
 \item{num_samples}{total number of samples to analyze}
 
 \item{sampled}{the down sampled matrix}
+
+\item{small_sample_cutoff}{value at which non-parametric test was used
+(considered "large sample size") vs parametric was used (considered
+"small sample size")}
 }
 \value{
 a list containing the string recommendation
