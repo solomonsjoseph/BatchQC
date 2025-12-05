@@ -45,7 +45,7 @@ umap <- function(se_object, assay_of_interest, batch, covar, neighbors = 15,
             covar = colData(se_object)[[covar]])
 
         plot <- ggplot(df, aes(x, y, color = batch, shape = covar)) +
-            geom_point()
+            geom_point(size = 3)
     }else {
         if (dim(plot_assay)[1] < 15) {
             stop("Exploratory option is only valid on data sets with
