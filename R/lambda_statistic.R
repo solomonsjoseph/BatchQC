@@ -113,9 +113,9 @@ is_design_balanced <- function(se, batch, covariate) {
 #'  print(lambda_calculation$lambda_stat)
 #'
 #' @return a list with 2 parameters, 'lambda_stat' which contains the adj lambda
-#'   value from lambda_compute (ln(lambda)) or 'NULL' if the design is balanced,
-#'   and 'correction_recommendation' which contains a string with a
-#'   recommendation on if batch correction should be completed
+#'   value from lambda_compute (ln(lambda)) and 'correction_recommendation'
+#'   which contains a string with a recommendation on if batch correction
+#'   should be completed
 #' @export
 
 run_lambda <- function(se, assay, batch, condition) {
@@ -143,7 +143,7 @@ run_lambda <- function(se, assay, batch, condition) {
         }
     }else {
         recommendation <- paste0("The experimental design is unbalanced. ",
-            "Therefore, you should condsider applying a batch correction ",
+            "Therefore, you should consider applying a batch correction ",
             "method to your data. The calculated lambda statistic is ",
             round(lambda_res$lambda_adj, digits = 2), ".")
     }

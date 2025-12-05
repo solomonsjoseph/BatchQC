@@ -23,9 +23,9 @@ a named list with:
 }
 
 a list with 2 parameters, 'lambda_stat' which contains the adj lambda
-value from lambda_compute (ln(lambda)) or 'NULL' if the design is balanced,
-and 'correction_recommendation' which contains a string with a
-recommendation on if batch correction should be completed
+value from lambda_compute (ln(lambda)) and 'correction_recommendation'
+which contains a string with a recommendation on if batch correction
+should be completed
 }
 \description{
 This functions determines if an experimental design is balanced, then

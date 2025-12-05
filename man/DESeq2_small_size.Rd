@@ -11,7 +11,8 @@ DESeq2_small_size(
   other_variables,
   conditions_df,
   formula_for_DESeq,
-  num_samples
+  num_samples,
+  small_sample_cutoff
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ variables of interest (columns in order of the other_variables vector)}
 \item{formula_for_DESeq}{the stat formula to be used in the DESeq analysis}
 
 \item{num_samples}{total number of samples to analyze}
+
+\item{small_sample_cutoff}{value at which non-parametric test was used
+(considered "large sample size") vs parametric was used (considered
+"small sample size")}
 }
 \value{
 a list containing the string recommendation, the histogram and a

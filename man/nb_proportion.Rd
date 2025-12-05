@@ -11,7 +11,9 @@ nb_proportion(
   p_val_table,
   low_pval = 0.01,
   threshold = 0.42,
-  num_samples
+  num_samples,
+  small_sample_cutoff,
+  method
 )
 }
 \arguments{
@@ -25,6 +27,13 @@ nb_proportion(
 sets less than 20, default is 0.42}
 
 \item{num_samples}{the number of samples in the analysis}
+
+\item{small_sample_cutoff}{value at which non-parametric test will be used
+(considered "large sample size") vs parametric will be used (considered
+"small sample size); default is 20}
+
+\item{method}{string; method utilized for the parametric or non-parametric
+test; either "DESeq2" or "edgeR"}
 }
 \value{
 a statement about whether DESeq2 is appropriate to use for analysis

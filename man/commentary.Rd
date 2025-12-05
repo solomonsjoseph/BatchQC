@@ -10,7 +10,8 @@ commentary(
   nb_fit_pval,
   count_below_value,
   count_below_value_pval,
-  low_pval
+  low_pval,
+  method
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ commentary(
 \item{count_below_value_pval}{number of features below p-val threshold}
 
 \item{low_pval}{pval threshold}
+
+\item{method}{string; method utilized for the parametric or non-parametric
+test; either "DESeq2" or "edgeR"}
 }
 \value{
 a commentary string statement
