@@ -5,21 +5,10 @@
 \title{This function creates the commentary recommendation when there are more than
 20 samples.}
 \usage{
-commentary(
-  nb_fit,
-  nb_fit_pval,
-  count_below_value,
-  count_below_value_pval,
-  low_pval,
-  method
-)
+commentary(nb_fit_pval, count_below_value_pval, low_pval, method)
 }
 \arguments{
-\item{nb_fit}{Boolean representing if the count is below the threshold}
-
 \item{nb_fit_pval}{Boolean representing if the p-val count is below threshold}
-
-\item{count_below_value}{number of features below threshold}
 
 \item{count_below_value_pval}{number of features below p-val threshold}
 

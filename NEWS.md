@@ -2,7 +2,7 @@
 
 ## Minor Changes
 * Updated negative binomial test to allow users to set the low sample threshold
-* Created place holder sin negative binomial function for edgeR usability
+* Created place holders in negative binomial function for edgeR usability
 * Increased umap point size
 
 # Version 2.5.15

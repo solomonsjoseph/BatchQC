@@ -210,7 +210,7 @@ by running the DESeq2 negative binomial check.
 # Set a seed if you would like reproducible results
 set.seed(2)
 
-TB_fit <- goodness_of_fit_DESeq2(se = se_object,
+TB_fit <- goodness_of_fit_nb(se = se_object,
     count_matrix = assay_of_interest,
     condition = covar,
     other_variables = batch,

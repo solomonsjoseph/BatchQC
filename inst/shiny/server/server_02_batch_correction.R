@@ -66,8 +66,7 @@ observeEvent(input$nb_check, {
     req(input$correction_assay,
         input$condition_of_interest, input$nb_method)
     withBusyIndicatorServer("nb_check", {
-        browser()
-        check_res <- goodness_of_fit_DESeq2(reactivevalue$se,
+        check_res <- goodness_of_fit_nb(reactivevalue$se,
             input$correction_assay,
             input$condition_of_interest,
             input$nb_variables,

@@ -5,10 +5,10 @@
 \title{This function creates a histogram from the negative binomial goodness-of-fit
 adjusted pvalues.}
 \usage{
-nb_histogram(adj_p_val_table)
+nb_histogram(p_val_table)
 }
 \arguments{
-\item{adj_p_val_table}{table of adjusted p-values from the nb test}
+\item{p_val_table}{table of adjusted p-values from the nb test}
 }
 \value{
 a histogram of the number of genes within a p-value range
