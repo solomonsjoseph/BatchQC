@@ -17,7 +17,7 @@ tabPanel('Batch Correction/Normalization',
             tabsetPanel(
                 tabPanel('Negative Binomial Check',
                     h4(strong("Usage")),
-                    h5("This features allows you to check your data (must be counts/whole number data) to see if it conforms to the required negative binomial assumption needed for various downstream analysis. If The negative binomial assumption is not met, you should normalize your data or perform other preprocessing step and/or use other more appropraite analysis tools."),
+                    h5("This features allows you to check your data (must be counts/whole number data) to see if it conforms to the required negative binomial assumption needed for various downstream analysis. If The negative binomial assumption is not met, you should normalize your data or perform other preprocessing step and/or use other more appropraite analysis tools. We recommend using the edgeR tool as the DESeq2 tool has not been fully analyzed, but is available at the user's discretion."),
                     selectizeInput('condition_of_interest',
                         'Select the variable you are interested in analyzing',
                         multiple = FALSE,

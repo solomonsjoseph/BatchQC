@@ -1,8 +1,15 @@
+# Version 2.5.17
+## Major Changes
+* Added edgeR negative binomial tests
+
+## Minor Changes
+* Updated non-parametric (large sample) thresholds and adjusted p-value info
+
 # Version 2.5.16
 
 ## Minor Changes
 * Updated negative binomial test to allow users to set the low sample threshold
-* Created place holder sin negative binomial function for edgeR usability
+* Created place holders in negative binomial function for edgeR usability
 * Increased umap point size
 
 # Version 2.5.15

@@ -2,7 +2,7 @@
 % Please edit documentation in R/negative_binomial_check.R
 \name{nb_down_sample}
 \alias{nb_down_sample}
-\title{Performs down sampling for negative binomail model fit check.}
+\title{Performs down sampling for negative binomial model fit check.}
 \usage{
 nb_down_sample(count_matrix, num_genes)
 }
@@ -13,9 +13,9 @@ nb_down_sample(count_matrix, num_genes)
 }
 \value{
 list containing "sampled" a down sampled assay and "count_matrix"
-with the down sampled count_marix
+with the down sampled count_matrix
 }
 \description{
-Performs down sampling for negative binomail model fit check.
+Performs down sampling for negative binomial model fit check.
 }
 \keyword{internal}

@@ -10,7 +10,7 @@ DESeq2_small_size(
   condition,
   other_variables,
   conditions_df,
-  formula_for_DESeq,
+  model_formula,
   num_samples,
   small_sample_cutoff
 )
@@ -26,7 +26,7 @@ DESeq2_small_size(
 \item{conditions_df}{data frame containing information for the other
 variables of interest (columns in order of the other_variables vector)}
 
-\item{formula_for_DESeq}{the stat formula to be used in the DESeq analysis}
+\item{model_formula}{the stat formula to be used in the DESeq analysis}
 
 \item{num_samples}{total number of samples to analyze}
 

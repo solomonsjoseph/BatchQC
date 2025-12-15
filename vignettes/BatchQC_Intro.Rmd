@@ -208,21 +208,22 @@ by running the DESeq2 negative binomial check.
 
 ```{R Neg Binomial Model Fit TB Data}
 # Set a seed if you would like reproducible results
-set.seed(2)
+set.seed(1)
 
-TB_fit <- goodness_of_fit_DESeq2(se = se_object,
+TB_fit <- goodness_of_fit_nb(se = se_object,
     count_matrix = assay_of_interest,
     condition = covar,
     other_variables = batch,
     num_genes = 3000,
-    method = "DESeq2")
+    method = "edgeR")
 
 TB_fit$res_histogram
 TB_fit$recommendation
 ```
 
-The recommendation states that DESeq may be a good option, therefore we can 
-consider downstream methods that require a negative binomial fit.
+The recommendation states that the edgeR negative binomial distribution is
+likely being violated. Therefore we probably should not consider down stream 
+methods that assume a negative binomial distribution.
 
 ### Apply Normalization methods
 After you have successfully uploaded your data set of interest, you can apply
