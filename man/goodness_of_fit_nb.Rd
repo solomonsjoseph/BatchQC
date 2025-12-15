@@ -44,14 +44,26 @@ This function calculates goodness-of-fit pvalues for all genes by looking at
 how the NB model by edgeR or DESeq2 fit the data
 }
 \examples{
-# example code
+# example code for small sample
 library(scran)
 se <- mockSCE(ncells = 20)
 se$Treatment <- as.factor(se$Treatment)
 se$Mutation_Status <- as.factor(se$Mutation_Status)
 nb_results <- goodness_of_fit_nb(se = se, count_matrix = "counts",
   condition = "Treatment", other_variables = "Mutation_Status",
-  method = "DESeq2")
+  method = "edgeR")
+nb_results[1]
+nb_results[2]
+nb_results[3]
+
+# example code for large sample
+library(scran)
+se <- mockSCE(ncells = 150)
+se$Treatment <- as.factor(se$Treatment)
+se$Mutation_Status <- as.factor(se$Mutation_Status)
+nb_results <- goodness_of_fit_nb(se = se, count_matrix = "counts",
+  condition = "Treatment", other_variables = "Mutation_Status",
+  method = "edgeR")
 nb_results[1]
 nb_results[2]
 nb_results[3]

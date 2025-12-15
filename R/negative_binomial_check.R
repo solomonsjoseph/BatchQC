@@ -19,6 +19,45 @@ counts2pvalue <- function(counts, size, mu) {
     return(p.fit)
 }
 
+#' This function calculates goodness-of-fit p-values for each condition level
+#' for each gene size, and estimated NB mean
+#' @param condition string; name of the se colData with the condition status
+#' @param size numeric; an estimated size parameter of the NB distributions for
+#'   the gene
+#' @param mu_matrix matrix;estimated mu parameter of the NB distributions for
+#'   different samples of each gene
+#' @param count_matrix string; name of the assay with gene expression matrix
+#'   (in counts)
+#' @return a data frame of p-values for each gene under each biological
+#'   condition
+#' @keywords internal
+
+pvalues_all_genes <- function(condition, size, mu_matrix, count_matrix) {
+    # Count the number of levels in condition
+    unique_conditions <- unique(condition)
+
+    all_pvalues <- vapply(seq_len(length(unique_conditions)), function(j) {
+        index_j <- which(condition == unique_conditions[j])
+        # For one condition level, calculate the goodness-of-fit p-values
+        pvalues_level <- vapply(seq_len(length(size)), function(i) {
+            mu_gene <- mu_matrix[i, index_j]
+            count_condition <- count_matrix[i, index_j]
+            pvalue <- counts2pvalue(counts = count_condition,
+                size = size[i],
+                mu = mu_gene)
+            return(pvalue)
+        }, double(1))
+        return(pvalues_level)
+    }, double(length(size)))
+
+    all_pvalues <- as.data.frame(all_pvalues,
+        row.names = row.names(count_matrix))
+
+    colnames(all_pvalues) <- unique_conditions
+
+    return(all_pvalues)
+}
+
 #' Performs down sampling for negative binomial model fit check.
 #'
 #' @param count_matrix matrix; contains the feature data (should be counts)
@@ -45,22 +84,6 @@ nb_down_sample <- function(count_matrix, num_genes) {
     return(list(sampled = sampled, count_matrix = count_matrix))
 }
 
-#' Sets the threshold based on sample size
-#'
-#' @param sample_size numeric; number of samples in the data set
-#' @return threshold; numeric with the threshold that should be used when
-#'   comparing significant genes
-#' @keywords internal
-#'
-determine_threshold <- function(sample_size) {
-    if (sample_size < 150) {
-        threshold <- 0.01
-    }else {
-        threshold <- 0.42
-    }
-    return(threshold)
-}
-
 #' This function calculates goodness-of-fit pvalues for all genes by looking at
 #' how the NB model by edgeR or DESeq2 fit the data
 #' @import DESeq2
@@ -83,14 +106,26 @@ determine_threshold <- function(sample_size) {
 #'   level within the condition of interest
 #' @export
 #' @examples
-#' # example code
+#' # example code for small sample
 #' library(scran)
 #' se <- mockSCE(ncells = 20)
 #' se$Treatment <- as.factor(se$Treatment)
 #' se$Mutation_Status <- as.factor(se$Mutation_Status)
 #' nb_results <- goodness_of_fit_nb(se = se, count_matrix = "counts",
 #'   condition = "Treatment", other_variables = "Mutation_Status",
-#'   method = "DESeq2")
+#'   method = "edgeR")
+#' nb_results[1]
+#' nb_results[2]
+#' nb_results[3]
+#'
+#' # example code for large sample
+#' library(scran)
+#' se <- mockSCE(ncells = 150)
+#' se$Treatment <- as.factor(se$Treatment)
+#' se$Mutation_Status <- as.factor(se$Mutation_Status)
+#' nb_results <- goodness_of_fit_nb(se = se, count_matrix = "counts",
+#'   condition = "Treatment", other_variables = "Mutation_Status",
+#'   method = "edgeR")
 #' nb_results[1]
 #' nb_results[2]
 #' nb_results[3]
@@ -197,7 +232,7 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
             return(pvalue)
         }, double(1))
         return(pvalues_level)
-    }, double(1))
+    }, double(length(size)))
 
     all_pvalues <- as.data.frame(all_pvalues, row.names =
             row.names(count_matrix))
@@ -237,43 +272,43 @@ DESeq2_small_size <- function(count_matrix, condition, other_variables,
 DESeq_large_analysis <- function(count_matrix, condition, other_variables,
     conditions_df, model_formula, num_samples, sampled,
     small_sample_cutoff) {
+    considered_significant <- 0.05
     dds <- permuted_DESeq(count_matrix, condition, other_variables,
         conditions_df, model_formula)
     res <- results(dds)
     # count the number of DEGs
-    num_DEGs <- sum(res$padj <= 0.01)
-    # all_padj_values <- NULL
+    num_DEGs <- sum(res$padj <= considered_significant)
+    all_padj_values <- NULL
     all_pvalues <- NULL
     for (i in 2:length(resultsNames(dds))){
-        #padj_values <- as.data.frame(results(dds,
-         #   name = resultsNames(dds)[i])$padj, row.names = sampled)
-        #all_padj_values <- as.data.frame(c(all_padj_values, padj_values))
+        padj_values <- as.data.frame(results(dds,
+            name = resultsNames(dds)[i])$padj, row.names = sampled)
+        all_padj_values <- as.data.frame(c(all_padj_values, padj_values))
         p_values <- as.data.frame(results(dds,
             name = resultsNames(dds)[i])$pvalue, row.names = sampled)
         all_pvalues <- as.data.frame(c(all_pvalues, p_values))
     }
 
-    #rownames(all_padj_values) <- sampled
+    rownames(all_padj_values) <- sampled
     rownames(all_pvalues) <- sampled
-    #all_padj_values <- stats::na.omit(all_padj_values)
+    all_padj_values <- stats::na.omit(all_padj_values)
     all_pvalues <- stats::na.omit(all_pvalues)
     num_genes <- dim(count_matrix)[1]
-    #colnames(all_padj_values) <- resultsNames(dds)[2:length(resultsNames(dds))]
+    colnames(all_padj_values) <- resultsNames(dds)[2:length(resultsNames(dds))]
     colnames(all_pvalues) <- resultsNames(dds)[2:length(resultsNames(dds))]
     levels_of_condition <- length(levels(condition))
     pvals_condition <- as.data.frame(
         all_pvalues[, seq_len(levels_of_condition - 1)])
     colnames(pvals_condition) <- resultsNames(dds)[2:levels_of_condition]
     rownames(pvals_condition) <- rownames(all_pvalues)
-    #adj_pvals_condition <- as.data.frame(
-    #    all_padj_values[, seq_len(levels_of_condition - 1)])
-    #colnames(adj_pvals_condition) <-
-       # resultsNames(dds)[2:levels_of_condition]
-    #rownames(adj_pvals_condition) <- rownames(all_padj_values)
-    threshold <- determine_threshold(num_samples)  #floor(0.001 * num_genes)
-    recommendation <- nb_proportion(#adj_pvals_condition,
-        pvals_condition, 0.01, threshold, num_samples, small_sample_cutoff,
-        method = "DESeq2")
+    adj_pvals_condition <- as.data.frame(
+        all_padj_values[, seq_len(levels_of_condition - 1)])
+    colnames(adj_pvals_condition) <-
+        resultsNames(dds)[2:levels_of_condition]
+    rownames(adj_pvals_condition) <- rownames(all_padj_values)
+    threshold <- 0.001 * num_genes
+    recommendation <- nb_proportion(adj_pvals_condition, considered_significant,
+        threshold, num_samples, small_sample_cutoff, method = "DESeq2")
     res_histogram <- nb_histogram(all_pvalues) #all_padj_values)
     reference <- paste0("Paper Reference: Li, Y., ",
         "Ge, X., Peng, F. et al. Exaggerated false positives by popular ",
@@ -317,33 +352,18 @@ edgeR_small_size <- function(count_matrix, condition, other_variables,
             paste0("~ condition", model_formula)), data = y$sample)
     }
     y <- estimateDisp(y, design)
+
     # The size parameters and mu estimated by edgeR for each gene
     size <- 1 / y$tagwise.dispersion
     sizefactor <- y$samples$norm.factors
     libsize.factor <- mean(colSums(count_matrix)) / mean(colSums(count_norm))
     cpm.mean <- rowMeans(count_norm)
-    # Count the number of levels in condition
-    unique_conditions <- unique(condition)
-    num_unique_conditions <- length(unique_conditions)
+
+    mu_matrix <- cpm.mean %*% t(sizefactor) * libsize.factor
 
     # For each condition level, get goodness-of-fit p-values for each genes
-    all_pvalues <- vapply(seq_len(length(unique_conditions)), function(j) {
-        index_j <- which(condition == unique_conditions[j])
-        # For one condition level, calculate the goodness-of-fit p-values
-        pvalues_level <-  vapply(seq_len(length(size)), function(i) {
-            mu_gene <- cpm.mean[i] * sizefactor[index_j] * libsize.factor
-            count_condition <- y$counts[i, index_j]
-            pvalue <- counts2pvalue(counts = count_condition,
-                size = size[i],
-                mu = mu_gene)
-            return(pvalue)
-        }, double(1))
-        return(pvalues_level)
-    }, double(length(size)))
+    all_pvalues <- pvalues_all_genes(condition, size, mu_matrix, y$counts)
 
-    all_pvalues <- as.data.frame(all_pvalues,
-        row.names = row.names(count_matrix))
-    colnames(all_pvalues) <- unique_conditions
     recommendation <- nb_proportion(all_pvalues, 0.01, 0.01, num_samples,
         small_sample_cutoff, method = "edgeR")
     res_histogram <- nb_histogram(all_pvalues)
@@ -379,31 +399,29 @@ edgeR_small_size <- function(count_matrix, condition, other_variables,
 edgeR_large_analysis <- function(count_matrix, condition, other_variables,
     conditions_df, model_formula, num_samples,
     sampled, small_sample_cutoff) {
-
-    count_norm <- NULL # needs to be defined
+    considered_significant <- 0.05
     fit <- permuted_edgeR(count_matrix, condition, other_variables,
         conditions_df, model_formula)
     qlf <- glmQLFTest(fit, coef = 2)
-    qlf_i <- topTags(qlf, n = nrow(count_norm), p.value = 1)@.Data[[1]]
+    qlf_i <- topTags(qlf, n = nrow(count_matrix), p.value = 1)@.Data[[1]]
     # count the number of DEGs
-    num_DEGs <- sum(qlf_i$FDR <= 0.01) # This is looking at adj_pvals (FDR)
-    #all_padj_values <- NULL
+    num_DEGs <- sum(qlf_i$FDR <= considered_significant)
+    all_padj_values <- NULL
     all_pvalues <- NULL
     for (i in 2:length(colnames(fit$coefficients))){
         qlf <- glmQLFTest(fit, coef = colnames(fit$coefficients)[i])
-        qlf_i <- topTags(qlf, n = nrow(count_norm), p.value = 1)@.Data[[1]]
-
-        #padj_values <- as.data.frame(qlf_i$FDR, row.names = sampled)
-        #all_padj_values <- as.data.frame(c(all_padj_values, padj_values))
+        qlf_i <- topTags(qlf, n = nrow(count_matrix), p.value = 1)@.Data[[1]]
+        padj_values <- as.data.frame(qlf_i$FDR, row.names = sampled)
+        all_padj_values <- as.data.frame(c(all_padj_values, padj_values))
         p_values <- as.data.frame(qlf_i$PValue, row.names = sampled)
         all_pvalues <- as.data.frame(c(all_pvalues, p_values))
     }
-    #rownames(all_padj_values) <- sampled
+    rownames(all_padj_values) <- sampled
     rownames(all_pvalues) <- sampled
-    #all_padj_values <- stats::na.omit(all_padj_values)
+    all_padj_values <- stats::na.omit(all_padj_values)
     all_pvalues <- stats::na.omit(all_pvalues)
     num_genes <- dim(count_matrix)[1]
-    #colnames(all_padj_values) <- colnames(fit$coefficients)[-1]
+    colnames(all_padj_values) <- colnames(fit$coefficients)[-1]
     colnames(all_pvalues) <- colnames(fit$coefficients)[-1]
     levels_of_condition <- length(levels(condition))
     pvals_condition <- as.data.frame(
@@ -411,14 +429,13 @@ edgeR_large_analysis <- function(count_matrix, condition, other_variables,
     colnames(pvals_condition) <-
         colnames(fit$coefficients)[2:levels_of_condition]
     rownames(pvals_condition) <- rownames(all_pvalues)
-    # adj_pvals_condition <- as.data.frame(
-    #    all_padj_values[, seq_len(levels_of_condition - 1)])
-    #colnames(adj_pvals_condition) <-
-     #   colnames(fit$coefficients)[2:levels_of_condition]
-    #rownames(adj_pvals_condition) <- rownames(all_padj_values)
-    threshold <- determine_threshold(num_samples) #floor(0.001 * num_genes)
-    recommendation <- nb_proportion(#adj_pvals_condition,
-        pvals_condition, 0.01,
+    adj_pvals_condition <- as.data.frame(
+        all_padj_values[, seq_len(levels_of_condition - 1)])
+    colnames(adj_pvals_condition) <-
+        colnames(fit$coefficients)[2:levels_of_condition]
+    rownames(adj_pvals_condition) <- rownames(all_padj_values)
+    threshold <- 0.001 * num_genes
+    recommendation <- nb_proportion(adj_pvals_condition, considered_significant,
         threshold, num_samples, small_sample_cutoff, method = "edgeR")
     res_histogram <- nb_histogram(all_pvalues) #all_padj_values)
     reference <- paste0("Paper Reference: Li, Y., ",
@@ -537,10 +554,8 @@ nb_histogram <- function(p_val_table) {
 #'   test; either "DESeq2" or "edgeR"
 #' @return a statement about whether DESeq2 is appropriate to use for analysis
 
-nb_proportion <- function(p_val_table, low_pval = 0.01,
-    threshold, num_samples, small_sample_cutoff, method) {
-
-    threshold <- determine_threshold(num_samples)
+nb_proportion <- function(p_val_table, low_pval, threshold, num_samples,
+    small_sample_cutoff, method) {
 
     if (num_samples > 20 & num_samples < 150) {
         caution_statement <- paste0("These methods have not been tested on ",
@@ -548,6 +563,12 @@ nb_proportion <- function(p_val_table, low_pval = 0.01,
         "when interpretting the results. ")
     }else {
         caution_statement <- ""
+    }
+
+    if (method == "DESeq2") {
+        caution_statement <- paste0("The DESeq2 method has not been fully ",
+            "tested. Please interpret results with caution. ",
+            caution_statement)
     }
 
     if (num_samples < small_sample_cutoff) {
@@ -576,7 +597,8 @@ nb_proportion <- function(p_val_table, low_pval = 0.01,
         proportion <- count_below_value_pval / ngene_pval
         nb_fit_pval <- proportion < threshold
         commentary <- paste0(caution_statement,
-            commentary(nb_fit_pval, count_below_value_pval, low_pval, method))
+            commentary(nb_fit_pval, count_below_value_pval, proportion,
+                low_pval, method))
     }
 
     return(commentary)
@@ -587,12 +609,14 @@ nb_proportion <- function(p_val_table, low_pval = 0.01,
 #' 20 samples.
 #' @param nb_fit_pval Boolean representing if the p-val count is below threshold
 #' @param count_below_value_pval number of features below p-val threshold
+#' @param proportion numeric; proportion of genes below the p-value
 #' @param low_pval pval threshold
 #' @param method string; method utilized for the parametric or non-parametric
 #'   test; either "DESeq2" or "edgeR"
 #' @return a commentary string statement
 #'
-commentary <- function(nb_fit_pval, count_below_value_pval, low_pval, method) {
+commentary <- function(nb_fit_pval, count_below_value_pval, proportion,
+    low_pval, method) {
     if (nb_fit_pval) {
         if (count_below_value_pval == 0) {
             recommendation <- paste0("you may use ", method,
@@ -608,12 +632,12 @@ commentary <- function(nb_fit_pval, count_below_value_pval, low_pval, method) {
             " for your analysis.")
     }
 
-    commentary <- paste0("With a p-value cut off of ", low_pval, ", ",
-        count_below_value_pval, " of your condition variable features are ",
-        "below the cutoff. If ", method, "'s assumptions are met, we would not",
-        " expect to find any significant features. Since ",
-        count_below_value_pval, " features have a significant pvalue (<",
-        low_pval, "), ", recommendation)
+    commentary <- paste0("With an FDR adjusted p-value cut off of ", low_pval,
+        ", ", count_below_value_pval, " of your condition variable features ",
+        "are below the cutoff. If ", method, "'s assumptions are met, we would",
+        " not expect to find any significant features. Since ",
+        round(proportion, 2) * 100, "% of features have a significant adjusted",
+        " pvalue (<", low_pval, "), ", recommendation)
 
     return(commentary)
 }

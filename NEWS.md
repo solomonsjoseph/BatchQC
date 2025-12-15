@@ -1,3 +1,10 @@
+# Version 2.5.17
+## Major Changes
+* Added edgeR negative binomial tests
+
+## Minor Changes
+* Updated non-parametric (large sample) thresholds and adjusted p-value info
+
 # Version 2.5.16
 
 ## Minor Changes

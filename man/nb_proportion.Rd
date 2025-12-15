@@ -7,7 +7,7 @@ and compares to the previously determined threshold}
 \usage{
 nb_proportion(
   p_val_table,
-  low_pval = 0.01,
+  low_pval,
   threshold,
   num_samples,
   small_sample_cutoff,
