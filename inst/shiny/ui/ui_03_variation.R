@@ -24,7 +24,7 @@ tabPanel(
         tabsetPanel(
             tabPanel('Lambda Statistic',
                 h4(strong("Usage")),
-                h5("The laambda statistic should be applied to uncorrected data
+                h5("The lambda statistic should be applied to uncorrected data
                     sets to aid in determining if a batch correction should be
                     applied to the uncorrected data. It is not appropriate to
                     use on corrected data sets."),

@@ -635,7 +635,7 @@ commentary <- function(nb_fit_pval, count_below_value_pval, proportion,
     commentary <- paste0("With an FDR adjusted p-value cut off of ", low_pval,
         ", ", count_below_value_pval, " of your condition variable features ",
         "are below the cutoff. If ", method, "'s assumptions are met, we would",
-        " not expect to find any significant features. Since ",
+        " expect a uniform distribution of significant features. Since ",
         round(proportion, 2) * 100, "% of features have a significant adjusted",
         " pvalue (<", low_pval, "), ", recommendation)
 
