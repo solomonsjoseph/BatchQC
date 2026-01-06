@@ -425,25 +425,21 @@ This is visible in our example data set and confirms the need for batch
 adjustment.
 
 To recreate the variation analysis plot for the TB counts assay, use the
-following code:
+following code for individual variation:
 ```{r}
 ex_variation <- batchqc_explained_variation(se = se_object,
     batch = batch, condition = covar, assay_name = assay_of_interest)
 EV_boxplot <- BatchQC::EV_plotter(batchqc_ev = ex_variation[[1]])
 EV_boxplot
-EV_boxplot_type_2 <- BatchQC::EV_plotter(batchqc_ev = ex_variation[[2]])
-EV_boxplot_type_2
+BatchQC::summary_stats_EV_table(ex_variation[[1]])
 ```
 
-To recreate the variation analysis table for the TB counts assay, use the
-following code:
+To recreate the residual variation analysis table for the TB counts assay, use 
+the following code:
 ```{r}
-ex_variation <- batchqc_explained_variation(se = se_object,
-    batch = batch, condition = covar, assay_name = assay_of_interest)
-EV_table <- BatchQC::EV_table(batchqc_ev = ex_variation[[1]])
-EV_table
-EV_table_type_2 <- BatchQC::EV_table(batchqc_ev = ex_variation[[2]])
-EV_table_type_2
+EV_boxplot_type_2 <- BatchQC::EV_plotter(batchqc_ev = ex_variation[[2]])
+EV_boxplot_type_2
+BatchQC::summary_stats_EV_table(ex_variation[[2]])
 ```
 
 We can then compare our batch corrected assay, using the following code:
@@ -452,8 +448,10 @@ ex_variation <- batchqc_explained_variation(se = se_object,
     batch = batch, condition = covar, assay_name = "ComBat_corrected")
 EV_boxplot <- BatchQC::EV_plotter(batchqc_ev = ex_variation[[1]])
 EV_boxplot
+BatchQC::summary_stats_EV_table(ex_variation[[1]])
 EV_boxplot_type_2 <- BatchQC::EV_plotter(batchqc_ev = ex_variation[[2]])
 EV_boxplot_type_2
+BatchQC::summary_stats_EV_table(ex_variation[[2]])
 EV_table <- BatchQC::EV_table(batchqc_ev = ex_variation[[1]])
 EV_table
 EV_table_type_2 <- BatchQC::EV_table(batchqc_ev = ex_variation[[2]])

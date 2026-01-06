@@ -24,22 +24,28 @@ tabPanel(
         tabsetPanel(
             tabPanel('Lambda Statistic',
                 h4(strong("Usage")),
-                h5("The lambda statistic should be applied to uncorrected data
-                    sets to aid in determining if a batch correction should be
-                    applied to the uncorrected data. It is not appropriate to
-                    use on corrected data sets."),
+                h5("The lambda statistic can be used to compare uncorrected and
+                    batch corrected datasets"),
                 textOutput('lambda_rec')
             ),
             tabPanel("Explained Variation - Individual Variable",
                 h5("The boxplot and p-value table display the individual, or raw
                     variation, explained by each variable."),
-                     plotOutput('EV_show_plot'),
-                     dataTableOutput('EV_show_table')
+                plotOutput('EV_show_plot'),
+                h5("Below are the summary statistics for the boxplot:"),
+                dataTableOutput('EV_summary_stats'),
+                h5("Below are the values for each gene that make up the
+                        boxplot:"),
+                dataTableOutput('EV_show_table')
             ),
             tabPanel("Explained Variation - Residual",
                 h5("The boxplot and p-value table display the residual
                     varaition."),
                 plotOutput('EV_residual_show_plot'),
+                h5("Below are the summary statistics for the boxplot:"),
+                dataTableOutput('EV_residual_summary_stats'),
+                h5("Below are the values for each gene that make up the
+                        boxplot:"),
                 dataTableOutput('EV_residual_show_table')
             ),
             tabPanel("Individual Variation Variable/Batch Ratio",
@@ -52,6 +58,8 @@ tabPanel(
                 ),
                 conditionalPanel(condition = "input.variation_condition != ''",
                     plotOutput('EV_ratio_plot'),
+                    h5("Below are the values for each gene that make up the
+                        boxplot:"),
                     dataTableOutput('EV_ratio_table')
                     )
             ),
@@ -64,6 +72,8 @@ tabPanel(
                 ),
                 conditionalPanel(condition = "input.variation_condition != ''",
                     plotOutput('EV_residual_ratio_plot'),
+                    h5("Below are the values for each gene that make up the
+                        boxplot:"),
                     dataTableOutput('EV_residual_ratio_table')
                 )
             )
