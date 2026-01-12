@@ -1,3 +1,7 @@
+# Version 2.5.20
+## Minor Changes
+* Updated AIC to provide an overall metric
+
 # Version 2.5.19
 ## Minor Changes
 * Added color to the generated kBET plots

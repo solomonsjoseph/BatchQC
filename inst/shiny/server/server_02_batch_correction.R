@@ -95,7 +95,7 @@ observeEvent(input$compute_aic, {
         output$total_aic <- renderTable({
             total_aic_data <- aic_res[["total_AIC"]]
             df <- data.frame(
-                Model = c("NB_AIC", "Lognormal_AIC", "Voom_AIC"),
+                Model = c("nb", "lognormal", "voom"),
                 AIC_Value = round(as.numeric(total_aic_data), 3),
                 stringsAsFactors = FALSE
             )
@@ -105,6 +105,16 @@ observeEvent(input$compute_aic, {
         output$min_aic <- renderTable({
             min_aic_data <- aic_res[["min_AIC"]]
             return(min_aic_data)
+        }, rownames = FALSE)
+
+        output$aic_metric <- renderTable({
+            aic_metric_data <- aic_res[["AIC_metric"]]
+            df <- data.frame(
+                Model = c("nb", "lognormal", "voom"),
+                AIC_metric = round(as.numeric(aic_metric_data), 3),
+                stringsAsFactors = FALSE
+            )
+            return(df)
         }, rownames = FALSE)
     })
 })

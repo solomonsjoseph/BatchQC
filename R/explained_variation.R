@@ -122,7 +122,7 @@ EV_plotter <- function(batchqc_ev) {
 
     compare <- list()
     i <- 2
-    while (i < length(colnames(batchqc_ev))){
+    while (i < length(colnames(batchqc_ev))) {
         j <- i + 1
         while (i < length(colnames(batchqc_ev)) &&
                 j < (length(colnames(batchqc_ev)))) {
