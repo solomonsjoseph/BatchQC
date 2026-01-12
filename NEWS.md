@@ -1,3 +1,7 @@
+# Version 2.5.18
+## Minor Changes
+* Added summary statistics and p-values for explained variation boxplots
+
 # Version 2.5.17
 ## Major Changes
 * Added edgeR negative binomial tests

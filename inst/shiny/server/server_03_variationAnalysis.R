@@ -43,12 +43,20 @@ observeEvent(input$variation, {
                     ratio_plotter(EV_ratios)
                 })
 
+                output$EV_ratio_summary_stats <- renderDataTable({
+                    summary_stats_EV_table(EV_ratios)
+                })
+
                 output$EV_ratio_table <- renderDataTable({
                     EV_ratios
                 })
 
                 output$EV_residual_ratio_plot <- renderPlot({
                     ratio_plotter(EV_residual_ratios)
+                })
+
+                output$EV_residual_ratio_summary_stats <- renderDataTable({
+                    summary_stats_EV_table(EV_residual_ratios)
                 })
 
                 output$EV_residual_ratio_table <- renderDataTable({
@@ -63,11 +71,19 @@ observeEvent(input$variation, {
             EV_plotter(EV_results$EV_table_ind)
         })
 
+        output$EV_summary_stats <- renderDataTable({
+            summary_stats_EV_table(EV_results$EV_table_ind)
+        })
+
         output$EV_show_table <- renderDataTable({
             EV_table(EV_results$EV_table_ind)
         })
         output$EV_residual_show_plot <- renderPlot({
             EV_plotter(EV_results$EV_table_type2)
+        })
+
+        output$EV_residual_summary_stats <- renderDataTable({
+            summary_stats_EV_table(EV_results$EV_table_type2)
         })
 
         output$EV_residual_show_table <- renderDataTable({
