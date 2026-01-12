@@ -105,6 +105,7 @@ check_valid_input <- function(se, batch, condition) {
 #'   batchqc_explained_variation
 #' @import reshape2
 #' @import ggplot2
+#' @import ggpubr
 #' @return boxplot of explained variation
 #' @examples
 #' library(scran)
@@ -118,6 +119,20 @@ check_valid_input <- function(se, batch, condition) {
 #'
 #' @export
 EV_plotter <- function(batchqc_ev) {
+
+    compare <- list()
+    i <- 2
+    while (i < length(colnames(batchqc_ev))){
+        j <- i + 1
+        while (i < length(colnames(batchqc_ev)) &&
+                j < (length(colnames(batchqc_ev)))) {
+            compare <- c(compare, list(c(colnames(batchqc_ev)[i],
+                colnames(batchqc_ev)[j])))
+            j <- j + 1
+        }
+        i <- i + 1
+    }
+
     EV_boxplot <- ggplot(data =
             melt(as.data.frame(batchqc_ev),
                 id.vars = NULL),
@@ -126,7 +141,9 @@ EV_plotter <- function(batchqc_ev) {
         scale_x_discrete(name = "") +
         scale_y_continuous(name = "Percent Explained Variation") +
         labs(title = "Percent of Variation Explained by Source") +
-        theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+        theme(legend.position = "none",
+            plot.title = element_text(hjust = 0.5)) +
+        stat_compare_means(comparisons = compare)
     return(EV_boxplot)
 }
 
@@ -156,4 +173,33 @@ EV_table <- function(batchqc_ev) {
         keep.rownames = TRUE)
     colnames(EV_table)[1] <- "Gene Name"
     return(EV_table = EV_table)
+}
+
+#' Summary Stats EV Table
+#' Returns table with min, 1st quartile, mean, 2nd quartile, and max for each
+#' variable in the explained variation boxplot
+#'
+#' @param batchqc_ev explained variation results from
+#' @return summary_stats_table dataframe containing the min, 1st quartile, mean,
+#'   2nd quartile, and max for each variable in the explained variation boxplot
+#'
+#' @examples
+#' library(scran)
+#' se <- mockSCE()
+#' se$Mutation_Status <- as.factor(se$Mutation_Status)
+#' se$Treatment <- as.factor(se$Treatment)
+#' exp_var_result <- BatchQC::batchqc_explained_variation(se,
+#'                                     batch = "Mutation_Status",
+#'                                     condition = "Treatment",
+#'                                     assay_name = "counts")
+#' summary_stats_table <- BatchQC::summary_stats_EV_table(exp_var_result[[1]])
+#'
+#' summary_stats_table
+#'
+#' @export
+#'
+#'
+summary_stats_EV_table <- function(batchqc_ev) {
+    sum_table <- do.call(cbind, lapply(batchqc_ev, summary))
+    return(as.data.frame(sum_table))
 }
