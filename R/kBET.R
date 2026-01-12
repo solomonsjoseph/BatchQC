@@ -306,9 +306,10 @@ plot_kBET <- function(kBET_res) {
         )
     )
     g <- ggplot(plot.data, aes(class, data)) +
-        geom_boxplot() +
+        geom_boxplot(aes(fill = class)) +
         labs(x = "Test", y = "Rejection rate", title = "kBET test results") +
         theme_bw() +
+        theme(legend.position = "none") +
         scale_y_continuous(limits = c(0, 1))
 
     return(g)

@@ -1,3 +1,7 @@
+# Version 2.5.19
+## Minor Changes
+* Added color to the generated kBET plots
+
 # Version 2.5.18
 ## Minor Changes
 * Added summary statistics and p-values for explained variation boxplots
