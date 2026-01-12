@@ -89,7 +89,6 @@ tabPanel('Batch Correction/Normalization',
                             onInitialize = I(
                                 'function() { this.setValue(""); }'
                             ))),
-                    actionButton(inputId = 'compute_aic', label = 'Compute AIC'),
                     h5("Adjust advanced options if numerous warnings regarding theta estimation are received."),
                     h6("Note: Needing these adjustments suggests NB may not be suitable for your data!"),
                     checkboxInput('aic_advanced_options', 'Advanced Options',
@@ -105,11 +104,14 @@ tabPanel('Batch Correction/Normalization',
                                                  min = 0,
                                                  max = 100,
                                                  value = 100)),
+                    actionButton(inputId = 'compute_aic', label = 'Compute AIC'),
                     br(),
                     h5("total_AIC: The sum of AICs across all genes for the three models in comparison."),
                     tableOutput('total_aic'),
                     h5("min_AIC: The number of minimum AIC across the three models in comparison for individual genes."),
-                    tableOutput('min_aic')
+                    tableOutput('min_aic'),
+                    h5("AIC_metric: total_AIC / min_AIC; the lowest value is likely the best fit distribution."),
+                    tableOutput('aic_metric')
                 ),
                 tabPanel('Batch Correction',
                     h4(strong("Usage")),

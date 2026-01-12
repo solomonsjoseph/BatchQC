@@ -18,8 +18,8 @@ compute_aic(
 \item{se}{SummarizedExperiment object}
 
 \item{assay_of_interest}{The assay name from se that you are interested in
-analyzing. This assay need to be a counts assay containing only non-negative
-integers.}
+analyzing. This assay need to be a counts assay containing only
+non-negative integers.}
 
 \item{batchind}{Factor or numeric vector of length = ncol(dat);
 batch indicator for each sample.}
@@ -31,16 +31,19 @@ biological group label/indicator for each sample.}
 25.}
 
 \item{zero_filt_percent}{Numeric value between 0 and 100, the percentage of
-zeros allowed for each gene to be included in the AIC calculation. Genes with
-more than this percentage of zeros will be filtered out. Default is 100.}
+zeros allowed for each gene to be included in the AIC calculation. Genes
+with more than this percentage of zeros will be filtered out. Default is
+100.}
 }
 \value{
-A list with the following two elements:
+A list with a dataframe of the total_AIC values, a dataframe with
+the min_AIC values, and AIC_metric vector with the following three elements:
 \describe{
-\item{total_AIC}{The sum of AICs across all genes for the three models
-in comparison.}
-\item{min_AIC}{The number of minimum AIC across the three models in
-comparison for individual genes.}
+\item{nb}{The metric value calculated based on the negative binomial
+model.}
+\item{lognormal}{The metric value calculated based on the lognormal
+model.}
+\item{voom}{The metric value calculated based on the voom-based model.}
 }
 }
 \description{
@@ -55,12 +58,15 @@ for individual genes.}
 in comparison.}
 \item{min_AIC}{The number of minimum AIC across the three models in
 comparison for individual genes.}
+\item{AIC_metric}{The ratios between total_AIC and min_AIC for the three
+models in comparison. The optimal model is the one has minimum value.}
 }
 }
 \details{
 This function calculates the AIC based on lognormal distribution,
-negative-binomial distribution as well as the Voom transformation.
-It then compares the AICs of the three models across different genes.
+negative-binomial distribution as well as the voom transformation.
+It then compares the AICs of the three models across different genes and
+yields AIC-based metric values.
 }
 \examples{
 library(scran)
@@ -68,7 +74,6 @@ se <- mockSCE()
 compare_aic <- compute_aic(se, assay_of_interest = "counts",
                             batchind = "Cell_Cycle",
                             groupind = c("Treatment", "Mutation_Status"))
-print(compare_aic["total_AIC"])
-print(compare_aic["min_AIC"])
+print(compare_aic)
 
 }
