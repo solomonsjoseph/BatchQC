@@ -12,7 +12,7 @@ covar, output_assay_name, ...)
 \item{se}{SummarizedExperiment object}
 
 \item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva",
-svaseq)}
+svaseq, "harman")}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
