@@ -35,7 +35,8 @@ globalVariables(c("mod"))
 #'
 #' @export
 batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
-    covar, output_assay_name, ...) {
+    covar, output_assay_name, psva = FALSE, num_sv = FALSE, limit = 0.95, 
+    numrepeats = 100000L) {
     se <- se
     var_of_interest <- batch
     batch <- data.frame(colData(se))[, batch]
@@ -50,15 +51,15 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
             output_assay_name)
     } else if (method == 'sva') {
         se <- sva_correction(se, assay_to_normalize, var_of_interest, covar,
-            output_assay_name, psva = FALSE)
+            output_assay_name, psva)
     } else if (method == "svaseq") {
         se <- svaseq_correction(se, assay_to_normalize, var_of_interest, covar,
-            output_assay_name, num_sv = FALSE)
+            output_assay_name, num_sv)
     } else if (method == "harman") {
-      se <- harman_correction(se, assay_to_normalize, batch, covar, 
-                              output_assay_name, ...)
+       se <- harman_correction(se, assay_to_normalize, batch, covar, 
+            output_assay_name, limit, numrepeats)
     }
-    return(se)
+   return(se)
 }
 
 #' ComBat-Seq Correction
@@ -368,7 +369,9 @@ harman_correction <- function(se, assay_to_normalize, batch,
    if (is.null(covar)) {
        cov <- NULL 
    }else if(length(covar) > 1) {
-       stop("Harman correction only supports NULL covar or one covar.")
+       warning("Harman correction only supports NULL covar or one covar.
+               Setting covar = NULL")
+       cov <- NULL
    }else {
        cov <- as.factor(colData(se)[[covar]]) 
    }
