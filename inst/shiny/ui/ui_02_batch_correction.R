@@ -176,14 +176,14 @@ tabPanel('Batch Correction/Normalization',
                                                    'Check this if you have no covariate and want to use psva to remove batch effect. \n
                                                    Parker HS, Leek JT, Favorov AV, Considine M, Xia X, Chavan S, Chung CH, Fertig EJ (2014) Preserving biological heterogeneity with a permuted surrogate variable analysis for genomics batch correction Bioinformatics doi: 10.1093/bioinformatics/btu375',
                                                    value = FALSE)
-                    ), 
+                    ),
                     conditionalPanel(condition = "input.correction_method == 'harman'",
                                      numericInput('harman_limit',
                                                    'Indicates the limit of confidence in which to stop removing a batch effect. Must be between 0 and 1',
-                                                   value = 0.95, 
-                                                   min = 0, 
+                                                   value = 0.95,
+                                                   min = 0,
                                                    max = 1)
-                    ), 
+                    ),
                     conditionalPanel(condition = "input.correction_method == 'harman'",
                                      numericInput('harman_numrepeats',
                                                    'integer; default: 100000L the number of repeats in which to run the simulated batch mean distribution estimator using the random selection algorithm',

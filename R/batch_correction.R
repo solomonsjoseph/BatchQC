@@ -9,10 +9,21 @@ globalVariables(c("mod"))
 #' @param group The group variable
 #' @param covar list of covariates
 #' @param output_assay_name name of results assay
-#' @param ... Arguments to be passed to specific methods, such as `num_sv` for
-#' `svaseq_correction` and `psva` for `sva_correction`.
+#' @param psva boolean; default: FALSE. Only used if normalization method is 
+#' "sva". If set to TRUE and no covariate input, psva function from the sva 
+#' package will be used to remove batch effect.
+#' @param num_sv boolean; default: FALSE. Only used if normalization method is
+#' "svaseq". The number of estimated latent factor is set to 1 for a small
+#' number of samples. If set to TRUE, svaseq function will estimate the number
+#' of latent factors for you.
+#' @param limit numeric; default: 0.95. Only used if normalization method is
+#' "harman". Indicates the limit of confidence in which to stop removing a batch
+#' effect. Must be between 0 and 1.
+#' @param numrepeats integer; default: 100000L. Only used if normalization
+#' method is "harman". The number of repeats in which to run the simulated batch
+#' mean distribution estimator using the random selection algorithm.
 #' @usage batch_correct(se, method, assay_to_normalize, batch, group = NULL,
-#' covar, output_assay_name, ...)
+#' covar, output_assay_name, psva, num_sv, limit, numrepeats)
 #' @return a summarized experiment object with normalized assay appended
 #' @import SummarizedExperiment
 #' @import sva
@@ -35,7 +46,7 @@ globalVariables(c("mod"))
 #'
 #' @export
 batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
-    covar, output_assay_name, psva = FALSE, num_sv = FALSE, limit = 0.95, 
+    covar, output_assay_name, psva = FALSE, num_sv = FALSE, limit = 0.95,
     numrepeats = 100000L) {
     se <- se
     var_of_interest <- batch
@@ -56,10 +67,10 @@ batch_correct <- function(se, method, assay_to_normalize, batch, group = NULL,
         se <- svaseq_correction(se, assay_to_normalize, var_of_interest, covar,
             output_assay_name, num_sv)
     } else if (method == "harman") {
-       se <- harman_correction(se, assay_to_normalize, batch, covar, 
+        se <- harman_correction(se, assay_to_normalize, batch, covar,
             output_assay_name, limit, numrepeats)
     }
-   return(se)
+    return(se)
 }
 
 #' ComBat-Seq Correction
@@ -348,36 +359,36 @@ svaseq_correction <- function(se, assay_to_normalize, var_of_interest,
 #' @param se SummarizedExperiment object
 #' @param assay_to_normalize string; name of assay that should be corrected
 #' @param batch factor; The variable that represents batch
-#' @param covar string; name of covariate. 
+#' @param covar string; name of covariate.
 #' @param output_assay_name string; name of results assay
 #' @param limit numeric; default: 0.95 Indicates the limit of confidence in
 #' which to stop removing a batch effect. Must be between 0 and 1
-#' @param numrepeats integer; default: 100000L the number of repeats in which 
-#' to run the simulated batch mean distribution estimator using the random 
+#' @param numrepeats integer; default: 100000L the number of repeats in which
+#' to run the simulated batch mean distribution estimator using the random
 #' selection algorithm.
 #' @return SE object with an added Harman corrected reconstructed data
 #' @import SummarizedExperiment
 #' @import Harman
 
 harman_correction <- function(se, assay_to_normalize, batch,
-                               covar, output_assay_name, limit = 0.95, 
-                               numrepeats = 100000L) {
-   if (!is.factor(batch)) {
-       batch <- as.factor(batch)
-   }
-   dat <- assays(se)[[assay_to_normalize]]
-   if (is.null(covar)) {
-       cov <- NULL 
-   }else if(length(covar) > 1) {
-       warning("Harman correction only supports NULL covar or one covar.
-               Setting covar = NULL")
-       cov <- NULL
-   }else {
-       cov <- as.factor(colData(se)[[covar]]) 
-   }
+                                covar, output_assay_name, limit = 0.95,
+                                numrepeats = 100000L) {
+    if (!is.factor(batch)) {
+        batch <- as.factor(batch)
+    }
+    dat <- assays(se)[[assay_to_normalize]]
+    if (is.null(covar)) {
+        cov <- NULL
+    }else if (length(covar) > 1) {
+        warning("Harman correction only supports NULL covar or one covar.
+                Setting covar = NULL")
+        cov <- NULL
+    }else {
+        cov <- as.factor(colData(se)[[covar]])
+    }
 
-   harman_res <- harman(data = dat, expt = cov, batch = batch, 
-                       limit = limit, numrepeats = numrepeats)
-   assays(se)[[output_assay_name]] <- reconstructData(harman_res)
-   return(se)
+    harman_res <- harman(datamatrix = dat, expt = cov, batch = batch,
+                        limit = limit, numrepeats = numrepeats)
+    assays(se)[[output_assay_name]] <- reconstructData(harman_res)
+    return(se)
 }
