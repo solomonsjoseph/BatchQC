@@ -9,8 +9,8 @@ globalVariables(c("mod"))
 #' @param group The group variable
 #' @param covar list of covariates
 #' @param output_assay_name name of results assay
-#' @param psva boolean; default: FALSE. Only used if normalization method is 
-#' "sva". If set to TRUE and no covariate input, psva function from the sva 
+#' @param psva boolean; default: FALSE. Only used if normalization method is
+#' "sva". If set to TRUE and no covariate input, psva function from the sva
 #' package will be used to remove batch effect.
 #' @param num_sv boolean; default: FALSE. Only used if normalization method is
 #' "svaseq". The number of estimated latent factor is set to 1 for a small
