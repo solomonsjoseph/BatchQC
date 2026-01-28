@@ -70,61 +70,89 @@ compute_aic <- function(se, assay_of_interest, batchind,
                             paste(colnames(analysis_design), collapse = "+"))),
                             data = analysis_design)
     nb_test <- TRUE
-    num_models <- 2
+    num_models <- 3
 
     if (any(dat < 0)) {
         stop("Counts must be non-negative values only.")
-    } else if (!all(dat == floor(dat))){
+    } else if (!all(dat == floor(dat))) {
         nb_test <- FALSE
+        num_models <- 2
     }
 
     dat <- dat[rowSums(dat) != 0, ]
     dat <- dat[rowSums(dat == 0) <= zero_filt_percent / 100 * ncol(dat), ]
 
+    aic_matrix <- run_AIC_models(dat, design, nb_test, maxit)
+
+    total_AIC <- as.data.frame(t(colSums(aic_matrix, na.rm = TRUE)),
+        colnames = "")
+
+    min_model <- apply(aic_matrix, 1, function(x) {
+        if (all(is.na(x))) return(NA)
+        which.min(x)})
+
+    min_AIC <- t(as.data.frame(table(factor(min_model,
+        levels = seq_along(seq(1, num_models)))))[2])
+    colnames(min_AIC) <- colnames(aic_matrix)
+
+    return(list(total_AIC = total_AIC, min_AIC = min_AIC,
+        AIC_score = as.data.frame(total_AIC / min_AIC, row.names = "")))
+}
+#' Helper function that contains the code to run the lognormal, voom, and
+#' negative binomial AIC models for `compute_aic`
+#'
+#' @importFrom limma voom
+#' @importFrom stats AIC gaussian glm glm.control
+#' @importFrom MASS glm.nb
+#' @import SummarizedExperiment
+#'
+#' @param dat dataframe of the data to analyze
+#' @param design stats design model to be used in the analyses
+#' @param nb_test boolean; should negative binomial run (must be discrete data)
+#' @param maxit integer; the max number of IWLS iterations
+#'
+#' @return data frame; containing the AIC results of each method
+#'
+
+run_AIC_models <- function(dat, design, nb_test, maxit) {
     lognormal_result <- apply(dat, 1, function(x) {
         tryCatch({
-        lognormal_model <- glm(log(x + 1e-100) ~ design, family = gaussian)
-        lognormal_AIC <- AIC(lognormal_model)
-        return(lognormal_AIC)
-    }, error = function(e) {
-        return(NA)
-    })})
+            lognormal_model <- glm(log(x + 1e-100) ~ design, family = gaussian)
+            lognormal_AIC <- AIC(lognormal_model)
+            return(lognormal_AIC)
+        }, error = function(e) {
+            return(NA)
+        })})
 
     voom_dat <- voom(dat, design = design)
     voom_dat <- voom_dat$E
     voom_result <- apply(voom_dat, 1, function(x) {
         tryCatch({
-        voom_lm_model <- lm(x ~ design)
-        voom_lm_AIC <- AIC(voom_lm_model)
-        return(voom_lm_AIC)
-    }, error = function(e) {
-        return(NA)
-    })})
+            voom_lm_model <- lm(x ~ design)
+            voom_lm_AIC <- AIC(voom_lm_model)
+            return(voom_lm_AIC)
+        }, error = function(e) {
+            return(NA)
+        })})
 
-    if(nb_test){
+    if (nb_test) {
         nb_result <- apply(dat, 1, function(x) {
             tryCatch({
-                nb_model <- glm.nb(x ~ design, control = glm.control(maxit = maxit))
+                nb_model <- glm.nb(x ~ design,
+                    control = glm.control(maxit = maxit))
                 nb_AIC <- AIC(nb_model)
                 return(nb_AIC)
             }, error = function(e) {
                 return(NA)
             })})
+
         aic_matrix <- cbind(nb_result, lognormal_result, voom_result)
         colnames(aic_matrix) <- c("nb_AIC", "lognormal_AIC", "voom_AIC")
-        num_models <- 3
+
     } else {
         aic_matrix <- cbind(lognormal_result, voom_result)
         colnames(aic_matrix) <- c("lognormal_AIC", "voom_AIC")
     }
 
-    total_AIC <- as.data.frame(t(colSums(aic_matrix, na.rm = TRUE)), colnames = "")
-    min_model <- apply(aic_matrix, 1, function(x) {
-        if (all(is.na(x))) return(NA)
-        which.min(x)
-    })
-    min_AIC <- t(as.data.frame(table(factor(min_model, levels = seq_along(seq(1, num_models)))))[2])
-    colnames(min_AIC) <- colnames(aic_matrix)
-    return(list(total_AIC = total_AIC, min_AIC = min_AIC,
-        AIC_score = as.data.frame(total_AIC/min_AIC, row.names = "")))
+    return(aic_matrix)
 }

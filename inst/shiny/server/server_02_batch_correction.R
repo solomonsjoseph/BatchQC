@@ -130,8 +130,8 @@ observeEvent(input$correct, {
                 input$corrected_assay_name,
                 psva = input$sva_psva,
                 num_sv = input$svaseq_num_sv,
-                limit = input$harman_limit,
-                numrepeats = input$harman_numrepeats)
+                limit = input$Harman_limit,
+                numrepeats = input$Harman_numrepeats)
             setProgress(1, 'Complete!')
         })
     }},
