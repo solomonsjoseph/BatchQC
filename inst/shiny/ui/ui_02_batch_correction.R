@@ -110,8 +110,8 @@ tabPanel('Batch Correction/Normalization',
                     tableOutput('total_aic'),
                     h5("min_AIC: The number of minimum AIC across the three models in comparison for individual genes."),
                     tableOutput('min_aic'),
-                    h5("AIC_metric: total_AIC / min_AIC; the lowest value is likely the best fit distribution."),
-                    tableOutput('aic_metric')
+                    h5("AIC_score: total_AIC / min_AIC; the lowest value is likely the best fit distribution."),
+                    tableOutput('aic_score')
                 ),
                 tabPanel('Batch Correction',
                     h4(strong("Usage")),

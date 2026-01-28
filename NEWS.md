@@ -1,6 +1,10 @@
+# Version 2.5.22
+## Major Changes
+* Updated AIC GoF to run lognormal and voom for nondiscrete data
+
 # Version 2.5.21
 ## Major Changes
-* Added harman method in batch correction
+* Added Harman method in batch correction
 
 # Version 2.5.20
 ## Minor Changes

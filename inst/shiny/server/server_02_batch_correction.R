@@ -85,39 +85,34 @@ observeEvent(input$compute_aic, {
     req(reactivevalue$se, input$correction_assay,
         input$aic_batch, input$aic_covar, input$aic_nb_maxit,
         input$aic_zero_filt_percent)
-    withBusyIndicatorServer("compute_aic", {
-        aic_res <- compute_aic(reactivevalue$se,
-            input$correction_assay,
-            input$aic_batch,
-            input$aic_covar,
-            input$aic_nb_maxit,
-            input$aic_zero_filt_percent)
-        output$total_aic <- renderTable({
-            total_aic_data <- aic_res[["total_AIC"]]
-            df <- data.frame(
-                Model = c("nb", "lognormal", "voom"),
-                AIC_Value = round(as.numeric(total_aic_data), 3),
-                stringsAsFactors = FALSE
-            )
-            return(df)
-        }, rownames = FALSE)
+    tryCatch({{
+        msg <- sprintf('Start the AIC analysis')
+        withProgress(message = msg, {
+            setProgress(0.5, 'Analyzing...')
+            aic_res <- compute_aic(reactivevalue$se,
+                input$correction_assay,
+                input$aic_batch,
+                input$aic_covar,
+                input$aic_nb_maxit,
+                input$aic_zero_filt_percent)
+            output$total_aic <- renderTable({
+                total_aic_data <- aic_res[["total_AIC"]]})
 
-        output$min_aic <- renderTable({
-            min_aic_data <- aic_res[["min_AIC"]]
-            return(min_aic_data)
-        }, rownames = FALSE)
+            output$min_aic <- renderTable({
+                min_aic_data <- aic_res[["min_AIC"]]})
 
-        output$aic_metric <- renderTable({
-            aic_metric_data <- aic_res[["AIC_metric"]]
-            df <- data.frame(
-                Model = c("nb", "lognormal", "voom"),
-                AIC_metric = round(as.numeric(aic_metric_data), 3),
-                stringsAsFactors = FALSE
-            )
-            return(df)
-        }, rownames = FALSE)
+            output$aic_score <- renderTable({
+                aic_metric_data <- aic_res[["AIC_score"]]})
+
+            setProgress(1, 'Complete!')
+        })
+    }},
+        error = function(error) {
+            showNotification('Counts must be non-negative values only.',
+                type = "error")
+            print(error)
+        })
     })
-})
 
 ## Run batch effect correction
 observeEvent(input$correct, {

@@ -37,7 +37,7 @@ with more than this percentage of zeros will be filtered out. Default is
 }
 \value{
 A list with a dataframe of the total_AIC values, a dataframe with
-the min_AIC values, and AIC_metric vector with the following three elements:
+the min_AIC values, and AIC_score vector with the following three elements:
 \describe{
 \item{nb}{The metric value calculated based on the negative binomial
 model.}
@@ -54,19 +54,20 @@ model for individual genes.}
 model for individual genes.}
 \item{voom_result}{A vector contains the AIC based on voom transformation
 for individual genes.}
-\item{total_AIC}{The sum of AICs across all genes for the three models
-in comparison.}
-\item{min_AIC}{The number of minimum AIC across the three models in
+\item{total_AIC}{The sum of AICs across all genes for the models in
+comparison.}
+\item{min_AIC}{The number of minimum AIC across the models in
 comparison for individual genes.}
-\item{AIC_metric}{The ratios between total_AIC and min_AIC for the three
+\item{AIC_score}{The ratios between total_AIC and min_AIC for the
 models in comparison. The optimal model is the one has minimum value.}
 }
 }
 \details{
 This function calculates the AIC based on lognormal distribution,
-negative-binomial distribution as well as the voom transformation.
+negative binomial distribution as well as the voom transformation.
 It then compares the AICs of the three models across different genes and
-yields AIC-based metric values.
+yields AIC-based metric values. Must have non-negative data and non-discrete
+data will only analyze the lognormal and voom distribution.
 }
 \examples{
 library(scran)
