@@ -1,3 +1,7 @@
+# Version 2.5.21
+## Major Changes
+* Added harman method in batch correction
+
 # Version 2.5.20
 ## Minor Changes
 * Updated AIC to provide an overall metric

@@ -1,7 +1,7 @@
 Type: Package
 Package: BatchQC
 Title: Batch Effects Quality Control Software
-Version: 2.5.20
+Version: 2.5.21
 Date: 2026-01-12
 Authors@R: c(
     person("Jessica", "Anderson", , "anderson.jessica@rutgers.edu", 
@@ -20,7 +20,8 @@ Authors@R: c(
     person("Solomon", "Joseph", , "sj1136@njms.rutgers.edu", role = "ctb"),
     person("Yaoan", "Leng", , "leng@bu.edu", role = "ctb",
     comment = c(ORCID = "0009-0002-3957-5250")),
-    person("Howard", "Fan", , "hf268@njms.rutgers.edu", role = "ctb")
+    person("Howard", "Fan", , "hf268@njms.rutgers.edu", role = "ctb"),
+    person("Sean", "Lu", , "sl1729@njms.rutgers.edu", role = "ctb")
   )
 Description: Sequencing and microarray samples often are collected or
     processed in multiple batches or at different times. This often
@@ -55,6 +56,7 @@ Imports:
     ggnewscale,
     ggplot2,
     ggpubr,
+    Harman,
     limma,
     matrixStats,
     methods,

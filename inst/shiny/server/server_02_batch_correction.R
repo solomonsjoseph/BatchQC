@@ -132,7 +132,11 @@ observeEvent(input$correct, {
                 input$correction_batch,
                 group = NULL,
                 input$correction_covariates,
-                input$corrected_assay_name)
+                input$corrected_assay_name,
+                psva = input$sva_psva,
+                num_sv = input$svaseq_num_sv,
+                limit = input$harman_limit,
+                numrepeats = input$harman_numrepeats)
             setProgress(1, 'Complete!')
         })
     }},

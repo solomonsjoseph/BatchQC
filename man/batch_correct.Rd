@@ -6,13 +6,13 @@
 This function allows you to Add batch corrected count matrix to the SE object}
 \usage{
 batch_correct(se, method, assay_to_normalize, batch, group = NULL,
-covar, output_assay_name, ...)
+covar, output_assay_name, psva, num_sv, limit, numrepeats)
 }
 \arguments{
 \item{se}{SummarizedExperiment object}
 
 \item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva",
-svaseq)}
+svaseq, "harman")}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
@@ -24,8 +24,22 @@ svaseq)}
 
 \item{output_assay_name}{name of results assay}
 
-\item{...}{Arguments to be passed to specific methods, such as \code{num_sv} for
-\code{svaseq_correction} and \code{psva} for \code{sva_correction}.}
+\item{psva}{boolean; default: FALSE. Only used if normalization method is
+"sva". If set to TRUE and no covariate input, psva function from the sva
+package will be used to remove batch effect.}
+
+\item{num_sv}{boolean; default: FALSE. Only used if normalization method is
+"svaseq". The number of estimated latent factor is set to 1 for a small
+number of samples. If set to TRUE, svaseq function will estimate the number
+of latent factors for you.}
+
+\item{limit}{numeric; default: 0.95. Only used if normalization method is
+"harman". Indicates the limit of confidence in which to stop removing a batch
+effect. Must be between 0 and 1.}
+
+\item{numrepeats}{integer; default: 100000L. Only used if normalization
+method is "harman". The number of repeats in which to run the simulated batch
+mean distribution estimator using the random selection algorithm.}
 }
 \value{
 a summarized experiment object with normalized assay appended

@@ -131,9 +131,12 @@ tabPanel('Batch Correction/Normalization',
                     conditionalPanel(condition = "input.correction_method == 'svaseq'",
                                      h5("svaseq correction is a variant of sva correction for sequencing data")
                     ),
+                    conditionalPanel(condition = "input.correction_method == 'harman'",
+                                     h5("") #TODO: CHANGE THIS
+                    ),
                     selectizeInput('correction_method', 'Choose correction method',
                         multiple = FALSE,
-                        choices = c('ComBat-Seq', 'ComBat', 'limma', 'sva', 'svaseq'),
+                        choices = c('ComBat-Seq', 'ComBat', 'limma', 'sva', 'svaseq', 'harman'),
                         selected = NULL,
                         options = list(placeholder =
                                 'Please select an option below',
@@ -163,17 +166,29 @@ tabPanel('Batch Correction/Normalization',
                     textInput(inputId = 'corrected_assay_name',
                         'Name for the corrected assay'),
                     conditionalPanel(condition = "input.correction_method == 'svaseq'",
-                                     checkboxInput('num_sv',
+                                     checkboxInput('svaseq_num_sv',
                                                    'Uncheck this if the number of samples is small (the number of latent factors that need to be estimated (n.sv) is set to 1);
                                                    otherwise, svaseq function will estimate n.sv for you.',
                                                    value = FALSE)
                     ),
                     conditionalPanel(condition = "input.correction_method == 'sva'",
-                                     checkboxInput('psva',
+                                     checkboxInput('sva_psva',
                                                    'Check this if you have no covariate and want to use psva to remove batch effect. \n
                                                    Parker HS, Leek JT, Favorov AV, Considine M, Xia X, Chavan S, Chung CH, Fertig EJ (2014) Preserving biological heterogeneity with a permuted surrogate variable analysis for genomics batch correction Bioinformatics doi: 10.1093/bioinformatics/btu375',
                                                    value = FALSE)
                     ),
+                    conditionalPanel(condition = "input.correction_method == 'harman'",
+                                     numericInput('harman_limit',
+                                                   'Indicates the limit of confidence in which to stop removing a batch effect. Must be between 0 and 1',
+                                                   value = 0.95,
+                                                   min = 0,
+                                                   max = 1)
+                    ),
+                    conditionalPanel(condition = "input.correction_method == 'harman'",
+                                     numericInput('harman_numrepeats',
+                                                   'integer; default: 100000L the number of repeats in which to run the simulated batch mean distribution estimator using the random selection algorithm',
+                                                   value = 100000L)
+                    ), ### add conditionalPanel
                     actionButton(inputId = 'correct', label = 'Correct')
                     ),
                 tabPanel('Normalization',
