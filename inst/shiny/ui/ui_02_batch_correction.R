@@ -134,7 +134,7 @@ tabPanel('Batch Correction/Normalization',
                                      h5("svaseq correction is a variant of sva correction for sequencing data")
                     ),
                     conditionalPanel(condition = "input.correction_method == 'Harman'",
-                                     h5("") #TODO: CHANGE THIS
+                                     h5("a PCA and constrained optimisation based technique that maximises the removal of batch effects from datasets, with the constraint that the probability of overcorrection (i.e. removing genuine biological signal along with batch noise) is kept to a fraction")
                     ),
                     selectizeInput('correction_method', 'Choose correction method',
                         multiple = FALSE,
@@ -180,17 +180,20 @@ tabPanel('Batch Correction/Normalization',
                                                    value = FALSE)
                     ),
                     conditionalPanel(condition = "input.correction_method == 'Harman'",
-                                     numericInput('Harman_limit',
-                                                   'Indicates the limit of confidence in which to stop removing a batch effect. Must be between 0 and 1',
-                                                   value = 0.95,
-                                                   min = 0,
-                                                   max = 1)
+                        checkboxInput('Harman_options',
+                            label = 'Advaced Options for Harman',
+                            value = FALSE),
+                        conditionalPanel(condition = "input.Harman_options == 1",
+                                numericInput('Harman_limit',
+                                    'Indicates the limit of confidence in which to stop removing a batch effect. Must be between 0 and 1',
+                                    value = 0.95,
+                                    min = 0,
+                                    max = 1),
+                                numericInput('Harman_numrepeats',
+                                    'the number of repeats in which to run the simulated batch mean distribution estimator using the random selection algorithm',
+                                    value = 100000L)
+                        )
                     ),
-                    conditionalPanel(condition = "input.correction_method == 'Harman'",
-                                     numericInput('Harman_numrepeats',
-                                                   'integer; default: 100000L the number of repeats in which to run the simulated batch mean distribution estimator using the random selection algorithm',
-                                                   value = 100000L)
-                    ), ### add conditionalPanel
                     actionButton(inputId = 'correct', label = 'Correct')
                     ),
                 tabPanel('Normalization',
