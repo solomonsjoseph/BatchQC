@@ -36,8 +36,9 @@ with more than this percentage of zeros will be filtered out. Default is
 100.}
 }
 \value{
-A list with a dataframe of the total_AIC values, a dataframe with
-the min_AIC values, and AIC_score vector with the following three elements:
+A list with a  boxplot of the AIC_boxplot and a dataframe containing
+the total_AIC values, the frequency of the min_AIC values, the AIC_score, and
+the median_AIC value, for the following three elements:
 \describe{
 \item{nb}{The metric value calculated based on the negative binomial
 model.}

@@ -95,14 +95,14 @@ observeEvent(input$compute_aic, {
                 input$aic_covar,
                 input$aic_nb_maxit,
                 input$aic_zero_filt_percent)
-            output$total_aic <- renderTable({
-                total_aic_data <- aic_res[["total_AIC"]]})
 
-            output$min_aic <- renderTable({
-                min_aic_data <- aic_res[["min_AIC"]]})
+            output$aic_table <- renderTable({
+                aic_res[["AIC_table"]]
+            }, rownames = TRUE)
 
-            output$aic_score <- renderTable({
-                aic_metric_data <- aic_res[["AIC_score"]]})
+            output$aic_boxplot <- renderPlot({
+                aic_res[["AIC_boxplot"]]
+            })
 
             setProgress(1, 'Complete!')
         })

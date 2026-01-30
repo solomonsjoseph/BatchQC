@@ -39,8 +39,9 @@ globalVariables(c(glm.nb, AIC, glm, gaussian, glm.control))
 #'     models in comparison. The optimal model is the one has minimum value.}
 #'   }
 #'
-#' @return A list with a dataframe of the total_AIC values, a dataframe with
-#' the min_AIC values, and AIC_score vector with the following three elements:
+#' @return A list with a  boxplot of the AIC_boxplot and a dataframe containing
+#' the total_AIC values, the frequency of the min_AIC values, the AIC_score, and
+#' the median_AIC value, for the following three elements:
 #' \describe{
 #'     \item{nb}{The metric value calculated based on the negative binomial
 #'       model.}
@@ -48,6 +49,7 @@ globalVariables(c(glm.nb, AIC, glm, gaussian, glm.control))
 #'       model.}
 #'     \item{voom}{The metric value calculated based on the voom-based model.}
 #'   }
+#'
 #' @examples
 #' library(scran)
 #' se <- mockSCE()
@@ -83,7 +85,7 @@ compute_aic <- function(se, assay_of_interest, batchind,
     dat <- dat[rowSums(dat == 0) <= zero_filt_percent / 100 * ncol(dat), ]
 
     aic_matrix <- run_AIC_models(dat, design, nb_test, maxit)
-
+    aic_median <- apply(aic_matrix, 2, median, na.rm = TRUE)
     total_AIC <- as.data.frame(t(colSums(aic_matrix, na.rm = TRUE)),
         colnames = "")
 
@@ -95,8 +97,14 @@ compute_aic <- function(se, assay_of_interest, batchind,
         levels = seq_along(seq(1, num_models)))))[2])
     colnames(min_AIC) <- colnames(aic_matrix)
 
-    return(list(total_AIC = total_AIC, min_AIC = min_AIC,
-        AIC_score = as.data.frame(total_AIC / min_AIC, row.names = "")))
+    AIC_boxplot <- AIC_boxplots(aic_matrix, num_models)
+
+    AIC_score <- as.data.frame(total_AIC / min_AIC, row.names = "")
+    AIC_table <- rbind(total_AIC, min_AIC, AIC_score, aic_median)
+    rownames(AIC_table) <- c("Total AIC", "Frequency of Minimum AIC",
+        "AIC Score", "Median AIC")
+
+    return(list(AIC_table = AIC_table, AIC_boxplot = AIC_boxplot))
 }
 #' Helper function that contains the code to run the lognormal, voom, and
 #' negative binomial AIC models for `compute_aic`
@@ -156,3 +164,32 @@ run_AIC_models <- function(dat, design, nb_test, maxit) {
 
     return(aic_matrix)
 }
+
+#' Boxplots for the distribution of AIC for each method
+#'
+#' This function creates a boxplot of all the AIC values for each gene under
+#' each tested distribution to aid in identifying outliers
+#'
+#' @import tidyr
+#'
+#' @param AIC_data dataframe with the data to be plotted
+#' @param num_methods integer representing the number of distribution methods
+#'
+#' @return AIC_boxplot; a boxplot for each method showing distribution of data
+
+AIC_boxplots <- function(AIC_data, num_methods) {
+    method <- "method"
+    AIC_data <- AIC_data %>%
+        as.data.frame() %>%
+        rownames_to_column(var = "feature") %>%
+        pivot_longer(cols = 2:(num_methods + 1),
+            names_to = method,
+            values_to = "AIC")
+
+    AIC_plot <- ggplot(AIC_data, aes(x = method, y = AIC, color = method)) +
+        geom_boxplot() +
+        geom_point(position = position_jitterdodge(jitter.width = 0.2,
+                                                    dodge.width = 0.75),
+            alpha = 0.5)
+}
+
