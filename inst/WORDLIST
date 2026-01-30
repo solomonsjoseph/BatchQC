@@ -9,6 +9,8 @@ EV
 FoldChange
 GSE
 Github
+GoF
+Harman
 Immunol
 JT
 LTBI
@@ -37,7 +39,6 @@ dat
 dendextend
 devtools
 doi
-downsample
 edgeR
 et
 fimmu
@@ -45,6 +46,7 @@ fvalue
 ggplot
 github
 glm
+harman
 https
 jessmcc
 kBET
@@ -55,10 +57,12 @@ logCPM
 mTCC
 nb
 ncol
+nd
 neighbour
 neighbourhood
 neighbourhoods
 neighbours
+nondiscrete
 normalizations
 onject
 overfits

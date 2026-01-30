@@ -12,7 +12,7 @@ covar, output_assay_name, psva, num_sv, limit, numrepeats)
 \item{se}{SummarizedExperiment object}
 
 \item{method}{Normalization Method ("ComBat-Seq", "ComBat", "limma", "sva",
-svaseq, "harman")}
+svaseq, "Harman")}
 
 \item{assay_to_normalize}{Which assay use to do normalization}
 
@@ -34,11 +34,11 @@ number of samples. If set to TRUE, svaseq function will estimate the number
 of latent factors for you.}
 
 \item{limit}{numeric; default: 0.95. Only used if normalization method is
-"harman". Indicates the limit of confidence in which to stop removing a batch
+"Harman". Indicates the limit of confidence in which to stop removing a batch
 effect. Must be between 0 and 1.}
 
 \item{numrepeats}{integer; default: 100000L. Only used if normalization
-method is "harman". The number of repeats in which to run the simulated batch
+method is "Harman". The number of repeats in which to run the simulated batch
 mean distribution estimator using the random selection algorithm.}
 }
 \value{

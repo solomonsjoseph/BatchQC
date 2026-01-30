@@ -85,39 +85,34 @@ observeEvent(input$compute_aic, {
     req(reactivevalue$se, input$correction_assay,
         input$aic_batch, input$aic_covar, input$aic_nb_maxit,
         input$aic_zero_filt_percent)
-    withBusyIndicatorServer("compute_aic", {
-        aic_res <- compute_aic(reactivevalue$se,
-            input$correction_assay,
-            input$aic_batch,
-            input$aic_covar,
-            input$aic_nb_maxit,
-            input$aic_zero_filt_percent)
-        output$total_aic <- renderTable({
-            total_aic_data <- aic_res[["total_AIC"]]
-            df <- data.frame(
-                Model = c("nb", "lognormal", "voom"),
-                AIC_Value = round(as.numeric(total_aic_data), 3),
-                stringsAsFactors = FALSE
-            )
-            return(df)
-        }, rownames = FALSE)
+    tryCatch({{
+        msg <- sprintf('Start the AIC analysis')
+        withProgress(message = msg, {
+            setProgress(0.5, 'Analyzing...')
+            aic_res <- compute_aic(reactivevalue$se,
+                input$correction_assay,
+                input$aic_batch,
+                input$aic_covar,
+                input$aic_nb_maxit,
+                input$aic_zero_filt_percent)
 
-        output$min_aic <- renderTable({
-            min_aic_data <- aic_res[["min_AIC"]]
-            return(min_aic_data)
-        }, rownames = FALSE)
+            output$aic_table <- renderTable({
+                aic_res[["AIC_table"]]
+            }, rownames = TRUE)
 
-        output$aic_metric <- renderTable({
-            aic_metric_data <- aic_res[["AIC_metric"]]
-            df <- data.frame(
-                Model = c("nb", "lognormal", "voom"),
-                AIC_metric = round(as.numeric(aic_metric_data), 3),
-                stringsAsFactors = FALSE
-            )
-            return(df)
-        }, rownames = FALSE)
+            output$aic_boxplot <- renderPlot({
+                aic_res[["AIC_boxplot"]]
+            })
+
+            setProgress(1, 'Complete!')
+        })
+    }},
+        error = function(error) {
+            showNotification('Counts must be non-negative values only.',
+                type = "error")
+            print(error)
+        })
     })
-})
 
 ## Run batch effect correction
 observeEvent(input$correct, {
@@ -135,8 +130,8 @@ observeEvent(input$correct, {
                 input$corrected_assay_name,
                 psva = input$sva_psva,
                 num_sv = input$svaseq_num_sv,
-                limit = input$harman_limit,
-                numrepeats = input$harman_numrepeats)
+                limit = input$Harman_limit,
+                numrepeats = input$Harman_numrepeats)
             setProgress(1, 'Complete!')
         })
     }},
