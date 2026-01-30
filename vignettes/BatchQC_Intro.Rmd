@@ -309,6 +309,10 @@ It should be run on cleaned and log transformed data. This can be run with or
 without additional adjustment variables.
 5. **svaseq** svaseq is a variant of sva specifically for sequencing data. Data
 should still be normalized.
+6. **Harman** a PCA and constrained optimisation based technique that maximizes
+the removal of batch effects from datasets, with the constraint that the
+probability of overcorrection (i.e. removing genuine biological signal along
+with batch noise) is kept to a fraction (as set by the user).
 
 To apply your desired batch effect correction model, select the method from the 
 drop down menu, then select the appropriate assay in the second drop down menu,

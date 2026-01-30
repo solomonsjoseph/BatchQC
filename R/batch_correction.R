@@ -389,6 +389,7 @@ Harman_correction <- function(se, assay_to_normalize, batch,
 
     Harman_res <- harman(datamatrix = dat, expt = cov, batch = batch,
                         limit = limit, numrepeats = numrepeats)
-    assays(se)[[output_assay_name]] <- reconstructData(Harman_res)
+    assays(se)[[output_assay_name]] <- as.data.frame(reconstructData(
+        Harman_res))
     return(se)
 }
