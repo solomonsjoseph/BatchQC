@@ -93,7 +93,7 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
-biocViews: BatchEffect, GeenExpression, GraphAndNetwork, Microarray,
+biocViews: BatchEffect, GeneExpression, GraphAndNetwork, Microarray,
     Normalization, PrincipalComponent, Sequencing, Software, Visualization,
     QualityControl, RNASeq, Preprocessing, DifferentialExpression, ImmunoOncology
 Config/testthat/edition: 3

@@ -170,16 +170,18 @@ correction method based on the results of the distribution check, but you may
 choose to do further analysis before selecting (a) (or even comparing) batch 
 correction method(s).
 
-### Data Distribution Check (only available for whole number data, like counts)
-If you have raw count data, other data that is positive whole numbers, or can
-provide a backwards compatible positive whole number dataset, you may use the 
-Negative Binomial Check and/or the AIC model to check the distribution of your 
-data to aid in making informed downstream analysis choices that are appropriate 
-for the distribution of your data.
+### Data Distribution Check
+`compute_aic' can provide a negative binomial distribution value only for
+positive discrete data. Positive non-discrete data will result in `compute_aic`
+reporting only the voom and log-normal distribution analysis.
+
+The negative binomial goodness-of-fit will provide an estimate for discrete or
+non-discrete data.
 
 These tools are found on the Batch Correction/Normalization tab as we recommend
 utilizing these tools to inform your choice of batch correction method.
 
+#### AIC
 ```{R AIC Model Fit}
 TB_AIC <- compute_aic(se = se_object,
     assay_of_interest = assay_of_interest,
@@ -188,21 +190,15 @@ TB_AIC <- compute_aic(se = se_object,
     maxit = 1000,
     zero_filt_percent = 15
     )
-TB_AIC["total_AIC"]
-TB_AIC["min_AIC"]
+TB_AIC["AIC_table"]
+TB_AIC["AIC_boxplot"]
 ```
 
-The lowest AIC score represented by "total_AIC" indicates the model that is
-likely the best fit. However, the voom/limma model often overfits the data, so
-we also look at the "min_AIC" parameter. The "min_AIC" parameter is a count of
-which distribution each individual gene fits best. Therefore, the model that
-has the highest number is the model that we would recommend utilizing.
+The lowest AIC represented by "AIC Score" indicates the model that is
+likely the best fit. In this dataset, the lowest "AIC Score" is lognormal.
+Therefore, we should consider using ComBat as our correction method. 
 
-In this dataset the lowest "total_AIC" is voom, followed by log
-normal. Since limma often over corrects data, we can then look at "min_AIC"
-and it seems most genes fit a log normal distribution, so we should consider
-using ComBat as our correction method. 
-
+#### Negative Binomial GoF
 We can further confirm that a negative binomial distribution is not a good fit
 by running the DESeq2 negative binomial check.
 
@@ -313,6 +309,10 @@ It should be run on cleaned and log transformed data. This can be run with or
 without additional adjustment variables.
 5. **svaseq** svaseq is a variant of sva specifically for sequencing data. Data
 should still be normalized.
+6. **Harman** a PCA and constrained optimization based technique that maximizes
+the removal of batch effects from datasets, with the constraint that the
+probability of overcorrection (i.e. removing genuine biological signal along
+with batch noise) is kept to a fraction (as set by the user).
 
 To apply your desired batch effect correction model, select the method from the 
 drop down menu, then select the appropriate assay in the second drop down menu,

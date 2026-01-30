@@ -134,7 +134,7 @@ tabPanel('Batch Correction/Normalization',
                                      h5("svaseq correction is a variant of sva correction for sequencing data")
                     ),
                     conditionalPanel(condition = "input.correction_method == 'Harman'",
-                                     h5("a PCA and constrained optimisation based technique that maximises the removal of batch effects from datasets, with the constraint that the probability of overcorrection (i.e. removing genuine biological signal along with batch noise) is kept to a fraction")
+                                     h5("a PCA and constrained optimisation based technique that maximizes the removal of batch effects from datasets, with the constraint that the probability of overcorrection (i.e. removing genuine biological signal along with batch noise) is kept to a fraction")
                     ),
                     selectizeInput('correction_method', 'Choose correction method',
                         multiple = FALSE,
