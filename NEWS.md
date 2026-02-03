@@ -1,3 +1,7 @@
+# Version 2.7.2
+## Minor Changes
+* Added lambda example to Intro vignette
+
 # Version 2.5.22
 ## Major Changes
 * Updated AIC GoF to run lognormal and voom for nondiscrete data

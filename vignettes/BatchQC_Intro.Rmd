@@ -401,12 +401,12 @@ correction for your results.
 First, select your unadjusted assay, your batch variable and any covariates of
 interest. Click "Here we go!" to see the lambda statistic and variation analysis
 results. The "Individual Variable" tab shows the individual, or raw variation, 
-explained by each variable. The "Residual" tab displays the type 2, or residual, 
-variation for each variable. A box plot is displayed along with a table with the 
+explained by each variable. The "Residual" tab displays the type 2, or residual,
+variation for each variable. A box plot is displayed along with a table with the
 variation specific to each gene listed. This table is searchable and can be 
 displayed in ascending or descending order. Notice the amount of variation 
 attributed to batch. In our signature data set, most of the variation is 
-attributed to batch rather than the condition. This indicates a need for a batch 
+attributed to batch rather than the condition. This indicates a need for a batch
 correction.
 
 The "Individual Variation Variable/Batch Ratio" tab displays the individual, or
