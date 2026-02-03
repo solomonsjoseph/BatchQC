@@ -397,16 +397,17 @@ if one or both metrics indicate some or high batch effect, you should use
 additional analysis tools (listed below) to explore the need for a batch
 correction for your results.
 
-## 4. Variation Analysis
+## 4. lambda/Variation Analysis
 First, select your unadjusted assay, your batch variable and any covariates of
-interest. Click "Here we go!" to see the variation analysis results. The
-"Individual Variable" tab shows the individual, or raw variation, explained
-by each variable. The "Residual" tab displays the type 2, or residual, variation
-for each variable. A box plot is displayed along with a table with the variation
-specific to each gene listed. This table is searchable and can be displayed in
-ascending or descending order. Notice the amount of variation attributed to
-batch. In our signature data set, most of the variation is attributed to batch
-rather than the condition. This indicates a need for a batch correction.
+interest. Click "Here we go!" to see the lambda statistic and variation analysis
+results. The "Individual Variable" tab shows the individual, or raw variation, 
+explained by each variable. The "Residual" tab displays the type 2, or residual,
+variation for each variable. A box plot is displayed along with a table with the
+variation specific to each gene listed. This table is searchable and can be 
+displayed in ascending or descending order. Notice the amount of variation 
+attributed to batch. In our signature data set, most of the variation is 
+attributed to batch rather than the condition. This indicates a need for a batch
+correction.
 
 The "Individual Variation Variable/Batch Ratio" tab displays the individual, or
 raw variation, divided by the batch. A ratio greater that 1 indicates that batch
@@ -423,6 +424,19 @@ variation in the data is now more likely to be associated with your condition of
 interest rather than the batch. The ratio statistics should also be less than 1.
 This is visible in our example data set and confirms the need for batch
 adjustment.
+
+To recreate the lambda statistic for the TB counts assay, use the following
+code:
+
+```{R lambda Statistic}
+lambda_calculation <- run_lambda(se = se_object,
+    assay = assay_of_interest,
+    batch = batch,
+    condition = covar)
+
+lambda_calculation$correction_recommendation
+lambda_calculation$lambda_stat
+```
 
 To recreate the variation analysis plot for the TB counts assay, use the
 following code for individual variation:

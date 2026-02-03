@@ -25,10 +25,12 @@ TMM
 UMAP
 VanValkenburg
 Voom
+aic
 al
 ann
 batchqc
 bladderbatch
+boxplox
 colData
 colNames
 covar
@@ -46,7 +48,6 @@ fvalue
 ggplot
 github
 glm
-harman
 https
 jessmcc
 kBET
@@ -65,7 +66,7 @@ neighbours
 nondiscrete
 normalizations
 onject
-overfits
+overcorrection
 padj
 pca
 pearson
