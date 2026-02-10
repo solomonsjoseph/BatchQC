@@ -1,13 +1,15 @@
 Type: Package
 Package: BatchQC
 Title: Batch Effects Quality Control Software
-Version: 2.7.2
-Date: 2026-02-03
+Version: 2.7.3
+Date: 2026-02-10
 Authors@R: c(
     person("Jessica", "Anderson", , "anderson.jessica@rutgers.edu", 
-    role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0542-9872")),
+    role = c("aut"), comment = c(ORCID = "0000-0002-0542-9872")),
     person("W. Evan", "Johnson", , "wj183@njms.rutgers.edu",
     role = c("aut", "fnd"), comment = c(ORCID = "0000-0002-6247-6595")),
+    person("Yaoan", "Leng", , "leng@bu.edu", role = c("ctb", "cre"),
+    comment = c(ORCID = "0009-0002-3957-5250")),
     person("Solaiappan", "Manimaran", , "manimaran_1975@hotmail.com", role = "aut"),
     person("Heather", "Selby", , "selbyh@bu.edu", role = "ctb"),
     person("Claire", "Ruberman", , "claireruberman@gmail.com", role = "ctb"),
@@ -18,8 +20,6 @@ Authors@R: c(
     person("Zhaorong", "Li", , "zhaorong@bu.edu", role = "ctb"),
     person("Evan", "Holmes", , "evanjh19@gmail.com", role = "ctb"),
     person("Solomon", "Joseph", , "sj1136@njms.rutgers.edu", role = "ctb"),
-    person("Yaoan", "Leng", , "leng@bu.edu", role = "ctb",
-    comment = c(ORCID = "0009-0002-3957-5250")),
     person("Howard", "Fan", , "hf268@njms.rutgers.edu", role = "ctb"),
     person("Sean", "Lu", , "sl1729@njms.rutgers.edu", role = "ctb")
   )
