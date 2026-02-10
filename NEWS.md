@@ -1,5 +1,9 @@
 # Version 2.7.2
 ## Minor Changes
+* Changed maintainer from Jessica Anderson to Yaoan Li
+
+# Version 2.7.2
+## Minor Changes
 * Added lambda example to Intro vignette
 
 # Version 2.5.22
